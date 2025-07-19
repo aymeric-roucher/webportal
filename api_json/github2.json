@@ -1,0 +1,923 @@
+{
+  "GET /numpy/numpy/main/branding/logo/primary/numpylogo.svg": {
+    "method": "GET",
+    "url": "https://raw.githubusercontent.com/numpy/numpy/main/branding/logo/primary/numpylogo.svg",
+    "path": "/numpy/numpy/main/branding/logo/primary/numpylogo.svg",
+    "queryParams": {},
+    "requestHeaders": {
+      "sec-ch-ua-platform": "\"macOS\"",
+      "Referer": "https://github.com/numpy/numpy",
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
+      "sec-ch-ua-mobile": "?0"
+    },
+    "requestBody": null,
+    "responseStatus": 200,
+    "responseBody": null
+  },
+  "GET /{id}b2ae40f5f5d969e01dbd95b3ba815e27294c4448272adef7f012a2b6a743/{id}a2f2f696d672e736869656c64732e696f2f62616467652f706f776572656425323062792d4e756d464f4355532d6f72616e67652e7376673f7374796c653d666c617426636f6c6f72413d45313532334426636f6c6f72423d303037443841": {
+    "method": "GET",
+    "url": "https://camo.githubusercontent.com/6836b2ae40f5f5d969e01dbd95b3ba815e27294c4448272adef7f012a2b6a743/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f706f776572656425323062792d4e756d464f4355532d6f72616e67652e7376673f7374796c653d666c617426636f6c6f72413d45313532334426636f6c6f72423d303037443841",
+    "path": "/{id}b2ae40f5f5d969e01dbd95b3ba815e27294c4448272adef7f012a2b6a743/{id}a2f2f696d672e736869656c64732e696f2f62616467652f706f776572656425323062792d4e756d464f4355532d6f72616e67652e7376673f7374796c653d666c617426636f6c6f72413d45313532334426636f6c6f72423d303037443841",
+    "queryParams": {},
+    "requestHeaders": {
+      "sec-ch-ua-platform": "\"macOS\"",
+      "Referer": "https://github.com/numpy/numpy",
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
+      "sec-ch-ua-mobile": "?0"
+    },
+    "requestBody": null,
+    "responseStatus": 200,
+    "responseBody": null
+  },
+  "GET /b9868ab6e4cbd8598d7df610486133d36e081f0672cf87dfe05bd62c0fa31668/{id}a2f2f696d672e736869656c64732e696f2f707970692f646d2f6e756d70792e7376673f6c6162656c3d50795049253230646f776e6c6f616473": {
+    "method": "GET",
+    "url": "https://camo.githubusercontent.com/b9868ab6e4cbd8598d7df610486133d36e081f0672cf87dfe05bd62c0fa31668/68747470733a2f2f696d672e736869656c64732e696f2f707970692f646d2f6e756d70792e7376673f6c6162656c3d50795049253230646f776e6c6f616473",
+    "path": "/b9868ab6e4cbd8598d7df610486133d36e081f0672cf87dfe05bd62c0fa31668/{id}a2f2f696d672e736869656c64732e696f2f707970692f646d2f6e756d70792e7376673f6c6162656c3d50795049253230646f776e6c6f616473",
+    "queryParams": {},
+    "requestHeaders": {
+      "sec-ch-ua-platform": "\"macOS\"",
+      "Referer": "https://github.com/numpy/numpy",
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
+      "sec-ch-ua-mobile": "?0"
+    },
+    "requestBody": null,
+    "responseStatus": 200,
+    "responseBody": null
+  },
+  "GET /{id}fb8a096af17cf5e7625329137eba5ceaa3ca8346381a810f497185/{id}a2f2f696d672e736869656c64732e696f2f636f6e64612f646e2f636f6e64612d666f7267652f6e756d70792e7376673f6c6162656c3d436f6e6461253230646f776e6c6f616473": {
+    "method": "GET",
+    "url": "https://camo.githubusercontent.com/2311833104fb8a096af17cf5e7625329137eba5ceaa3ca8346381a810f497185/68747470733a2f2f696d672e736869656c64732e696f2f636f6e64612f646e2f636f6e64612d666f7267652f6e756d70792e7376673f6c6162656c3d436f6e6461253230646f776e6c6f616473",
+    "path": "/{id}fb8a096af17cf5e7625329137eba5ceaa3ca8346381a810f497185/{id}a2f2f696d672e736869656c64732e696f2f636f6e64612f646e2f636f6e64612d666f7267652f6e756d70792e7376673f6c6162656c3d436f6e6461253230646f776e6c6f616473",
+    "queryParams": {},
+    "requestHeaders": {
+      "sec-ch-ua-platform": "\"macOS\"",
+      "Referer": "https://github.com/numpy/numpy",
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
+      "sec-ch-ua-mobile": "?0"
+    },
+    "requestBody": null,
+    "responseStatus": 200,
+    "responseBody": null
+  },
+  "GET /{id}a94a70d43633a9e0d699bb39d4e21281ac5d5a5077c09e6fb954e4498/{id}a2f2f696d672e736869656c64732e696f2f62616467652f737461636b6f766572666c6f772d41736b2532307175657374696f6e732d626c75652e737667": {
+    "method": "GET",
+    "url": "https://camo.githubusercontent.com/8397625a94a70d43633a9e0d699bb39d4e21281ac5d5a5077c09e6fb954e4498/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f737461636b6f766572666c6f772d41736b2532307175657374696f6e732d626c75652e737667",
+    "path": "/{id}a94a70d43633a9e0d699bb39d4e21281ac5d5a5077c09e6fb954e4498/{id}a2f2f696d672e736869656c64732e696f2f62616467652f737461636b6f766572666c6f772d41736b2532307175657374696f6e732d626c75652e737667",
+    "queryParams": {},
+    "requestHeaders": {
+      "sec-ch-ua-platform": "\"macOS\"",
+      "Referer": "https://github.com/numpy/numpy",
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
+      "sec-ch-ua-mobile": "?0"
+    },
+    "requestBody": null,
+    "responseStatus": 200,
+    "responseBody": null
+  },
+  "GET /f7c8fb84a56380c2e2bd1a324e1eef278ab8745796ff286541ded30440d9ae02/{id}a2f2f696d672e736869656c64732e696f2f62616467652f444f492d31302e313033382532467334313538362d2d3032302d2d323634392d2d322d626c7565": {
+    "method": "GET",
+    "url": "https://camo.githubusercontent.com/f7c8fb84a56380c2e2bd1a324e1eef278ab8745796ff286541ded30440d9ae02/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f444f492d31302e313033382532467334313538362d2d3032302d2d323634392d2d322d626c7565",
+    "path": "/f7c8fb84a56380c2e2bd1a324e1eef278ab8745796ff286541ded30440d9ae02/{id}a2f2f696d672e736869656c64732e696f2f62616467652f444f492d31302e313033382532467334313538362d2d3032302d2d323634392d2d322d626c7565",
+    "queryParams": {},
+    "requestHeaders": {
+      "sec-ch-ua-platform": "\"macOS\"",
+      "Referer": "https://github.com/numpy/numpy",
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
+      "sec-ch-ua-mobile": "?0"
+    },
+    "requestBody": null,
+    "responseStatus": 200,
+    "responseBody": null
+  },
+  "GET /{id}bedfee0c6511b804cfcbd75d340e473032a598f1cd4561c83570d5f96c02e/{id}a2f2f6170692e736563757269747973636f726563617264732e6465762f70726f6a656374732f6769746875622e636f6d2f6e756d70792f6e756d70792f6261646765": {
+    "method": "GET",
+    "url": "https://camo.githubusercontent.com/565bedfee0c6511b804cfcbd75d340e473032a598f1cd4561c83570d5f96c02e/68747470733a2f2f6170692e736563757269747973636f726563617264732e6465762f70726f6a656374732f6769746875622e636f6d2f6e756d70792f6e756d70792f6261646765",
+    "path": "/{id}bedfee0c6511b804cfcbd75d340e473032a598f1cd4561c83570d5f96c02e/{id}a2f2f6170692e736563757269747973636f726563617264732e6465762f70726f6a656374732f6769746875622e636f6d2f6e756d70792f6e756d70792f6261646765",
+    "queryParams": {},
+    "requestHeaders": {
+      "sec-ch-ua-platform": "\"macOS\"",
+      "Referer": "https://github.com/numpy/numpy",
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
+      "sec-ch-ua-mobile": "?0"
+    },
+    "requestBody": null,
+    "responseStatus": 200,
+    "responseBody": null
+  },
+  "GET /{id}af7ed322fc187266c600911d890c10873836e258e15246f40829331c68ec7da/{id}a2f2f696d672e736869656c64732e696f2f707970692f74797065732f6e756d7079": {
+    "method": "GET",
+    "url": "https://camo.githubusercontent.com/7af7ed322fc187266c600911d890c10873836e258e15246f40829331c68ec7da/68747470733a2f2f696d672e736869656c64732e696f2f707970692f74797065732f6e756d7079",
+    "path": "/{id}af7ed322fc187266c600911d890c10873836e258e15246f40829331c68ec7da/{id}a2f2f696d672e736869656c64732e696f2f707970692f74797065732f6e756d7079",
+    "queryParams": {},
+    "requestHeaders": {
+      "sec-ch-ua-platform": "\"macOS\"",
+      "Referer": "https://github.com/numpy/numpy",
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
+      "sec-ch-ua-mobile": "?0"
+    },
+    "requestBody": null,
+    "responseStatus": 200,
+    "responseBody": null
+  },
+  "GET /assets/open_collective-0a706523753d.svg": {
+    "method": "GET",
+    "url": "https://github.githubassets.com/assets/open_collective-0a706523753d.svg",
+    "path": "/assets/open_collective-0a706523753d.svg",
+    "queryParams": {},
+    "requestHeaders": {
+      "sec-ch-ua-platform": "\"macOS\"",
+      "Referer": "https://github.com/numpy/numpy",
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
+      "sec-ch-ua-mobile": "?0"
+    },
+    "requestBody": null,
+    "responseStatus": 200,
+    "responseBody": null
+  },
+  "GET /assets/tidelift-8cea37dea8fc.svg": {
+    "method": "GET",
+    "url": "https://github.githubassets.com/assets/tidelift-8cea37dea8fc.svg",
+    "path": "/assets/tidelift-8cea37dea8fc.svg",
+    "queryParams": {},
+    "requestHeaders": {
+      "sec-ch-ua-platform": "\"macOS\"",
+      "Referer": "https://github.com/numpy/numpy",
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
+      "sec-ch-ua-mobile": "?0"
+    },
+    "requestBody": null,
+    "responseStatus": 200,
+    "responseBody": null
+  },
+  "GET /numpy/numpy/latest-commit/main": {
+    "method": "GET",
+    "url": "https://github.com/numpy/numpy/latest-commit/main",
+    "path": "/numpy/numpy/latest-commit/main",
+    "queryParams": {},
+    "requestHeaders": {
+      ":authority": "github.com",
+      ":method": "GET",
+      ":path": "/numpy/numpy/latest-commit/main",
+      ":scheme": "https",
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br, zstd",
+      "accept-language": "en-GB,en-US;q=0.9,en;q=0.8,fr;q=0.7",
+      "content-type": "application/json",
+      "github-verified-fetch": "true",
+      "if-none-match": "W/\"70d15420dc9f12420d848041555d109c\"",
+      "priority": "u=1, i",
+      "referer": "https://github.com/numpy/numpy",
+      "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": "\"macOS\"",
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "sec-fetch-site": "same-origin",
+      "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "x-fetch-nonce": "v2:55925c4a-bce9-0484-a9c0-e515a79b59e5",
+      "x-github-client-version": "af8b8db961ba78e3d23e4b92e239c190ef136f06",
+      "x-requested-with": "XMLHttpRequest"
+    },
+    "requestBody": null,
+    "responseStatus": 304,
+    "responseBody": {
+      "oid": "d02611ad99488637b48f4be203f297ea7b29c95d",
+      "url": "/numpy/numpy/commit/d02611ad99488637b48f4be203f297ea7b29c95d",
+      "date": "2025-07-17T02:43:20.000-07:00",
+      "shortMessageHtmlLink": "<a data-pjax=\"true\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/d02611ad99488637b48f4be203f297ea7b29c95d\">Doc: use different data in stacked arrays (</a><a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"3237037299\" data-permission-text=\"Title is private\" data-url=\"https://github.com/numpy/numpy/issues/29390\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/numpy/numpy/pull/29390/hovercard\" href=\"https://github.com/numpy/numpy/pull/29390\">#29390</a><a data-pjax=\"true\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/d02611ad99488637b48f4be203f297ea7b29c95d\">)</a>",
+      "bodyMessageHtml": "Improve docstring examples for dstack and column_stack",
+      "author": {
+        "displayName": "hannah",
+        "login": "story645",
+        "path": "/story645",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/1300499?s=40&v=4"
+      },
+      "authors": [
+        {
+          "login": "story645",
+          "displayName": "hannah",
+          "avatarUrl": "https://avatars.githubusercontent.com/u/1300499?v=4",
+          "path": "/story645",
+          "isGitHub": false
+        }
+      ],
+      "committerAttribution": false,
+      "committer": {
+        "login": "web-flow",
+        "displayName": "GitHub",
+        "avatarUrl": "https://avatars.githubusercontent.com/u/19864447?v=4",
+        "path": "/web-flow",
+        "isGitHub": true
+      },
+      "pusher": null,
+      "pushedDate": null,
+      "status": "success",
+      "isSpoofed": false
+    }
+  },
+  "GET /numpy/numpy/tree-commit-info/main": {
+    "method": "GET",
+    "url": "https://github.com/numpy/numpy/tree-commit-info/main",
+    "path": "/numpy/numpy/tree-commit-info/main",
+    "queryParams": {},
+    "requestHeaders": {
+      ":authority": "github.com",
+      ":method": "GET",
+      ":path": "/numpy/numpy/tree-commit-info/main",
+      ":scheme": "https",
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br, zstd",
+      "accept-language": "en-GB,en-US;q=0.9,en;q=0.8,fr;q=0.7",
+      "content-type": "application/json",
+      "github-verified-fetch": "true",
+      "if-none-match": "W/\"51e5d15878bc0b6ad57c9dddf6597f25\"",
+      "priority": "u=1, i",
+      "referer": "https://github.com/numpy/numpy",
+      "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": "\"macOS\"",
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "sec-fetch-site": "same-origin",
+      "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "x-fetch-nonce": "v2:55925c4a-bce9-0484-a9c0-e515a79b59e5",
+      "x-github-client-version": "af8b8db961ba78e3d23e4b92e239c190ef136f06",
+      "x-requested-with": "XMLHttpRequest"
+    },
+    "requestBody": null,
+    "responseStatus": 304,
+    "responseBody": {
+      ".circleci": {
+        "oid": "1489be4cc2b5c5328015730bf856aa9a509dbb6d",
+        "url": "/numpy/numpy/commit/1489be4cc2b5c5328015730bf856aa9a509dbb6d",
+        "date": "2024-11-24T11:03:44.000-07:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"CI: update circleci to python3.11.10, limit parallel builds. (#27826)\n\n* CI: update circleci to python3.12.7, ubuntu 20.04.3 [skip actions][skip azp]\n\n* limit to 2 parallel build jobs\n\n* using python3.12 fails to build numpy.distutils, use 3.11 instead\n\n* typo\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/1489be4cc2b5c5328015730bf856aa9a509dbb6d\">CI: update circleci to python3.11.10, limit parallel builds. (</a><a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"2687262471\" data-permission-text=\"Title is private\" data-url=\"https://github.com/numpy/numpy/issues/27826\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/numpy/numpy/pull/27826/hovercard\" href=\"https://github.com/numpy/numpy/pull/27826\">#27826</a><a data-pjax=\"true\" title=\"CI: update circleci to python3.11.10, limit parallel builds. (#27826)\n\n* CI: update circleci to python3.12.7, ubuntu 20.04.3 [skip actions][skip azp]\n\n* limit to 2 parallel build jobs\n\n* using python3.12 fails to build numpy.distutils, use 3.11 instead\n\n* typo\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/1489be4cc2b5c5328015730bf856aa9a509dbb6d\">)</a>"
+      },
+      ".devcontainer": {
+        "oid": "c43d5a9e1e0e287e86565986ab94b76fb538bdbe",
+        "url": "/numpy/numpy/commit/c43d5a9e1e0e287e86565986ab94b76fb538bdbe",
+        "date": "2023-08-09T10:50:13.000-03:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"MAINT: Fix codespaces setup.sh script\n\nA change in how codespaces is configured upstream causes the installation script for micromamba to wait for input unless stdin is explicitly made empty, which causes codespaces creation to fail.\n\n[skip ci]\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/c43d5a9e1e0e287e86565986ab94b76fb538bdbe\">MAINT: Fix codespaces setup.sh script</a>"
+      },
+      ".github": {
+        "oid": "81be692aacdae64962b0c847ba25c6db6ca7111b",
+        "url": "/numpy/numpy/commit/81be692aacdae64962b0c847ba25c6db6ca7111b",
+        "date": "2025-07-14T10:14:24.000+02:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"BLD: use github to build macos-arm64 wheels with OpenBLAS and update to 0.3.30\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/81be692aacdae64962b0c847ba25c6db6ca7111b\">BLD: use github to build macos-arm64 wheels with OpenBLAS and update \u2026</a>"
+      },
+      ".spin": {
+        "oid": "a88d0149ae91b301696f507f350499207d11f442",
+        "url": "/numpy/numpy/commit/a88d0149ae91b301696f507f350499207d11f442",
+        "date": "2025-06-05T11:00:59.000+02:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"MAINT: Bump ``scipy-doctest`` to 1.8 (#29085)\n\n* MAINT: check-docs: require scipy-doctest &gt;= 1.8.0\n\nSee for the discussion https://discuss.scientific-python.org/t/scipy-doctest-select-only-doctests-or-both-doctests-and-unit-tests/1950\n\n[docs only]\n\n* CI: bump scipy-doctest version on CI\n\n[skip azp] [skip actions] [skip cirrus]\n\n* MAINT: tweak doctests to not fail\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/a88d0149ae91b301696f507f350499207d11f442\">MAINT: Bump</a> <code><a data-pjax=\"true\" title=\"MAINT: Bump ``scipy-doctest`` to 1.8 (#29085)\n\n* MAINT: check-docs: require scipy-doctest &gt;= 1.8.0\n\nSee for the discussion https://discuss.scientific-python.org/t/scipy-doctest-select-only-doctests-or-both-doctests-and-unit-tests/1950\n\n[docs only]\n\n* CI: bump scipy-doctest version on CI\n\n[skip azp] [skip actions] [skip cirrus]\n\n* MAINT: tweak doctests to not fail\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/a88d0149ae91b301696f507f350499207d11f442\">scipy-doctest</a></code> <a data-pjax=\"true\" title=\"MAINT: Bump ``scipy-doctest`` to 1.8 (#29085)\n\n* MAINT: check-docs: require scipy-doctest &gt;= 1.8.0\n\nSee for the discussion https://discuss.scientific-python.org/t/scipy-doctest-select-only-doctests-or-both-doctests-and-unit-tests/1950\n\n[docs only]\n\n* CI: bump scipy-doctest version on CI\n\n[skip azp] [skip actions] [skip cirrus]\n\n* MAINT: tweak doctests to not fail\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/a88d0149ae91b301696f507f350499207d11f442\">to 1.8 (</a><a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"3100896238\" data-permission-text=\"Title is private\" data-url=\"https://github.com/numpy/numpy/issues/29085\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/numpy/numpy/pull/29085/hovercard\" href=\"https://github.com/numpy/numpy/pull/29085\">#29085</a><a data-pjax=\"true\" title=\"MAINT: Bump ``scipy-doctest`` to 1.8 (#29085)\n\n* MAINT: check-docs: require scipy-doctest &gt;= 1.8.0\n\nSee for the discussion https://discuss.scientific-python.org/t/scipy-doctest-select-only-doctests-or-both-doctests-and-unit-tests/1950\n\n[docs only]\n\n* CI: bump scipy-doctest version on CI\n\n[skip azp] [skip actions] [skip cirrus]\n\n* MAINT: tweak doctests to not fail\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/a88d0149ae91b301696f507f350499207d11f442\">)</a>"
+      },
+      "benchmarks": {
+        "oid": "a982786564e1a2d1bc7913daee8d3c179f0584ed",
+        "url": "/numpy/numpy/commit/a982786564e1a2d1bc7913daee8d3c179f0584ed",
+        "date": "2025-07-01T09:34:13.000-06:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"MAINT: Enable linting with ruff E501 (#29300)\n\n* MAINT: Enforce ruff E501\n\n* fix merge\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/a982786564e1a2d1bc7913daee8d3c179f0584ed\">MAINT: Enable linting with ruff E501 (</a><a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"3191854161\" data-permission-text=\"Title is private\" data-url=\"https://github.com/numpy/numpy/issues/29300\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/numpy/numpy/pull/29300/hovercard\" href=\"https://github.com/numpy/numpy/pull/29300\">#29300</a><a data-pjax=\"true\" title=\"MAINT: Enable linting with ruff E501 (#29300)\n\n* MAINT: Enforce ruff E501\n\n* fix merge\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/a982786564e1a2d1bc7913daee8d3c179f0584ed\">)</a>"
+      },
+      "branding/logo": {
+        "oid": "86f230f7743cac5f47fa8c770464d76712aa817b",
+        "url": "/numpy/numpy/commit/86f230f7743cac5f47fa8c770464d76712aa817b",
+        "date": "2023-11-01T21:41:48.000+01:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"DOC: correct Logo SVG files rendered in dark by Figma (#24975)\n\nUse hex code, for no good reason other than Figma being buggy.\r\n\r\nCloses gh-24933\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/86f230f7743cac5f47fa8c770464d76712aa817b\">DOC: correct Logo SVG files rendered in dark by Figma (</a><a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"1955466152\" data-permission-text=\"Title is private\" data-url=\"https://github.com/numpy/numpy/issues/24975\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/numpy/numpy/pull/24975/hovercard\" href=\"https://github.com/numpy/numpy/pull/24975\">#24975</a><a data-pjax=\"true\" title=\"DOC: correct Logo SVG files rendered in dark by Figma (#24975)\n\nUse hex code, for no good reason other than Figma being buggy.\r\n\r\nCloses gh-24933\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/86f230f7743cac5f47fa8c770464d76712aa817b\">)</a>"
+      },
+      "doc": {
+        "oid": "685918f57bb2591f1ad14dedc7f2920cc533e4f8",
+        "url": "/numpy/numpy/commit/685918f57bb2591f1ad14dedc7f2920cc533e4f8",
+        "date": "2025-07-16T14:52:57.000+02:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"DOC: Fix `PyArrayMapIterObject` document (#29386)\n\nThe structure of `PyArrayMapIterObject` defined in `multiarray/mapping.h`, not in `arrayobject.h`.\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/685918f57bb2591f1ad14dedc7f2920cc533e4f8\">DOC: Fix</a> <code><a data-pjax=\"true\" title=\"DOC: Fix `PyArrayMapIterObject` document (#29386)\n\nThe structure of `PyArrayMapIterObject` defined in `multiarray/mapping.h`, not in `arrayobject.h`.\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/685918f57bb2591f1ad14dedc7f2920cc533e4f8\">PyArrayMapIterObject</a></code> <a data-pjax=\"true\" title=\"DOC: Fix `PyArrayMapIterObject` document (#29386)\n\nThe structure of `PyArrayMapIterObject` defined in `multiarray/mapping.h`, not in `arrayobject.h`.\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/685918f57bb2591f1ad14dedc7f2920cc533e4f8\">document (</a><a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"3235213698\" data-permission-text=\"Title is private\" data-url=\"https://github.com/numpy/numpy/issues/29386\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/numpy/numpy/pull/29386/hovercard\" href=\"https://github.com/numpy/numpy/pull/29386\">#29386</a><a data-pjax=\"true\" title=\"DOC: Fix `PyArrayMapIterObject` document (#29386)\n\nThe structure of `PyArrayMapIterObject` defined in `multiarray/mapping.h`, not in `arrayobject.h`.\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/685918f57bb2591f1ad14dedc7f2920cc533e4f8\">)</a>"
+      },
+      "meson_cpu": {
+        "oid": "2306bced4d3234e7cc8be8631b2b72773eabf7f3",
+        "url": "/numpy/numpy/commit/2306bced4d3234e7cc8be8631b2b72773eabf7f3",
+        "date": "2025-06-03T22:05:22.000+05:30",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"update windows-2019 to windows-2022 and meson flag[wheel build]\n\nCo-authored-by: Charles Harris &lt;charlesr.harris@gmail.com&gt;\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/2306bced4d3234e7cc8be8631b2b72773eabf7f3\">update windows-2019 to windows-2022 and meson flag[wheel build]</a>"
+      },
+      "numpy": {
+        "oid": "d02611ad99488637b48f4be203f297ea7b29c95d",
+        "url": "/numpy/numpy/commit/d02611ad99488637b48f4be203f297ea7b29c95d",
+        "date": "2025-07-17T02:43:20.000-07:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"Doc: use different data in stacked arrays (#29390)\n\nImprove docstring examples for dstack and column_stack\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/d02611ad99488637b48f4be203f297ea7b29c95d\">Doc: use different data in stacked arrays (</a><a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"3237037299\" data-permission-text=\"Title is private\" data-url=\"https://github.com/numpy/numpy/issues/29390\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/numpy/numpy/pull/29390/hovercard\" href=\"https://github.com/numpy/numpy/pull/29390\">#29390</a><a data-pjax=\"true\" title=\"Doc: use different data in stacked arrays (#29390)\n\nImprove docstring examples for dstack and column_stack\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/d02611ad99488637b48f4be203f297ea7b29c95d\">)</a>"
+      },
+      "requirements": {
+        "oid": "81be692aacdae64962b0c847ba25c6db6ca7111b",
+        "url": "/numpy/numpy/commit/81be692aacdae64962b0c847ba25c6db6ca7111b",
+        "date": "2025-07-14T10:14:24.000+02:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"BLD: use github to build macos-arm64 wheels with OpenBLAS and update to 0.3.30\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/81be692aacdae64962b0c847ba25c6db6ca7111b\">BLD: use github to build macos-arm64 wheels with OpenBLAS and update \u2026</a>"
+      },
+      "tools": {
+        "oid": "b5d6eb4300f782f67dde893dc72f2dca94945b6c",
+        "url": "/numpy/numpy/commit/b5d6eb4300f782f67dde893dc72f2dca94945b6c",
+        "date": "2025-07-16T14:37:09.000-06:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"MNT: add linter for thread-unsafe C API uses (#29371)\n\n* MNT: add extra lint - thread-unsafe C API lint\n\n* MNT: integrate ruff-lint with C-API-lint\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/b5d6eb4300f782f67dde893dc72f2dca94945b6c\">MNT: add linter for thread-unsafe C API uses (</a><a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"3226982339\" data-permission-text=\"Title is private\" data-url=\"https://github.com/numpy/numpy/issues/29371\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/numpy/numpy/pull/29371/hovercard\" href=\"https://github.com/numpy/numpy/pull/29371\">#29371</a><a data-pjax=\"true\" title=\"MNT: add linter for thread-unsafe C API uses (#29371)\n\n* MNT: add extra lint - thread-unsafe C API lint\n\n* MNT: integrate ruff-lint with C-API-lint\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/b5d6eb4300f782f67dde893dc72f2dca94945b6c\">)</a>"
+      },
+      "vendored-meson": {
+        "oid": "682e95457d66e230aef27d5dfd83addfd52db1c5",
+        "url": "/numpy/numpy/commit/682e95457d66e230aef27d5dfd83addfd52db1c5",
+        "date": "2025-05-05T12:39:30.000+02:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"BLD: update vendored Meson to include iOS fix\n\nThis is PR 21 from https://github.com/numpy/meson\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/682e95457d66e230aef27d5dfd83addfd52db1c5\">BLD: update vendored Meson to include iOS fix</a>"
+      },
+      ".cirrus.star": {
+        "oid": "81be692aacdae64962b0c847ba25c6db6ca7111b",
+        "url": "/numpy/numpy/commit/81be692aacdae64962b0c847ba25c6db6ca7111b",
+        "date": "2025-07-14T10:14:24.000+02:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"BLD: use github to build macos-arm64 wheels with OpenBLAS and update to 0.3.30\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/81be692aacdae64962b0c847ba25c6db6ca7111b\">BLD: use github to build macos-arm64 wheels with OpenBLAS and update \u2026</a>"
+      },
+      ".clang-format": {
+        "oid": "fb7135f9a512d6e35544aa331a0e38f3d60863ac",
+        "url": "/numpy/numpy/commit/fb7135f9a512d6e35544aa331a0e38f3d60863ac",
+        "date": "2025-06-28T15:58:33.000+02:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"BUG: Fix macro redefinition (#29289)\n\nAlso update .clang-format to indent preprocessor conditional blocks.\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/fb7135f9a512d6e35544aa331a0e38f3d60863ac\">BUG: Fix macro redefinition (</a><a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"3184953079\" data-permission-text=\"Title is private\" data-url=\"https://github.com/numpy/numpy/issues/29289\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/numpy/numpy/pull/29289/hovercard\" href=\"https://github.com/numpy/numpy/pull/29289\">#29289</a><a data-pjax=\"true\" title=\"BUG: Fix macro redefinition (#29289)\n\nAlso update .clang-format to indent preprocessor conditional blocks.\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/fb7135f9a512d6e35544aa331a0e38f3d60863ac\">)</a>"
+      },
+      ".codecov.yml": {
+        "oid": "645b3045d21f2f209e5ff6dd3b9c6ec4eaa28c20",
+        "url": "/numpy/numpy/commit/645b3045d21f2f209e5ff6dd3b9c6ec4eaa28c20",
+        "date": "2021-04-13T19:12:04.000-05:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"CI: Use informational mode for codecov\n\n[skip CI]\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/645b3045d21f2f209e5ff6dd3b9c6ec4eaa28c20\">CI: Use informational mode for codecov</a>"
+      },
+      ".coveragerc": {
+        "oid": "030ebff9b9a7484335bbbb83971a0eacde88835f",
+        "url": "/numpy/numpy/commit/030ebff9b9a7484335bbbb83971a0eacde88835f",
+        "date": "2019-07-13T13:55:29.000-06:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"MAINT, TST: remove test-installed-numpy.py\n\n* replace usage of test-installed-numpy.py\nwith runtests.py; they serve similar purposes\nand the latter is more commonly used / maintained\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/030ebff9b9a7484335bbbb83971a0eacde88835f\">MAINT, TST: remove test-installed-numpy.py</a>"
+      },
+      ".ctags.d": {
+        "oid": "11e0707c8c91b8970653835a7354b75d0938ed5e",
+        "url": "/numpy/numpy/commit/11e0707c8c91b8970653835a7354b75d0938ed5e",
+        "date": "2018-12-11T12:58:31.000+02:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"DEV: add ctags option file\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/11e0707c8c91b8970653835a7354b75d0938ed5e\">DEV: add ctags option file</a>"
+      },
+      ".editorconfig": {
+        "oid": "932da9450f41b46db23cd4dc02ef9b6b02f21ef6",
+        "url": "/numpy/numpy/commit/932da9450f41b46db23cd4dc02ef9b6b02f21ef6",
+        "date": "2025-02-14T09:15:26.000-07:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"MAIN: Update c,c++ line length to 88\n\nThis makes the c/c++ line length the same as the modern Python defaults.\nNote that linux has dropped the hard 80 character limit, it is now only\npreferred. I don&#39;t know how to configure a linter for &quot;preferred&quot;, so\njust make the hard limit 88.\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/932da9450f41b46db23cd4dc02ef9b6b02f21ef6\">MAIN: Update c,c++ line length to 88</a>"
+      },
+      ".gitattributes": {
+        "oid": "d18c70346f5e5805afe61a44a5e9fd262fd5febd",
+        "url": "/numpy/numpy/commit/d18c70346f5e5805afe61a44a5e9fd262fd5febd",
+        "date": "2024-02-25T15:33:13.000Z",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"MAINT: Refactor tests a bit\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/d18c70346f5e5805afe61a44a5e9fd262fd5febd\">MAINT: Refactor tests a bit</a>"
+      },
+      ".gitignore": {
+        "oid": "0c203ed4d6ccfb44efef41e87fe5819dbeb7d822",
+        "url": "/numpy/numpy/commit/0c203ed4d6ccfb44efef41e87fe5819dbeb7d822",
+        "date": "2025-07-14T18:14:31.000+01:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"DEV: remove &quot;packages&quot; from `.gitignore`\n\nnot necessary now (and can interfere with niche build circumstances https://github.com/prefix-dev/pixi-build-backends/issues/243)\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/0c203ed4d6ccfb44efef41e87fe5819dbeb7d822\">DEV: remove \"packages\" from <code>.gitignore</code></a>"
+      },
+      ".gitmodules": {
+        "oid": "77b59140791123ab9cdd168117c375ecf8ae4d65",
+        "url": "/numpy/numpy/commit/77b59140791123ab9cdd168117c375ecf8ae4d65",
+        "date": "2024-04-01T09:52:40.000-06:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"MNT: add pythoncapi-compat as a git submodule\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/77b59140791123ab9cdd168117c375ecf8ae4d65\">MNT: add pythoncapi-compat as a git submodule</a>"
+      },
+      ".mailmap": {
+        "oid": "e81abf7f0ab8c0eba1541e35d048469731c4c6a2",
+        "url": "/numpy/numpy/commit/e81abf7f0ab8c0eba1541e35d048469731c4c6a2",
+        "date": "2025-06-07T10:01:25.000-06:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"MAINT: Update main after 2.3.0 release.\n\n- Forwardport 2.3.0-changelog.rst\n- Forwardport 2.3.0-notes.rst\n- Forwardport .mailmap\n\n[skip azp] [skip cirrus] [skip actions]\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/e81abf7f0ab8c0eba1541e35d048469731c4c6a2\">MAINT: Update main after 2.3.0 release.</a>"
+      },
+      "CITATION.bib": {
+        "oid": "55ec9241fa47354d95c73fcc29ead8c749cbb2d7",
+        "url": "/numpy/numpy/commit/55ec9241fa47354d95c73fcc29ead8c749cbb2d7",
+        "date": "2021-08-23T09:30:26.000+02:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"DOC: add citation file for GitHub support.\n\n[SKIP CI]\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/55ec9241fa47354d95c73fcc29ead8c749cbb2d7\">DOC: add citation file for GitHub support.</a>"
+      },
+      "CONTRIBUTING.rst": {
+        "oid": "7c91551b85650c5465d21956acf66a47d9d0d02b",
+        "url": "/numpy/numpy/commit/7c91551b85650c5465d21956acf66a47d9d0d02b",
+        "date": "2025-06-20T11:59:10.000-03:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"DOC: Update CONTRIBUTING.rst (#28158)\n\n* Update CONTRIBUTING.rst\n\nfixes #19778\r\nUpdating the contibution section so that contributors avoid doing mkstakes while asking questions, instead they focus on doing contribution and work on project right after.\n\n* Update CONTRIBUTING.rst\n\nShortened the length of the sentence.\n\n* Update CONTRIBUTING.rst\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/7c91551b85650c5465d21956acf66a47d9d0d02b\">DOC: Update CONTRIBUTING.rst (</a><a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"2790345176\" data-permission-text=\"Title is private\" data-url=\"https://github.com/numpy/numpy/issues/28158\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/numpy/numpy/pull/28158/hovercard\" href=\"https://github.com/numpy/numpy/pull/28158\">#28158</a><a data-pjax=\"true\" title=\"DOC: Update CONTRIBUTING.rst (#28158)\n\n* Update CONTRIBUTING.rst\n\nfixes #19778\r\nUpdating the contibution section so that contributors avoid doing mkstakes while asking questions, instead they focus on doing contribution and work on project right after.\n\n* Update CONTRIBUTING.rst\n\nShortened the length of the sentence.\n\n* Update CONTRIBUTING.rst\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/7c91551b85650c5465d21956acf66a47d9d0d02b\">)</a>"
+      },
+      "INSTALL.rst": {
+        "oid": "69948f351fcdf7a873fdb360eeaa4d84673ea90f",
+        "url": "/numpy/numpy/commit/69948f351fcdf7a873fdb360eeaa4d84673ea90f",
+        "date": "2025-06-03T11:28:34.000-06:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"DOC: remove very outdated info on ATLAS (#29119)\n\n* DOC: remove very outdated info on ATLAS\n\nATLAS hasn't been developed for years, there is no reason to ever\nuse it instead of OpenBLAS, BLIS, or MKL. So remove mentions of it.\nThe troubleshooting instructions haven't been relevant in quite a\nwhile either.\n\nAddresses a comment on gh-29108\n\n[skip cirrus] [skip github] [skip azp]\n\n* accept review suggestion\r\n\r\n[skip ci]\n\nCo-authored-by: Matti Picus &lt;matti.picus@gmail.com&gt;\n\n---------\n\nCo-authored-by: Matti Picus &lt;matti.picus@gmail.com&gt;\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/69948f351fcdf7a873fdb360eeaa4d84673ea90f\">DOC: remove very outdated info on ATLAS (</a><a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"3113836780\" data-permission-text=\"Title is private\" data-url=\"https://github.com/numpy/numpy/issues/29119\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/numpy/numpy/pull/29119/hovercard\" href=\"https://github.com/numpy/numpy/pull/29119\">#29119</a><a data-pjax=\"true\" title=\"DOC: remove very outdated info on ATLAS (#29119)\n\n* DOC: remove very outdated info on ATLAS\n\nATLAS hasn't been developed for years, there is no reason to ever\nuse it instead of OpenBLAS, BLIS, or MKL. So remove mentions of it.\nThe troubleshooting instructions haven't been relevant in quite a\nwhile either.\n\nAddresses a comment on gh-29108\n\n[skip cirrus] [skip github] [skip azp]\n\n* accept review suggestion\r\n\r\n[skip ci]\n\nCo-authored-by: Matti Picus &lt;matti.picus@gmail.com&gt;\n\n---------\n\nCo-authored-by: Matti Picus &lt;matti.picus@gmail.com&gt;\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/69948f351fcdf7a873fdb360eeaa4d84673ea90f\">)</a>"
+      },
+      "LICENSE.txt": {
+        "oid": "84baf22dc30ff0f8b27c313fe8f5da0c4b1d441d",
+        "url": "/numpy/numpy/commit/84baf22dc30ff0f8b27c313fe8f5da0c4b1d441d",
+        "date": "2025-01-01T22:30:50.000+03:30",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"update copyright to 2025\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/84baf22dc30ff0f8b27c313fe8f5da0c4b1d441d\">update copyright to 2025</a>"
+      },
+      "LICENSES_bundled.txt": {
+        "oid": "86940987a9d8d54c860d8c862d5d96c51b339f23",
+        "url": "/numpy/numpy/commit/86940987a9d8d54c860d8c862d5d96c51b339f23",
+        "date": "2024-10-15T21:34:56.000+03:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"BUILD: vendor tempita from Cython\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/86940987a9d8d54c860d8c862d5d96c51b339f23\">BUILD: vendor tempita from Cython</a>"
+      },
+      "README.md": {
+        "oid": "fe0d7058f4b4264af7ceb96f4a4f842f474be744",
+        "url": "/numpy/numpy/commit/fe0d7058f4b4264af7ceb96f4a4f842f474be744",
+        "date": "2025-03-10T18:32:05.000Z",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"DOC: add typing badge to README\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/fe0d7058f4b4264af7ceb96f4a4f842f474be744\">DOC: add typing badge to README</a>"
+      },
+      "THANKS.txt": {
+        "oid": "a41de3adf9dbbff9d9f2f50fe0ac59d6eabd43cf",
+        "url": "/numpy/numpy/commit/a41de3adf9dbbff9d9f2f50fe0ac59d6eabd43cf",
+        "date": "2011-01-23T14:01:36.000-08:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"ENH: core: Start einsum function, add copyright notices to files\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/a41de3adf9dbbff9d9f2f50fe0ac59d6eabd43cf\">ENH: core: Start einsum function, add copyright notices to files</a>"
+      },
+      "azure-pipelines.yml": {
+        "oid": "2306bced4d3234e7cc8be8631b2b72773eabf7f3",
+        "url": "/numpy/numpy/commit/2306bced4d3234e7cc8be8631b2b72773eabf7f3",
+        "date": "2025-06-03T22:05:22.000+05:30",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"update windows-2019 to windows-2022 and meson flag[wheel build]\n\nCo-authored-by: Charles Harris &lt;charlesr.harris@gmail.com&gt;\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/2306bced4d3234e7cc8be8631b2b72773eabf7f3\">update windows-2019 to windows-2022 and meson flag[wheel build]</a>"
+      },
+      "azure-steps-windows.yml": {
+        "oid": "ebb8f6ef51f9b6cf7a869c18dfe20865078c0048",
+        "url": "/numpy/numpy/commit/ebb8f6ef51f9b6cf7a869c18dfe20865078c0048",
+        "date": "2024-03-11T08:22:34.000+01:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"CI: clean up some unused `choco install` invocations\n\n- `unzip` is (I think) a left-over from having to unzip OpenBLAS\n  tarballs (we have wheels for that now)\n- `ninja` is already installed from PyPI, it&#39;s in `test_requirements.txt`\n\nThe `rtools43` path cleanup helps readability. Rtools is already\ninstalled on the CI runner image, and only used for testing (f2py\ntests in &quot;full&quot; mode).\n\n[skip cirrus] [skip circle] [skip actions]\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/ebb8f6ef51f9b6cf7a869c18dfe20865078c0048\">CI: clean up some unused <code>choco install</code> invocations</a>"
+      },
+      "building_with_meson.md": {
+        "oid": "2452ff4f7d2cf7ede3b50945fce2d4fe194f7a0e",
+        "url": "/numpy/numpy/commit/2452ff4f7d2cf7ede3b50945fce2d4fe194f7a0e",
+        "date": "2024-04-09T18:16:19.000-06:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"MAINT: Drop Python 3.9\n\nDrop Python 3.9 from the supported Python versions and CI.\n\nPython 3.9 is still used in the Cygwin build test because Cygwin\ndoes not yet support 3.10.\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/2452ff4f7d2cf7ede3b50945fce2d4fe194f7a0e\">MAINT: Drop Python 3.9</a>"
+      },
+      "environment.yml": {
+        "oid": "4575abf725d9f14af73ee0442b05c01d0d46a7c1",
+        "url": "/numpy/numpy/commit/4575abf725d9f14af73ee0442b05c01d0d46a7c1",
+        "date": "2025-06-19T08:43:25.000-06:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"MAINT: bump ``ruff`` to ``0.12.0`` (#29220)\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/4575abf725d9f14af73ee0442b05c01d0d46a7c1\">MAINT: bump</a> <code><a data-pjax=\"true\" title=\"MAINT: bump ``ruff`` to ``0.12.0`` (#29220)\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/4575abf725d9f14af73ee0442b05c01d0d46a7c1\">ruff</a></code> <a data-pjax=\"true\" title=\"MAINT: bump ``ruff`` to ``0.12.0`` (#29220)\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/4575abf725d9f14af73ee0442b05c01d0d46a7c1\">to</a> <code><a data-pjax=\"true\" title=\"MAINT: bump ``ruff`` to ``0.12.0`` (#29220)\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/4575abf725d9f14af73ee0442b05c01d0d46a7c1\">0.12.0</a></code> <a data-pjax=\"true\" title=\"MAINT: bump ``ruff`` to ``0.12.0`` (#29220)\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/4575abf725d9f14af73ee0442b05c01d0d46a7c1\">(</a><a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"3153951757\" data-permission-text=\"Title is private\" data-url=\"https://github.com/numpy/numpy/issues/29220\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/numpy/numpy/pull/29220/hovercard\" href=\"https://github.com/numpy/numpy/pull/29220\">#29220</a><a data-pjax=\"true\" title=\"MAINT: bump ``ruff`` to ``0.12.0`` (#29220)\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/4575abf725d9f14af73ee0442b05c01d0d46a7c1\">)</a>"
+      },
+      "meson.build": {
+        "oid": "7771624a4a4c662f936e07bbf74dd7d553225f23",
+        "url": "/numpy/numpy/commit/7771624a4a4c662f936e07bbf74dd7d553225f23",
+        "date": "2025-04-15T17:41:48.000+02:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"Merge pull request #28713 from adamjstewart/build/macos\n\nMAINT: remove use of ld_classic on macOS\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/7771624a4a4c662f936e07bbf74dd7d553225f23\">Merge pull request</a> <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"2996153779\" data-permission-text=\"Title is private\" data-url=\"https://github.com/numpy/numpy/issues/28713\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/numpy/numpy/pull/28713/hovercard\" href=\"https://github.com/numpy/numpy/pull/28713\">#28713</a> <a data-pjax=\"true\" title=\"Merge pull request #28713 from adamjstewart/build/macos\n\nMAINT: remove use of ld_classic on macOS\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/7771624a4a4c662f936e07bbf74dd7d553225f23\">from adamjstewart/build/macos</a>"
+      },
+      "meson.options": {
+        "oid": "02c47281386f7e54554ce5d3854070b2c70ad21b",
+        "url": "/numpy/numpy/commit/02c47281386f7e54554ce5d3854070b2c70ad21b",
+        "date": "2025-04-30T21:16:34.000-07:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"Add meson option to toggle building with openMP\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/02c47281386f7e54554ce5d3854070b2c70ad21b\">Add meson option to toggle building with openMP</a>"
+      },
+      "pavement.py": {
+        "oid": "084f183a66cdaa888205ffeb599aff6c083178cc",
+        "url": "/numpy/numpy/commit/084f183a66cdaa888205ffeb599aff6c083178cc",
+        "date": "2025-05-21T12:58:48.000-06:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"BEG, MAINT: Begin NumPy 2.4.0 development.\n\n- Create 2.4.0-notes.rst\n- Update release.rst\n- Update pavement.py\n- Update pyproject.toml\n- Update cversions.txt\n- Update numpyconfig.h\n- Delete release fragments\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/084f183a66cdaa888205ffeb599aff6c083178cc\">BEG, MAINT: Begin NumPy 2.4.0 development.</a>"
+      },
+      "pyproject.toml": {
+        "oid": "bcf8a99e8ca8c068f9b51a7a086000b53632c3cd",
+        "url": "/numpy/numpy/commit/bcf8a99e8ca8c068f9b51a7a086000b53632c3cd",
+        "date": "2025-05-29T11:16:03.000-04:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"CI: clean up cibuildwheel config a bit [wheel build]\n\nThis simplifies the configuration a bit:\n\n* Combine pyodide blocks\n* Use tables/lists for config-settings and skip\n* Remove a few repeated lines\n* Use a list for select\n\nSigned-off-by: Henry Schreiner &lt;henryschreineriii@gmail.com&gt;\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/bcf8a99e8ca8c068f9b51a7a086000b53632c3cd\">CI: clean up cibuildwheel config a bit [wheel build]</a>"
+      },
+      "pytest.ini": {
+        "oid": "9173e548de3541077a9b50b0f4dff7eceb9354fd",
+        "url": "/numpy/numpy/commit/9173e548de3541077a9b50b0f4dff7eceb9354fd",
+        "date": "2025-07-14T12:46:38.000+02:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"MNT: Options to catch more issues reported by pytest (#28983)\n\nApply Repo-Review suggestions PP306, PP307, PP308. Skip PP305 for now.\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/9173e548de3541077a9b50b0f4dff7eceb9354fd\">MNT: Options to catch more issues reported by pytest (</a><a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"3068203069\" data-permission-text=\"Title is private\" data-url=\"https://github.com/numpy/numpy/issues/28983\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/numpy/numpy/pull/28983/hovercard\" href=\"https://github.com/numpy/numpy/pull/28983\">#28983</a><a data-pjax=\"true\" title=\"MNT: Options to catch more issues reported by pytest (#28983)\n\nApply Repo-Review suggestions PP306, PP307, PP308. Skip PP305 for now.\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/9173e548de3541077a9b50b0f4dff7eceb9354fd\">)</a>"
+      },
+      "ruff.toml": {
+        "oid": "a982786564e1a2d1bc7913daee8d3c179f0584ed",
+        "url": "/numpy/numpy/commit/a982786564e1a2d1bc7913daee8d3c179f0584ed",
+        "date": "2025-07-01T09:34:13.000-06:00",
+        "shortMessageHtmlLink": "<a data-pjax=\"true\" title=\"MAINT: Enable linting with ruff E501 (#29300)\n\n* MAINT: Enforce ruff E501\n\n* fix merge\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/a982786564e1a2d1bc7913daee8d3c179f0584ed\">MAINT: Enable linting with ruff E501 (</a><a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"3191854161\" data-permission-text=\"Title is private\" data-url=\"https://github.com/numpy/numpy/issues/29300\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/numpy/numpy/pull/29300/hovercard\" href=\"https://github.com/numpy/numpy/pull/29300\">#29300</a><a data-pjax=\"true\" title=\"MAINT: Enable linting with ruff E501 (#29300)\n\n* MAINT: Enforce ruff E501\n\n* fix merge\" class=\"Link--secondary\" href=\"/numpy/numpy/commit/a982786564e1a2d1bc7913daee8d3c179f0584ed\">)</a>"
+      }
+    }
+  },
+  "GET /numpy/numpy/overview-files/main": {
+    "method": "GET",
+    "url": "https://github.com/numpy/numpy/overview-files/main",
+    "path": "/numpy/numpy/overview-files/main",
+    "queryParams": {},
+    "requestHeaders": {
+      ":authority": "github.com",
+      ":method": "GET",
+      ":path": "/numpy/numpy/overview-files/main",
+      ":scheme": "https",
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br, zstd",
+      "accept-language": "en-GB,en-US;q=0.9,en;q=0.8,fr;q=0.7",
+      "content-type": "application/json",
+      "github-verified-fetch": "true",
+      "if-none-match": "W/\"104cf3f14fa303f5d1d75942aa8eba86\"",
+      "priority": "u=1, i",
+      "referer": "https://github.com/numpy/numpy",
+      "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": "\"macOS\"",
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "sec-fetch-site": "same-origin",
+      "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "x-fetch-nonce": "v2:55925c4a-bce9-0484-a9c0-e515a79b59e5",
+      "x-github-client-version": "af8b8db961ba78e3d23e4b92e239c190ef136f06",
+      "x-requested-with": "XMLHttpRequest"
+    },
+    "requestBody": null,
+    "responseStatus": 304,
+    "responseBody": {
+      "files": [
+        {
+          "displayName": "README.md",
+          "repoName": "numpy",
+          "refName": "main",
+          "path": "README.md",
+          "preferredFileType": "readme",
+          "tabName": "README",
+          "richText": "<article class=\"markdown-body entry-content container-lg\" itemprop=\"text\"><div class=\"markdown-heading\" dir=\"auto\"><h1 align=\"center\" tabindex=\"-1\" class=\"heading-element\" dir=\"auto\">\n<a target=\"_blank\" rel=\"noopener noreferrer nofollow\" href=\"https://raw.githubusercontent.com/numpy/numpy/main/branding/logo/primary/numpylogo.svg\"><img src=\"https://raw.githubusercontent.com/numpy/numpy/main/branding/logo/primary/numpylogo.svg\" width=\"300\" style=\"max-width: 100%;\"></a>\n</h1><a id=\"\" class=\"anchor\" aria-label=\"Permalink: \" href=\"#\"><svg class=\"octicon octicon-link\" viewBox=\"0 0 16 16\" version=\"1.1\" width=\"16\" height=\"16\" aria-hidden=\"true\"><path d=\"m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z\"></path></svg></a></div><br>\n<p dir=\"auto\"><a href=\"https://numfocus.org\" rel=\"nofollow\"><img src=\"https://camo.githubusercontent.com/6836b2ae40f5f5d969e01dbd95b3ba815e27294c4448272adef7f012a2b6a743/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f706f776572656425323062792d4e756d464f4355532d6f72616e67652e7376673f7374796c653d666c617426636f6c6f72413d45313532334426636f6c6f72423d303037443841\" alt=\"Powered by NumFOCUS\" data-canonical-src=\"https://img.shields.io/badge/powered%20by-NumFOCUS-orange.svg?style=flat&amp;colorA=E1523D&amp;colorB=007D8A\" style=\"max-width: 100%;\"></a>\n<a href=\"https://pypi.org/project/numpy/\" rel=\"nofollow\"><img src=\"https://camo.githubusercontent.com/b9868ab6e4cbd8598d7df610486133d36e081f0672cf87dfe05bd62c0fa31668/68747470733a2f2f696d672e736869656c64732e696f2f707970692f646d2f6e756d70792e7376673f6c6162656c3d50795049253230646f776e6c6f616473\" alt=\"PyPI Downloads\" data-canonical-src=\"https://img.shields.io/pypi/dm/numpy.svg?label=PyPI%20downloads\" style=\"max-width: 100%;\"></a>\n<a href=\"https://anaconda.org/conda-forge/numpy\" rel=\"nofollow\"><img src=\"https://camo.githubusercontent.com/2311833104fb8a096af17cf5e7625329137eba5ceaa3ca8346381a810f497185/68747470733a2f2f696d672e736869656c64732e696f2f636f6e64612f646e2f636f6e64612d666f7267652f6e756d70792e7376673f6c6162656c3d436f6e6461253230646f776e6c6f616473\" alt=\"Conda Downloads\" data-canonical-src=\"https://img.shields.io/conda/dn/conda-forge/numpy.svg?label=Conda%20downloads\" style=\"max-width: 100%;\"></a>\n<a href=\"https://stackoverflow.com/questions/tagged/numpy\" rel=\"nofollow\"><img src=\"https://camo.githubusercontent.com/8397625a94a70d43633a9e0d699bb39d4e21281ac5d5a5077c09e6fb954e4498/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f737461636b6f766572666c6f772d41736b2532307175657374696f6e732d626c75652e737667\" alt=\"Stack Overflow\" data-canonical-src=\"https://img.shields.io/badge/stackoverflow-Ask%20questions-blue.svg\" style=\"max-width: 100%;\"></a>\n<a href=\"https://doi.org/10.1038/s41586-020-2649-2\" rel=\"nofollow\"><img src=\"https://camo.githubusercontent.com/f7c8fb84a56380c2e2bd1a324e1eef278ab8745796ff286541ded30440d9ae02/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f444f492d31302e313033382532467334313538362d2d3032302d2d323634392d2d322d626c7565\" alt=\"Nature Paper\" data-canonical-src=\"https://img.shields.io/badge/DOI-10.1038%2Fs41586--020--2649--2-blue\" style=\"max-width: 100%;\"></a>\n<a href=\"https://securityscorecards.dev/viewer/?uri=github.com/numpy/numpy\" rel=\"nofollow\"><img src=\"https://camo.githubusercontent.com/565bedfee0c6511b804cfcbd75d340e473032a598f1cd4561c83570d5f96c02e/68747470733a2f2f6170692e736563757269747973636f726563617264732e6465762f70726f6a656374732f6769746875622e636f6d2f6e756d70792f6e756d70792f6261646765\" alt=\"OpenSSF Scorecard\" data-canonical-src=\"https://api.securityscorecards.dev/projects/github.com/numpy/numpy/badge\" style=\"max-width: 100%;\"></a>\n<a href=\"https://pypi.org/project/numpy/\" rel=\"nofollow\"><img src=\"https://camo.githubusercontent.com/7af7ed322fc187266c600911d890c10873836e258e15246f40829331c68ec7da/68747470733a2f2f696d672e736869656c64732e696f2f707970692f74797065732f6e756d7079\" alt=\"Typing\" data-canonical-src=\"https://img.shields.io/pypi/types/numpy\" style=\"max-width: 100%;\"></a></p>\n<p dir=\"auto\">NumPy is the fundamental package for scientific computing with Python.</p>\n<ul dir=\"auto\">\n<li><strong>Website:</strong> <a href=\"https://numpy.org\" rel=\"nofollow\">https://numpy.org</a></li>\n<li><strong>Documentation:</strong> <a href=\"https://numpy.org/doc\" rel=\"nofollow\">https://numpy.org/doc</a></li>\n<li><strong>Mailing list:</strong> <a href=\"https://mail.python.org/mailman/listinfo/numpy-discussion\" rel=\"nofollow\">https://mail.python.org/mailman/listinfo/numpy-discussion</a></li>\n<li><strong>Source code:</strong> <a href=\"https://github.com/numpy/numpy\">https://github.com/numpy/numpy</a></li>\n<li><strong>Contributing:</strong> <a href=\"https://numpy.org/devdocs/dev/index.html\" rel=\"nofollow\">https://numpy.org/devdocs/dev/index.html</a></li>\n<li><strong>Bug reports:</strong> <a href=\"https://github.com/numpy/numpy/issues\">https://github.com/numpy/numpy/issues</a></li>\n<li><strong>Report a security vulnerability:</strong> <a href=\"https://tidelift.com/docs/security\" rel=\"nofollow\">https://tidelift.com/docs/security</a></li>\n</ul>\n<p dir=\"auto\">It provides:</p>\n<ul dir=\"auto\">\n<li>a powerful N-dimensional array object</li>\n<li>sophisticated (broadcasting) functions</li>\n<li>tools for integrating C/C++ and Fortran code</li>\n<li>useful linear algebra, Fourier transform, and random number capabilities</li>\n</ul>\n<p dir=\"auto\">Testing:</p>\n<p dir=\"auto\">NumPy requires <code>pytest</code> and <code>hypothesis</code>.  Tests can then be run after installation with:</p>\n<div class=\"snippet-clipboard-content notranslate position-relative overflow-auto\" data-snippet-clipboard-copy-content=\"python -c &quot;import numpy, sys; sys.exit(numpy.test() is False)&quot;\"><pre class=\"notranslate\"><code>python -c \"import numpy, sys; sys.exit(numpy.test() is False)\"\n</code></pre></div>\n<div class=\"markdown-heading\" dir=\"auto\"><h2 tabindex=\"-1\" class=\"heading-element\" dir=\"auto\">Code of Conduct</h2><a id=\"user-content-code-of-conduct\" class=\"anchor\" aria-label=\"Permalink: Code of Conduct\" href=\"#code-of-conduct\"><svg class=\"octicon octicon-link\" viewBox=\"0 0 16 16\" version=\"1.1\" width=\"16\" height=\"16\" aria-hidden=\"true\"><path d=\"m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z\"></path></svg></a></div>\n<p dir=\"auto\">NumPy is a community-driven open source project developed by a diverse group of\n<a href=\"https://numpy.org/teams/\" rel=\"nofollow\">contributors</a>. The NumPy leadership has made a strong\ncommitment to creating an open, inclusive, and positive community. Please read the\n<a href=\"https://numpy.org/code-of-conduct/\" rel=\"nofollow\">NumPy Code of Conduct</a> for guidance on how to interact\nwith others in a way that makes our community thrive.</p>\n<div class=\"markdown-heading\" dir=\"auto\"><h2 tabindex=\"-1\" class=\"heading-element\" dir=\"auto\">Call for Contributions</h2><a id=\"user-content-call-for-contributions\" class=\"anchor\" aria-label=\"Permalink: Call for Contributions\" href=\"#call-for-contributions\"><svg class=\"octicon octicon-link\" viewBox=\"0 0 16 16\" version=\"1.1\" width=\"16\" height=\"16\" aria-hidden=\"true\"><path d=\"m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z\"></path></svg></a></div>\n<p dir=\"auto\">The NumPy project welcomes your expertise and enthusiasm!</p>\n<p dir=\"auto\">Small improvements or fixes are always appreciated. If you are considering larger contributions\nto the source code, please contact us through the <a href=\"https://mail.python.org/mailman/listinfo/numpy-discussion\" rel=\"nofollow\">mailing\nlist</a> first.</p>\n<p dir=\"auto\">Writing code isn\u2019t the only way to contribute to NumPy. You can also:</p>\n<ul dir=\"auto\">\n<li>review pull requests</li>\n<li>help us stay on top of new and old issues</li>\n<li>develop tutorials, presentations, and other educational materials</li>\n<li>maintain and improve <a href=\"https://github.com/numpy/numpy.org\">our website</a></li>\n<li>develop graphic design for our brand assets and promotional materials</li>\n<li>translate website content</li>\n<li>help with outreach and onboard new contributors</li>\n<li>write grant proposals and help with other fundraising efforts</li>\n</ul>\n<p dir=\"auto\">For more information about the ways you can contribute to NumPy, visit <a href=\"https://numpy.org/contribute/\" rel=\"nofollow\">our website</a>.\nIf you\u2019re unsure where to start or how your skills fit in, reach out! You can\nask on the mailing list or here, on GitHub, by opening a new issue or leaving a\ncomment on a relevant issue that is already open.</p>\n<p dir=\"auto\">Our preferred channels of communication are all public, but if you\u2019d like to\nspeak to us in private first, contact our community coordinators at\n<a href=\"mailto:numpy-team@googlegroups.com\">numpy-team@googlegroups.com</a> or on Slack (write <a href=\"mailto:numpy-team@googlegroups.com\">numpy-team@googlegroups.com</a> for\nan invitation).</p>\n<p dir=\"auto\">We also have a biweekly community call, details of which are announced on the\nmailing list. You are very welcome to join.</p>\n<p dir=\"auto\">If you are new to contributing to open source, <a href=\"https://opensource.guide/how-to-contribute/\" rel=\"nofollow\">this\nguide</a> helps explain why, what,\nand how to successfully get involved.</p>\n</article>",
+          "loaded": true,
+          "timedOut": false,
+          "errorMessage": null,
+          "headerInfo": {
+            "toc": [
+              {
+                "level": 1,
+                "text": "",
+                "anchor": "",
+                "htmlText": ""
+              },
+              {
+                "level": 2,
+                "text": "Code of Conduct",
+                "anchor": "code-of-conduct",
+                "htmlText": "Code of Conduct"
+              },
+              {
+                "level": 2,
+                "text": "Call for Contributions",
+                "anchor": "call-for-contributions",
+                "htmlText": "Call for Contributions"
+              }
+            ],
+            "siteNavLoginPath": "/login?return_to=https%3A%2F%2Fgithub.com%2Fnumpy%2Fnumpy"
+          }
+        },
+        {
+          "displayName": "CODE_OF_CONDUCT.md",
+          "repoName": ".github",
+          "refName": "main",
+          "path": "CODE_OF_CONDUCT.md",
+          "preferredFileType": "code_of_conduct",
+          "tabName": "Code of conduct",
+          "richText": "<article class=\"markdown-body entry-content container-lg\" itemprop=\"text\"><p dir=\"auto\">NumPy has a Code of Conduct, please see: <a href=\"https://numpy.org/code-of-conduct/\" rel=\"nofollow\">https://numpy.org/code-of-conduct/</a></p>\n</article>",
+          "loaded": true,
+          "timedOut": false,
+          "errorMessage": null,
+          "headerInfo": {
+            "toc": null,
+            "siteNavLoginPath": "/login?return_to=https%3A%2F%2Fgithub.com%2Fnumpy%2Fnumpy"
+          }
+        },
+        {
+          "displayName": "LICENSE.txt",
+          "repoName": "numpy",
+          "refName": "main",
+          "path": "LICENSE.txt",
+          "preferredFileType": "license",
+          "tabName": "License",
+          "richText": "<div class=\"plain\"><pre style=\"white-space: pre-wrap\">Copyright (c) 2005-2025, NumPy Developers.\nAll rights reserved.\n\nRedistribution and use in source and binary forms, with or without\nmodification, are permitted provided that the following conditions are\nmet:\n\n    * Redistributions of source code must retain the above copyright\n       notice, this list of conditions and the following disclaimer.\n\n    * Redistributions in binary form must reproduce the above\n       copyright notice, this list of conditions and the following\n       disclaimer in the documentation and/or other materials provided\n       with the distribution.\n\n    * Neither the name of the NumPy Developers nor the names of any\n       contributors may be used to endorse or promote products derived\n       from this software without specific prior written permission.\n\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n\"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\nLIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\nA PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\nOWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\nSPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\nLIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\nDATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\nTHEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\nOF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n</pre></div>",
+          "loaded": true,
+          "timedOut": false,
+          "errorMessage": null,
+          "headerInfo": {
+            "toc": null,
+            "siteNavLoginPath": "/login?return_to=https%3A%2F%2Fgithub.com%2Fnumpy%2Fnumpy"
+          }
+        },
+        {
+          "displayName": "SECURITY.md",
+          "repoName": ".github",
+          "refName": "main",
+          "path": "SECURITY.md",
+          "preferredFileType": "security",
+          "tabName": "Security",
+          "richText": "<article class=\"markdown-body entry-content container-lg\" itemprop=\"text\"><p dir=\"auto\">To report a security vulnerability to NumPy, please go to\n<a href=\"https://tidelift.com/security\" rel=\"nofollow\">https://tidelift.com/security</a> and see the instructions there.</p>\n</article>",
+          "loaded": true,
+          "timedOut": false,
+          "errorMessage": null,
+          "headerInfo": {
+            "toc": null,
+            "siteNavLoginPath": "/login?return_to=https%3A%2F%2Fgithub.com%2Fnumpy%2Fnumpy"
+          }
+        }
+      ],
+      "processingTime": 0
+    }
+  },
+  "GET /numpy/numpy/branch-and-tag-count": {
+    "method": "GET",
+    "url": "https://github.com/numpy/numpy/branch-and-tag-count",
+    "path": "/numpy/numpy/branch-and-tag-count",
+    "queryParams": {},
+    "requestHeaders": {
+      ":authority": "github.com",
+      ":method": "GET",
+      ":path": "/numpy/numpy/branch-and-tag-count",
+      ":scheme": "https",
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br, zstd",
+      "accept-language": "en-GB,en-US;q=0.9,en;q=0.8,fr;q=0.7",
+      "content-type": "application/json",
+      "github-verified-fetch": "true",
+      "if-none-match": "W/\"3e4fa0b122525a4eddc2f15441bf137d\"",
+      "priority": "u=1, i",
+      "referer": "https://github.com/numpy/numpy",
+      "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": "\"macOS\"",
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "sec-fetch-site": "same-origin",
+      "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "x-fetch-nonce": "v2:55925c4a-bce9-0484-a9c0-e515a79b59e5",
+      "x-github-client-version": "af8b8db961ba78e3d23e4b92e239c190ef136f06",
+      "x-requested-with": "XMLHttpRequest"
+    },
+    "requestBody": null,
+    "responseStatus": 304,
+    "responseBody": {
+      "branches": 32,
+      "tags": 261
+    }
+  },
+  "GET /manifest.json": {
+    "method": "GET",
+    "url": "https://github.com/manifest.json",
+    "path": "/manifest.json",
+    "queryParams": {},
+    "requestHeaders": {
+      "sec-ch-ua-platform": "\"macOS\"",
+      "Referer": "https://github.com/numpy/numpy",
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
+      "sec-ch-ua-mobile": "?0"
+    },
+    "requestBody": null,
+    "responseStatus": 200,
+    "responseBody": {
+      "name": "GitHub",
+      "short_name": "GitHub",
+      "start_url": "/",
+      "display": "standalone",
+      "icons": [
+        {
+          "sizes": "114x114",
+          "src": "https://github.githubassets.com/assets/apple-touch-icon-114x114-09ce42d3ca4b.png"
+        },
+        {
+          "sizes": "120x120",
+          "src": "https://github.githubassets.com/assets/apple-touch-icon-120x120-92bd46d04241.png"
+        },
+        {
+          "sizes": "144x144",
+          "src": "https://github.githubassets.com/assets/apple-touch-icon-144x144-b882e354c005.png"
+        },
+        {
+          "sizes": "152x152",
+          "src": "https://github.githubassets.com/assets/apple-touch-icon-152x152-5f777cdc30ae.png"
+        },
+        {
+          "sizes": "180x180",
+          "src": "https://github.githubassets.com/assets/apple-touch-icon-180x180-a80b8e11abe2.png"
+        },
+        {
+          "sizes": "57x57",
+          "src": "https://github.githubassets.com/assets/apple-touch-icon-57x57-22f09f5b3a64.png"
+        },
+        {
+          "sizes": "60x60",
+          "src": "https://github.githubassets.com/assets/apple-touch-icon-60x60-19037ac897bf.png"
+        },
+        {
+          "sizes": "72x72",
+          "src": "https://github.githubassets.com/assets/apple-touch-icon-72x72-e090c8a282d0.png"
+        },
+        {
+          "sizes": "76x76",
+          "src": "https://github.githubassets.com/assets/apple-touch-icon-76x76-a4523d80afb4.png"
+        },
+        {
+          "src": "https://github.githubassets.com/assets/app-icon-192-bcc967ab9829.png",
+          "type": "image/png",
+          "sizes": "192x192"
+        },
+        {
+          "src": "https://github.githubassets.com/assets/app-icon-512-7f9c4ff2e960.png",
+          "type": "image/png",
+          "sizes": "512x512"
+        }
+      ],
+      "prefer_related_applications": true,
+      "related_applications": [
+        {
+          "platform": "play",
+          "url": "https://play.google.com/store/apps/details?id=com.github.android",
+          "id": "com.github.android"
+        }
+      ]
+    }
+  },
+  "POST /pull_request_review_decisions": {
+    "method": "POST",
+    "url": "https://github.com/pull_request_review_decisions",
+    "path": "/pull_request_review_decisions",
+    "queryParams": {},
+    "requestHeaders": {
+      ":authority": "github.com",
+      ":method": "POST",
+      ":path": "/pull_request_review_decisions",
+      ":scheme": "https",
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br, zstd",
+      "accept-language": "en-GB,en-US;q=0.9,en;q=0.8,fr;q=0.7",
+      "content-length": "3331",
+      "content-type": "multipart/form-data; boundary=----WebKitFormBoundaryBzi9ZiVxqzgEHBtO",
+      "origin": "https://github.com",
+      "priority": "u=1, i",
+      "referer": "https://github.com/numpy/numpy/pulls",
+      "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": "\"macOS\"",
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "sec-fetch-site": "same-origin",
+      "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "x-fetch-nonce": "v2:55925c4a-bce9-0484-a9c0-e515a79b59e5",
+      "x-github-client-version": "af8b8db961ba78e3d23e4b92e239c190ef136f06",
+      "x-requested-with": "XMLHttpRequest"
+    },
+    "requestBody": null,
+    "responseStatus": 200,
+    "responseBody": {
+      "item-0": "",
+      "item-1": "",
+      "item-2": "",
+      "item-3": "",
+      "item-4": "",
+      "item-5": "  <span class=\"d-inline-block ml-1\">\n      &bull;\n        <a class=\"Link--muted tooltipped tooltipped-s\"\n          aria-label=\"1 review requesting changes\"\n          href=\"/numpy/numpy/pull/29383#partial-pull-merging\">\n          Changes requested\n        </a>\n          </span>\n",
+      "item-6": "",
+      "item-7": "",
+      "item-8": "",
+      "item-9": "",
+      "item-10": "",
+      "item-11": "",
+      "item-12": "",
+      "item-13": "",
+      "item-14": "",
+      "item-15": "",
+      "item-16": "",
+      "item-17": "",
+      "item-18": "",
+      "item-19": "",
+      "item-20": "",
+      "item-21": "",
+      "item-22": "",
+      "item-23": "",
+      "item-24": ""
+    }
+  },
+  "GET /numpy/numpy/pulse_committer_data": {
+    "method": "GET",
+    "url": "https://github.com/numpy/numpy/pulse_committer_data",
+    "path": "/numpy/numpy/pulse_committer_data",
+    "queryParams": {},
+    "requestHeaders": {
+      ":authority": "github.com",
+      ":method": "GET",
+      ":path": "/numpy/numpy/pulse_committer_data",
+      ":scheme": "https",
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate, br, zstd",
+      "accept-language": "en-GB,en-US;q=0.9,en;q=0.8,fr;q=0.7",
+      "priority": "u=1, i",
+      "referer": "https://github.com/numpy/numpy/pulse",
+      "sec-ch-ua": "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"",
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": "\"macOS\"",
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "sec-fetch-site": "same-origin",
+      "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "x-fetch-nonce": "v2:55925c4a-bce9-0484-a9c0-e515a79b59e5",
+      "x-github-client-version": "af8b8db961ba78e3d23e4b92e239c190ef136f06",
+      "x-requested-with": "XMLHttpRequest"
+    },
+    "requestBody": null,
+    "responseStatus": 200,
+    "responseBody": [
+      {
+        "name": "Marco Edward Gorelli",
+        "login": "MarcoGorelli",
+        "gravatar": "https://avatars.githubusercontent.com/u/33491632?s=60&v=4",
+        "commits": 3,
+        "hovercard_url": "/users/MarcoGorelli/hovercard"
+      },
+      {
+        "name": "Yuki Kobayashi",
+        "login": "koyuki7w",
+        "gravatar": "https://avatars.githubusercontent.com/u/126044367?s=60&v=4",
+        "commits": 1,
+        "hovercard_url": "/users/koyuki7w/hovercard"
+      },
+      {
+        "name": "Sarang Joshi",
+        "login": "sarangjo",
+        "gravatar": "https://avatars.githubusercontent.com/u/1961007?s=60&v=4",
+        "commits": 1,
+        "hovercard_url": "/users/sarangjo/hovercard"
+      },
+      {
+        "name": "Nathan Goldbaum",
+        "login": "ngoldbaum",
+        "gravatar": "https://avatars.githubusercontent.com/u/3126246?s=60&v=4",
+        "commits": 1,
+        "hovercard_url": "/users/ngoldbaum/hovercard"
+      },
+      {
+        "name": "Matti Picus",
+        "login": "mattip",
+        "gravatar": "https://avatars.githubusercontent.com/u/823911?s=60&v=4",
+        "commits": 1,
+        "hovercard_url": "/users/mattip/hovercard"
+      },
+      {
+        "name": "Joren Hammudoglu",
+        "login": "jorenham",
+        "gravatar": "https://avatars.githubusercontent.com/u/6208662?s=60&v=4",
+        "commits": 1,
+        "hovercard_url": "/users/jorenham/hovercard"
+      },
+      {
+        "name": "Iason Krommydas",
+        "login": "ikrommyd",
+        "gravatar": "https://avatars.githubusercontent.com/u/82155404?s=60&v=4",
+        "commits": 1,
+        "hovercard_url": "/users/ikrommyd/hovercard"
+      },
+      {
+        "name": "hannah",
+        "login": "story645",
+        "gravatar": "https://avatars.githubusercontent.com/u/1300499?s=60&v=4",
+        "commits": 1,
+        "hovercard_url": "/users/story645/hovercard"
+      },
+      {
+        "name": "Dimitri Papadopoulos Orfanos",
+        "login": "DimitriPapadopoulos",
+        "gravatar": "https://avatars.githubusercontent.com/u/3234522?s=60&v=4",
+        "commits": 1,
+        "hovercard_url": "/users/DimitriPapadopoulos/hovercard"
+      },
+      {
+        "name": "Dillon Niederhut",
+        "login": "deniederhut",
+        "gravatar": "https://avatars.githubusercontent.com/u/6868396?s=60&v=4",
+        "commits": 1,
+        "hovercard_url": "/users/deniederhut/hovercard"
+      },
+      {
+        "name": "Dan Raviv",
+        "login": "danra",
+        "gravatar": "https://avatars.githubusercontent.com/u/84245?s=60&v=4",
+        "commits": 1,
+        "hovercard_url": "/users/danra/hovercard"
+      },
+      {
+        "name": "lvllvl",
+        "login": "lvllvl",
+        "gravatar": "https://avatars.githubusercontent.com/u/24905907?s=60&v=4",
+        "commits": 1,
+        "hovercard_url": "/users/lvllvl/hovercard"
+      },
+      {
+        "name": "Ben Woodruff",
+        "login": "bmwoodruff",
+        "gravatar": "https://avatars.githubusercontent.com/u/1594818?s=60&v=4",
+        "commits": 1,
+        "hovercard_url": "/users/bmwoodruff/hovercard"
+      },
+      {
+        "name": "Verney7",
+        "login": null,
+        "gravatar": "https://camo.githubusercontent.com/21b763f007cb3e947c9a51a7f4f19daf0f7bb14cb7522fe01eec3655c87f8d1e/68747470733a2f2f302e67726176617461722e636f6d2f6176617461722f39616631646439386436353164346263386165633437366133643430646539643f643d68747470732533412532462532466769746875622e6769746875626173736574732e636f6d253246696d6167657325324667726176617461727325324667726176617461722d757365722d3432302e706e6726723d6726733d3330",
+        "commits": 1
+      },
+      {
+        "name": "Lucas Colley",
+        "login": "lucascolley",
+        "gravatar": "https://avatars.githubusercontent.com/u/51488791?s=60&v=4",
+        "commits": 1,
+        "hovercard_url": "/users/lucascolley/hovercard"
+      }
+    ]
+  }
+}
