@@ -1,32 +1,36 @@
 # GitHub NumPy Issues Page
+
+$repo_name: numpy/numpy
+$repo_id: 908607
+
 URL: https://github.com/numpy/numpy/issues
 Page Overview
 This is the issues listing page for the repository on GitHub, where users can view, search, and filter through open issues.
 
 ```interactive_element_issue_hover
-Type: Hover trigger
-Visual: When hovering over issue #29393
-Action: Mouseover on issue link
+type: Hover trigger
+action: Mouseover on issue link
 
-Request: GET https://github.com/numpy/numpy/issues/29393/hovercard
-Parameters: 
-  - subject=repository:908607
-  - current_path=/numpy/numpy/issues
+request: GET https://github.com/numpy/numpy/issues/$issue_number/hovercard
+parameters:
+  - subject=repository:$repo_id
+  - current_path=/$repo_name/issues
 
-Response effect: Displays a popup card with issue preview
-Content returned: HTML with issue title, description preview, and labels
+response_effect: Displays a popup card with issue preview
+content_returned: HTML with issue title, description preview, and labels
+viewport_effect: none
 
 Agent instruction: This is a hover action that displays additional information. 
 To view issue details without navigating away, use:
 visit_webpage(
-  url="https://github.com/numpy/numpy/issues/29393/hovercard",
+  url="https://github.com/numpy/numpy/issues/$issue_number/hovercard",
   method="GET",
   arguments={
-    "subject": "repository:908607",
-    "current_path": "/numpy/numpy/issues"
+    "subject": "repository:$repo_id",
+    "current_path": "/$repo_name/issues"
   }
 )
-````
+```
 
 ```interactive_element_author_filter
 Type: Button/Dropdown
@@ -39,6 +43,7 @@ Query parameters: Complex GraphQL query for author suggestions
 
 Response effect: Loads author suggestions for filtering
 Data returned: JSON with suggested authors including bots and users
+viewport_effect: none
 
 Agent instruction: To get author suggestions for filtering, use:
 visit_webpage(
