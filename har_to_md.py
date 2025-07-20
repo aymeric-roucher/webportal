@@ -18,6 +18,7 @@ from typing import Dict, List, Any, Optional
 def extract_api_calls(har_data: Dict[str, Any]) -> List[Dict[str, Any]]:
     """Extract API calls from HAR data."""
     api_calls = []
+    unique_calls = {}  # Track unique API calls
     
     if 'log' not in har_data or 'entries' not in har_data['log']:
         return api_calls
@@ -29,10 +30,22 @@ def extract_api_calls(har_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         # Skip non-API requests (images, CSS, JS, etc.)
         if not is_api_request(request):
             continue
+        
+        url = request.get('url', '')
+        method = request.get('method', 'GET')
+        
+        # Create unique identifier for this API call
+        # Use URL path and method as the key, ignoring query parameters for uniqueness
+        parsed = urlparse(url)
+        unique_key = f"{method}:{parsed.path}"
+        
+        # If we've already seen this API call, skip it
+        if unique_key in unique_calls:
+            continue
             
         api_call = {
-            'method': request.get('method', 'GET'),
-            'url': request.get('url', ''),
+            'method': method,
+            'url': url,
             'headers': {h['name']: h['value'] for h in request.get('headers', [])},
             'postData': request.get('postData', {}),
             'status': response.get('status', 0),
@@ -40,6 +53,7 @@ def extract_api_calls(har_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         }
         
         api_calls.append(api_call)
+        unique_calls[unique_key] = True  # Mark as seen
     
     return api_calls
 
