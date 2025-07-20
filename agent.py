@@ -1,7 +1,9 @@
 import json
 
 import requests
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+from markdownify import markdownify
 from smolagents import (
     CodeAgent,
     OpenAIModel,
@@ -33,8 +35,7 @@ To access a specific github issue, head to https://github.com/numpy/numpy/issues
 
 
 base_headers = {
-    "accept": "application/json",
-    "accept-encoding": "gzip, deflate, br, zstd",
+    "sec-fetch-site": "same-origin",
     "accept-language": "en-GB,en-US;q=0.9,en;q=0.8,fr;q=0.7",
     "github-verified-fetch": "true",
     "sec-ch-ua": '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
@@ -42,7 +43,6 @@ base_headers = {
     "sec-ch-ua-platform": '"macOS"',
     "sec-fetch-dest": "empty",
     "sec-fetch-mode": "cors",
-    "sec-fetch-site": "same-origin",
     "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
     "x-requested-with": "XMLHttpRequest",
 }
@@ -55,7 +55,7 @@ def get_request(url: str, params: dict | None = None) -> dict:
 
     Args:
         url (str): The URL to send the GET request to
-        params (dict): Query parameters to include in the request
+        params (dict): Query parameters to include in the request. Encode them as objects.
     """
     if params is None:
         params = {}
@@ -73,7 +73,33 @@ def get_request(url: str, params: dict | None = None) -> dict:
             url, headers=base_headers | {"referer": url}, params=processed_params
         )
         response.raise_for_status()
-        return response.json()
+        # Try to parse as JSON, but if not possible, return the raw text (e.g. HTML)
+        try:
+            result = response.json()
+            # Check for GraphQL-style errors in successful responses
+            if isinstance(result, dict) and "errors" in result:
+                return {"error": f"API returned errors: {result['errors']}"}
+            return result
+        except json.JSONDecodeError:
+            # Not JSON, extract data from HTML and script tags
+            html_content = response.text
+
+            # Parse HTML
+            soup = BeautifulSoup(html_content, "html.parser")
+
+            # Extract JSON data from script tags
+            script_data = ""
+
+            # Look for script tags with JSON data
+            for script in soup.find_all("script"):
+                if "data-target=" in str(script):
+                    script_data += "\n" + str(script)
+            result = {"content": markdownify(html_content)}
+            print("SCRIPTDATA\n", script_data)
+            if script_data:
+                result["extracted_data"] = script_data
+
+            return result
     except requests.exceptions.RequestException as e:
         error_msg = f"Error in GET request: {e}"
         return {"error": error_msg}
@@ -111,22 +137,29 @@ def post_request(
             json=post_data,
         )
         response.raise_for_status()
-        return response.json()
+        result = response.json()
+
+        # Check for GraphQL-style errors in successful responses
+        if isinstance(result, dict) and "errors" in result:
+            return {"error": f"API returned errors: {result['errors']}"}
+
+        return result
     except requests.exceptions.RequestException as e:
         error_msg = f"Error in POST request: {e}"
         return {"error": error_msg}
+    except json.JSONDecodeError as e:
+        return {"error": f"Failed to parse JSON response: {e}"}
 
 
 if __name__ == "__main__":
     agent = CodeAgent(
         model=model,
-        # tools=[get_manifest_json, post_pull_request_review_decisions],
-        tools=[],
+        tools=[get_request, post_request],
         instructions=instructions,
-        additional_authorized_imports=["requests", "json"],
+        additional_authorized_imports=["urllib.*"],
         verbosity_level=2,
     )
 
-    task = "Get the appropriate label for Regression on github issues for numpy. Always use the headers attached"
+    task = "According to github, when was Regression added to the oldest closed numpy.polynomial issue that has the Regression label in MM/DD/YY?"
 
-    agent.run(task, additional_tools={"headers_to_use": base_headers})
+    agent.run(task)
