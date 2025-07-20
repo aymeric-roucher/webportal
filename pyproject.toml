@@ -5,11 +5,13 @@ description = "Web Portal"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "crawl4ai>=0.7.1",
+    "crawl4ai<0.7.0",
     "dotenv>=0.9.9",
     "smolagents>=1.20.0",
 ]
 
+[project.optional-dependencies]
+dev = []
 
 [build-system]
 requires = ["hatchling"]
