@@ -8,6 +8,22 @@ dependencies = [
     "crawl4ai>=0.7.1",
     "dotenv>=0.9.9",
     "smolagents>=1.20.0",
+    "playwright>=1.40.0",
+    "markdown>=3.5.0",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=4.9.0",
+    "requests>=2.31.0",
+    "pydantic>=2.5.0",
+]
+
+[project.scripts]
+webportal = "webportal.cli:run_cli"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
 ]
 
 

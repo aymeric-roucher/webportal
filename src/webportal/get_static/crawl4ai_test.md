@@ -92,14 +92,8 @@ You signed in with another tab or window. [Reload](https://github.com/numpy/nump
 [ numpy ](https://github.com/numpy) / **[numpy](https://github.com/numpy/numpy) ** Public
   * Sponsor
 #  Sponsor numpy/numpy 
-##### External links
-![open_collective](https://github.githubassets.com/assets/open_collective-0a706523753d.svg)
-[opencollective.com/**numpy**](https://opencollective.com/numpy)
-![tidelift](https://github.githubassets.com/assets/tidelift-8cea37dea8fc.svg)
-[tidelift.com/funding/github/**pypi/numpy**](https://tidelift.com/funding/github/pypi/numpy)
-<https://numpy.org/about/#donate>
-[Learn more about funding links in repositories](https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository). 
-[Report abuse](https://github.com/contact/report-abuse?report=numpy%2Fnumpy+%28Repository+Funding+Links%29)
+###  Uh oh! 
+There was an error while loading. [Please reload this page](https://github.com/numpy/numpy/issues).
   * [ ](https://github.com/login?return_to=%2Fnumpy%2Fnumpy) You must be signed in to change notification settings
   * [ 11.1k ](https://github.com/login?return_to=%2Fnumpy%2Fnumpy)
   * [ Star  30k ](https://github.com/login?return_to=%2Fnumpy%2Fnumpy)
@@ -154,7 +148,6 @@ More Actions
 Status: Open.
 #29397 In numpy/numpy;
 · [kostayScr](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3AkostayScr) opened on Jul 19, 2025
-1 comment
   * ### [BUG: `np.dot` (with OpenBLAS specifically) on `float32` matrices returns all 0s but works as expected for `float64`](https://github.com/numpy/numpy/issues/29393)
 [00 - Bug](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%2200%20-%20Bug%22)
 Status: Open.
@@ -165,23 +158,18 @@ Status: Open.
 Status: Open.
 #29391 In numpy/numpy;
 · [BenLewis-Seequent](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3ABenLewis-Seequent) opened on Jul 16, 2025
-16 comments
   * ### [BUG: `power` called instead of `square` in `__array_ufunc__` for structured arrays](https://github.com/numpy/numpy/issues/29388)
 [00 - Bug](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%2200%20-%20Bug%22)
 [06 - Regression](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%2206%20-%20Regression%22)
 Status: Open.
 #29388 In numpy/numpy;
 · [Saransh-cpp](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3ASaransh-cpp) opened on Jul 16, 2025
-1
-4 comments
   * ### [DOC: developer workflow missing a note about typing checks](https://github.com/numpy/numpy/issues/29365)
 [04 - Documentation](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%2204%20-%20Documentation%22)
 [41 - Static typing](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%2241%20-%20Static%20typing%22)
 Status: Open.
 #29365 In numpy/numpy;
 · [deniederhut](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3Adeniederhut) opened on Jul 12, 2025
-1
-1 comment
   * ### [Inconsistent type promotion in numpy.polynomial.chebyshev functions depending on scalar/array input](https://github.com/numpy/numpy/issues/29357)
 Status: Open.
 #29357 In numpy/numpy;
@@ -190,51 +178,42 @@ Status: Open.
 Status: Open.
 #29349 In numpy/numpy;
 · [Smith-cc](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3ASmith-cc) opened on Jul 9, 2025
-4 comments
   * ### [BUG: Pickling/unpickling datetime64 adds dtype metadata](https://github.com/numpy/numpy/issues/29344)
 [00 - Bug](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%2200%20-%20Bug%22)
 [sprintable - C](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22sprintable%20-%20C%22)
 Status: Open.
 #29344 In numpy/numpy;
 · [sambateman](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3Asambateman) opened on Jul 9, 2025
-4 comments
   * ### [BUG: np.insert fails with datetime64 and string input combination](https://github.com/numpy/numpy/issues/29339)
 [00 - Bug](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%2200%20-%20Bug%22)
 Status: Open.
 #29339 In numpy/numpy;
 · [Kairoven](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3AKairoven) opened on Jul 8, 2025
-1 comment
   * ### [BUG: numpy.unique ignores 'equal_nan' parameter while 'axis' presents](https://github.com/numpy/numpy/issues/29336)
 [00 - Bug](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%2200%20-%20Bug%22)
 Status: Open.
 #29336 In numpy/numpy;
 · [LuMingQ](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3ALuMingQ) opened on Jul 8, 2025
-1 comment
   * ### [BUG: "import numpy" on Mac OS X raised the error "Library not loaded: @rpath/libgfortran.5.dylib"](https://github.com/numpy/numpy/issues/29319)
 [00 - Bug](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%2200%20-%20Bug%22)
 [57 - Close?Issues which may be closable unless discussion continued](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%2257%20-%20Close%3F%22)Issues which may be closable unless discussion continued
 Status: Open.
 #29319 In numpy/numpy;
 · [steffenschroe](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3Asteffenschroe) opened on Jul 4, 2025
-2 comments
   * ### [BUG: quantile inconsitent with median for size=0](https://github.com/numpy/numpy/issues/29315)
 [00 - Bug](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%2200%20-%20Bug%22)
 Status: Open.
 #29315 In numpy/numpy;
 · [DerWeh](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3ADerWeh) opened on Jul 3, 2025
-1
-4 comments
   * ### [BUG: Segmentation fault when misusing `masked_object`](https://github.com/numpy/numpy/issues/29299)
 [00 - Bug](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%2200%20-%20Bug%22)
 Status: Open.
 #29299 In numpy/numpy;
 · [BergLucas](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3ABergLucas) opened on Jul 1, 2025
-7 comments
   * ### [DEP: deprecate np.testing.suppress_warnings](https://github.com/numpy/numpy/issues/29293)
 Status: Open.
 #29293 In numpy/numpy;
 · [ngoldbaum](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3Angoldbaum) opened on Jun 30, 2025
-8 comments
   * ### [DEV: Investigate TySAN](https://github.com/numpy/numpy/issues/29292)
 [16 - Development](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%2216%20-%20Development%22)
 [17 - Task](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%2217%20-%20Task%22)
@@ -247,17 +226,14 @@ Status: Open.
 Status: Open.
 #29276 In numpy/numpy;
 · [YosiaRexy](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3AYosiaRexy) opened on Jun 26, 2025
-2 comments
   * ### [ENH: More user-friendly way to pad a specific axis](https://github.com/numpy/numpy/issues/29268)
 Status: Open.
 #29268 In numpy/numpy;
 · [carlosgmartin](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3Acarlosgmartin) opened on Jun 24, 2025
-1
   * ### [BUG: hypothesis finds 3 test failures in test_array_scalar_ufunc_equivalence](https://github.com/numpy/numpy/issues/29262)
 Status: Open.
 #29262 In numpy/numpy;
 · [mattip](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3Amattip) opened on Jun 23, 2025
-1 comment
   * ### [DOC: Rework the 'Writing custom array containers' guide](https://github.com/numpy/numpy/issues/29258)
 [04 - Documentation](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%2204%20-%20Documentation%22)
 Status: Open.
@@ -268,39 +244,31 @@ Status: Open.
 Status: Open.
 #29255 In numpy/numpy;
 · [charris](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3Acharris) opened on Jun 21, 2025
-1 comment
-[![rgommers](https://avatars.githubusercontent.com/u/98330?s=64&u=22a023f8d191ba200ab13d476c83860d015cc9fe&v=4)](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20assignee%3Argommers)
   * ### [BUG: polyfit([0],[0],1) crashes](https://github.com/numpy/numpy/issues/29249)
 [00 - Bug](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%2200%20-%20Bug%22)
 Status: Open.
 #29249 In numpy/numpy;
 · [fstecker](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3Afstecker) opened on Jun 20, 2025
-8 comments
   * ### [BUG: np.bool is not subscriptable at run time](https://github.com/numpy/numpy/issues/29247)
 [00 - Bug](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%2200%20-%20Bug%22)
 Status: Open.
 #29247 In numpy/numpy;
 · [bkeryan](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3Abkeryan) opened on Jun 20, 2025
-1
-4 comments
   * ### [ENH: Add a public API for generating hashable buffers](https://github.com/numpy/numpy/issues/29229)
 Status: Open.
 #29229 In numpy/numpy;
 · [ngoldbaum](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3Angoldbaum) opened on Jun 18, 2025
-14 comments
   * ### [BUG: numpy 1.26.4 is not supported on macOS<13.3 ?](https://github.com/numpy/numpy/issues/29228)
 [00 - Bug](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%2200%20-%20Bug%22)
 Status: Open.
 #29228 In numpy/numpy;
 · [Andrej730](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3AAndrej730) opened on Jun 18, 2025
-6 comments
   * ### [BUG: hashlib: hash collision for StringDType](https://github.com/numpy/numpy/issues/29226)
 [00 - Bug](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%2200%20-%20Bug%22)
 [component: numpy.stringsString dtypes and functions](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22component%3A%20numpy.strings%22)String dtypes and functions
 Status: Open.
 #29226 In numpy/numpy;
 · [crusaderky](https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aopen%20author%3Acrusaderky) opened on Jun 18, 2025
-4 comments
 
 
 Previous[1](https://github.com/numpy/numpy/issues?page=1)[2](https://github.com/numpy/numpy/issues?page=2)[3](https://github.com/numpy/numpy/issues?page=3)[4](https://github.com/numpy/numpy/issues?page=4)[5](https://github.com/numpy/numpy/issues?page=5)[6](https://github.com/numpy/numpy/issues?page=6)[7](https://github.com/numpy/numpy/issues?page=7)[8](https://github.com/numpy/numpy/issues?page=8)…[39](https://github.com/numpy/numpy/issues?page=39)[40](https://github.com/numpy/numpy/issues?page=40)[Next](https://github.com/numpy/numpy/issues?page=2)
