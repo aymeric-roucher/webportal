@@ -43,9 +43,9 @@ visual_element: "Product" button
 trigger: Click
 request: POST https://collector.github.com/github/collect
 arguments: {
-  "client_id": "599895485.1753053726",
-  "events": [{"page": "https://github.com/numpy/numpy/issues", "title": "Issues \u00b7 numpy/numpy", "context": {"user_id": "288276", "user_login": "numpy", "repository_id": "908607", "repository_nwo": "numpy/numpy", "repository_public": "true", "repository_is_fork": "false", "repository_network_root_id": "908607", "repository_network_root_nwo": "numpy/numpy", "referrer": "", "request_id": "F751:1D41FF:A05249A:A74144E:687D7A1E", "visitor_id": "2576531490846112286", "region_edge": "sea", "region_render": "sea", "staff": "false", "text": "\n        Product\n        \n    \n\n      ", "role": "button"}, "type": "analytics.click"}],
-  "request_context": {"referrer": "", "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/138.0.7204.23 Safari/537.36", "screen_resolution": "1280x720", "browser_resolution": "1280x720", "browser_languages": "en-US", "pixel_ratio": 1, "timestamp": 1753053732084, "tz_seconds": 7200},
+  "client_id": "866687711.1753054253",
+  "events": [{"page": "https://github.com/numpy/numpy/issues", "title": "Issues \u00b7 numpy/numpy", "context": {"user_id": "288276", "user_login": "numpy", "repository_id": "908607", "repository_nwo": "numpy/numpy", "repository_public": "true", "repository_is_fork": "false", "repository_network_root_id": "908607", "repository_network_root_nwo": "numpy/numpy", "referrer": "", "request_id": "FFD9:252EDC:9EB4A1B:A5A875E:687D7C2C", "visitor_id": "3722395376343153709", "region_edge": "sea", "region_render": "sea", "staff": "false", "text": "\n        Product\n        \n    \n\n      ", "role": "button"}, "type": "analytics.click"}],
+  "request_context": {"referrer": "", "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/138.0.7204.23 Safari/537.36", "screen_resolution": "1280x720", "browser_resolution": "1280x720", "browser_languages": "en-US", "pixel_ratio": 1, "timestamp": 1753054258735, "tz_seconds": 7200},
 }
 effect: Submits data to /github/collect
 returns: Response data from server
@@ -58,9 +58,9 @@ visual_element: "Solutions" button
 trigger: Click
 request: POST https://collector.github.com/github/collect
 arguments: {
-  "client_id": "599895485.1753053726",
-  "events": [{"page": "https://github.com/numpy/numpy/issues", "title": "Issues \u00b7 numpy/numpy", "context": {"user_id": "288276", "user_login": "numpy", "repository_id": "908607", "repository_nwo": "numpy/numpy", "repository_public": "true", "repository_is_fork": "false", "repository_network_root_id": "908607", "repository_network_root_nwo": "numpy/numpy", "referrer": "", "request_id": "F751:1D41FF:A05249A:A74144E:687D7A1E", "visitor_id": "2576531490846112286", "region_edge": "sea", "region_render": "sea", "staff": "false", "text": "\n        Solutions\n        \n    \n\n      ", "role": "button"}, "type": "analytics.click"}],
-  "request_context": {"referrer": "", "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/138.0.7204.23 Safari/537.36", "screen_resolution": "1280x720", "browser_resolution": "1280x720", "browser_languages": "en-US", "pixel_ratio": 1, "timestamp": 1753053734173, "tz_seconds": 7200},
+  "client_id": "866687711.1753054253",
+  "events": [{"page": "https://github.com/numpy/numpy/issues", "title": "Issues \u00b7 numpy/numpy", "context": {"user_id": "288276", "user_login": "numpy", "repository_id": "908607", "repository_nwo": "numpy/numpy", "repository_public": "true", "repository_is_fork": "false", "repository_network_root_id": "908607", "repository_network_root_nwo": "numpy/numpy", "referrer": "", "request_id": "FFD9:252EDC:9EB4A1B:A5A875E:687D7C2C", "visitor_id": "3722395376343153709", "region_edge": "sea", "region_render": "sea", "staff": "false", "text": "\n        Solutions\n        \n    \n\n      ", "role": "button"}, "type": "analytics.click"}],
+  "request_context": {"referrer": "", "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/138.0.7204.23 Safari/537.36", "screen_resolution": "1280x720", "browser_resolution": "1280x720", "browser_languages": "en-US", "pixel_ratio": 1, "timestamp": 1753054260825, "tz_seconds": 7200},
 }
 effect: Submits data to /github/collect
 returns: Response data from server
@@ -73,9 +73,9 @@ visual_element: "Resources" button
 trigger: Click
 request: POST https://collector.github.com/github/collect
 arguments: {
-  "client_id": "599895485.1753053726",
-  "events": [{"page": "https://github.com/numpy/numpy/issues", "title": "Issues \u00b7 numpy/numpy", "context": {"user_id": "288276", "user_login": "numpy", "repository_id": "908607", "repository_nwo": "numpy/numpy", "repository_public": "true", "repository_is_fork": "false", "repository_network_root_id": "908607", "repository_network_root_nwo": "numpy/numpy", "referrer": "", "request_id": "F751:1D41FF:A05249A:A74144E:687D7A1E", "visitor_id": "2576531490846112286", "region_edge": "sea", "region_render": "sea", "staff": "false", "text": "\n        Resources\n        \n    \n\n      ", "role": "button"}, "type": "analytics.click"}],
-  "request_context": {"referrer": "", "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/138.0.7204.23 Safari/537.36", "screen_resolution": "1280x720", "browser_resolution": "1280x720", "browser_languages": "en-US", "pixel_ratio": 1, "timestamp": 1753053736219, "tz_seconds": 7200},
+  "client_id": "866687711.1753054253",
+  "events": [{"page": "https://github.com/numpy/numpy/issues", "title": "Issues \u00b7 numpy/numpy", "context": {"user_id": "288276", "user_login": "numpy", "repository_id": "908607", "repository_nwo": "numpy/numpy", "repository_public": "true", "repository_is_fork": "false", "repository_network_root_id": "908607", "repository_network_root_nwo": "numpy/numpy", "referrer": "", "request_id": "FFD9:252EDC:9EB4A1B:A5A875E:687D7C2C", "visitor_id": "3722395376343153709", "region_edge": "sea", "region_render": "sea", "staff": "false", "text": "\n        Resources\n        \n    \n\n      ", "role": "button"}, "type": "analytics.click"}],
+  "request_context": {"referrer": "", "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/138.0.7204.23 Safari/537.36", "screen_resolution": "1280x720", "browser_resolution": "1280x720", "browser_languages": "en-US", "pixel_ratio": 1, "timestamp": 1753054262873, "tz_seconds": 7200},
 }
 effect: Submits data to /github/collect
 returns: Response data from server
@@ -88,9 +88,9 @@ visual_element: "Open Source" button
 trigger: Click
 request: POST https://collector.github.com/github/collect
 arguments: {
-  "client_id": "599895485.1753053726",
-  "events": [{"page": "https://github.com/numpy/numpy/issues", "title": "Issues \u00b7 numpy/numpy", "context": {"user_id": "288276", "user_login": "numpy", "repository_id": "908607", "repository_nwo": "numpy/numpy", "repository_public": "true", "repository_is_fork": "false", "repository_network_root_id": "908607", "repository_network_root_nwo": "numpy/numpy", "referrer": "", "request_id": "F751:1D41FF:A05249A:A74144E:687D7A1E", "visitor_id": "2576531490846112286", "region_edge": "sea", "region_render": "sea", "staff": "false", "text": "\n        Open Source\n        \n    \n\n      ", "role": "button"}, "type": "analytics.click"}],
-  "request_context": {"referrer": "", "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/138.0.7204.23 Safari/537.36", "screen_resolution": "1280x720", "browser_resolution": "1280x720", "browser_languages": "en-US", "pixel_ratio": 1, "timestamp": 1753053738269, "tz_seconds": 7200},
+  "client_id": "866687711.1753054253",
+  "events": [{"page": "https://github.com/numpy/numpy/issues", "title": "Issues \u00b7 numpy/numpy", "context": {"user_id": "288276", "user_login": "numpy", "repository_id": "908607", "repository_nwo": "numpy/numpy", "repository_public": "true", "repository_is_fork": "false", "repository_network_root_id": "908607", "repository_network_root_nwo": "numpy/numpy", "referrer": "", "request_id": "FFD9:252EDC:9EB4A1B:A5A875E:687D7C2C", "visitor_id": "3722395376343153709", "region_edge": "sea", "region_render": "sea", "staff": "false", "text": "\n        Open Source\n        \n    \n\n      ", "role": "button"}, "type": "analytics.click"}],
+  "request_context": {"referrer": "", "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/138.0.7204.23 Safari/537.36", "screen_resolution": "1280x720", "browser_resolution": "1280x720", "browser_languages": "en-US", "pixel_ratio": 1, "timestamp": 1753054264903, "tz_seconds": 7200},
 }
 effect: Submits data to /github/collect
 returns: Response data from server
@@ -103,9 +103,9 @@ visual_element: "Enterprise" button
 trigger: Click
 request: POST https://collector.github.com/github/collect
 arguments: {
-  "client_id": "599895485.1753053726",
-  "events": [{"page": "https://github.com/numpy/numpy/issues", "title": "Issues \u00b7 numpy/numpy", "context": {"user_id": "288276", "user_login": "numpy", "repository_id": "908607", "repository_nwo": "numpy/numpy", "repository_public": "true", "repository_is_fork": "false", "repository_network_root_id": "908607", "repository_network_root_nwo": "numpy/numpy", "referrer": "", "request_id": "F751:1D41FF:A05249A:A74144E:687D7A1E", "visitor_id": "2576531490846112286", "region_edge": "sea", "region_render": "sea", "staff": "false", "text": "\n        Enterprise\n        \n    \n\n      ", "role": "button"}, "type": "analytics.click"}],
-  "request_context": {"referrer": "", "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/138.0.7204.23 Safari/537.36", "screen_resolution": "1280x720", "browser_resolution": "1280x720", "browser_languages": "en-US", "pixel_ratio": 1, "timestamp": 1753053740319, "tz_seconds": 7200},
+  "client_id": "866687711.1753054253",
+  "events": [{"page": "https://github.com/numpy/numpy/issues", "title": "Issues \u00b7 numpy/numpy", "context": {"user_id": "288276", "user_login": "numpy", "repository_id": "908607", "repository_nwo": "numpy/numpy", "repository_public": "true", "repository_is_fork": "false", "repository_network_root_id": "908607", "repository_network_root_nwo": "numpy/numpy", "referrer": "", "request_id": "FFD9:252EDC:9EB4A1B:A5A875E:687D7C2C", "visitor_id": "3722395376343153709", "region_edge": "sea", "region_render": "sea", "staff": "false", "text": "\n        Enterprise\n        \n    \n\n      ", "role": "button"}, "type": "analytics.click"}],
+  "request_context": {"referrer": "", "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/138.0.7204.23 Safari/537.36", "screen_resolution": "1280x720", "browser_resolution": "1280x720", "browser_languages": "en-US", "pixel_ratio": 1, "timestamp": 1753054266937, "tz_seconds": 7200},
 }
 effect: Submits data to /github/collect
 returns: Response data from server
@@ -118,9 +118,9 @@ visual_element: "Search or jump to..." button
 trigger: Click
 request: POST https://collector.github.com/github/collect
 arguments: {
-  "client_id": "599895485.1753053726",
-  "events": [{"page": "https://github.com/numpy/numpy/issues", "title": "Issues \u00b7 numpy/numpy", "context": {"user_id": "288276", "user_login": "numpy", "repository_id": "908607", "repository_nwo": "numpy/numpy", "repository_public": "true", "repository_is_fork": "false", "repository_network_root_id": "908607", "repository_network_root_nwo": "numpy/numpy", "referrer": "", "request_id": "F751:1D41FF:A05249A:A74144E:687D7A1E", "visitor_id": "2576531490846112286", "region_edge": "sea", "region_render": "sea", "staff": "false", "target": "SEARCH_BOX"}, "type": "blackbird.click"}],
-  "request_context": {"referrer": "", "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/138.0.7204.23 Safari/537.36", "screen_resolution": "1280x720", "browser_resolution": "1280x720", "browser_languages": "en-US", "pixel_ratio": 1, "timestamp": 1753053742375, "tz_seconds": 7200},
+  "client_id": "866687711.1753054253",
+  "events": [{"page": "https://github.com/numpy/numpy/issues", "title": "Issues \u00b7 numpy/numpy", "context": {"user_id": "288276", "user_login": "numpy", "repository_id": "908607", "repository_nwo": "numpy/numpy", "repository_public": "true", "repository_is_fork": "false", "repository_network_root_id": "908607", "repository_network_root_nwo": "numpy/numpy", "referrer": "", "request_id": "FFD9:252EDC:9EB4A1B:A5A875E:687D7C2C", "visitor_id": "3722395376343153709", "region_edge": "sea", "region_render": "sea", "staff": "false", "target": "SEARCH_BOX"}, "type": "blackbird.click"}],
+  "request_context": {"referrer": "", "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/138.0.7204.23 Safari/537.36", "screen_resolution": "1280x720", "browser_resolution": "1280x720", "browser_languages": "en-US", "pixel_ratio": 1, "timestamp": 1753054268994, "tz_seconds": 7200},
 }
 effect: Submits data to /github/collect
 returns: Response data from server
