@@ -209,25 +209,7 @@ class SeleniumVisionAgent(CodeAgent):
         # Add default tools
         self.logger.log("Setting up agent tools...")
         self._setup_desktop_tools()
-        
-    def save_screenshot(self, memory_step: ActionStep, agent: CodeAgent) -> None:
-        time.sleep(1.0)  # Let JavaScript animations happen before taking the screenshot
-        
-        current_step = memory_step.step_number
-        if self.driver is not None:
-            for previous_memory_step in agent.memory.steps:  # Remove previous screenshots for lean processing
-                if isinstance(previous_memory_step, ActionStep) and previous_memory_step.step_number <= current_step - 2:
-                    previous_memory_step.observations_images = None
-            png_bytes = self.driver.get_screenshot_as_png()
-            image = Image.open(BytesIO(png_bytes))
-            print(f"Captured a browser screenshot: {image.size} pixels")
-            memory_step.observations_images = [image.copy()]  # Create a copy to ensure it persists
-
-        # Update observations with current URL
-        url_info = f"Current url: {self.driver.current_url}"
-        memory_step.observations = (
-            url_info if memory_step.observations is None else memory_step.observations + "\n" + url_info
-        )
+        self._setup_step_callbacks([self.take_screenshot_callback])
 
     def _setup_desktop_tools(self):
         """Register all desktop tools"""
@@ -520,7 +502,6 @@ class SeleniumVisionAgent(CodeAgent):
         return SeleniumVisionAgent(
             model=self.model,
             data_dir=data_dir,
-            step_callbacks=[lambda memory_step, agent: self.save_screenshot(memory_step, agent)],
             max_steps=20,
             verbosity_level=2,
             use_v1_prompt=True,
@@ -535,4 +516,5 @@ if __name__ == "__main__":
     selenium_vision_agent = SeleniumVisionAgent(model=model, data_dir="data")
 
     agent = selenium_vision_agent.create_agent(data_dir="data")
-    agent.run("Go to Google and search for 'Hello World'")
+    agent.run("""I want you to go to github.com, to look for the numpy package and give me a list of all of the labels on the issues. 
+              """)
