@@ -2,9 +2,11 @@ import os
 import time
 import unicodedata
 import json
+import requests
 from datetime import datetime
 from io import BytesIO
 from typing import Any
+from urllib.parse import urljoin, urlparse
 
 # Selenium imports
 from selenium import webdriver
@@ -500,6 +502,49 @@ class SeleniumVisionAgent(CodeAgent):
             
             return summary
 
+        @tool
+        def filter_and_test_requests() -> str:
+            """
+            Filters network requests to find relevant API calls (fetch/XHR requests), 
+            tests them independently, and generates markdown explanations for successful ones.
+            """
+            # Get all current network requests
+            current_activity = self.capture_current_network_activity()
+            all_requests = self.network_requests + current_activity
+            
+            # Filter for relevant requests (fetch/XHR, not static assets)
+            relevant_requests = self._filter_relevant_requests(all_requests)
+            
+            if not relevant_requests:
+                return "No relevant API requests found to test."
+            
+            markdown_explanations = []
+            successful_count = 0
+            failed_count = 0
+            
+            for request in relevant_requests:
+                result = self._test_request_independently(request)
+                if result['success']:
+                    successful_count += 1
+                    markdown_explanation = self._generate_markdown_explanation(request, result)
+                    markdown_explanations.append(markdown_explanation)
+                    print(f"✅ Successfully tested: {request['method']} {request['url']}")
+                    print(markdown_explanation)
+                    print("-" * 80)
+                else:
+                    failed_count += 1
+                    # For failed requests, generate an explanation of why it failed
+                    explanation = self._generate_failure_explanation(request, result)
+                    print(f"❌ Failed to test: {request['method']} {request['url']}")
+                    print(explanation)
+                    print("-" * 80)
+            
+            summary = f"Tested {len(relevant_requests)} relevant requests: {successful_count} successful, {failed_count} failed."
+            if markdown_explanations:
+                summary += f"\n\nGenerated {len(markdown_explanations)} API documentation entries."
+            
+            return summary
+
 
         # Register the tools
         self.tools["click"] = click
@@ -515,8 +560,7 @@ class SeleniumVisionAgent(CodeAgent):
         self.tools["drag_and_drop"] = drag_and_drop
         self.tools["find_on_page_ctrl_f"] = find_on_page_ctrl_f
         self.tools["get_network_requests"] = get_network_requests
-        # self.tools["clear_network_requests_buffer"] = clear_network_requests_buffer
-        # self.tools["get_network_requests_json"] = get_network_requests_json
+        self.tools["filter_and_test_requests"] = filter_and_test_requests
 
     def take_screenshot_callback(self, memory_step: ActionStep, agent=None) -> None:
         """Callback that takes a screenshot + memory snapshot after a step completes"""
@@ -581,5 +625,267 @@ class SeleniumVisionAgent(CodeAgent):
             print("Closing browser...")
             self.driver.quit()
             print("Browser closed")
+    
+    def _filter_relevant_requests(self, requests_list: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Filter requests to keep only relevant API calls (fetch/XHR, not static assets)"""
+        relevant_requests = []
+        
+        # Extensions to exclude (static assets)
+        static_extensions = {
+            '.js', '.css', '.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', 
+            '.ico', '.woff', '.woff2', '.ttf', '.eot', '.mp4', '.mp3', '.pdf'
+        }
+        
+        for request in requests_list:
+            url = request.get('url', '')
+            method = request.get('method', 'GET')
+            
+            # Skip empty URLs
+            if not url:
+                continue
+                
+            # Parse URL to check extension
+            parsed_url = urlparse(url)
+            path = parsed_url.path.lower()
+            
+            # Skip static assets
+            if any(path.endswith(ext) for ext in static_extensions):
+                continue
+                
+            # Skip non-HTTP URLs
+            if not url.startswith(('http://', 'https://')):
+                continue
+                
+            # Keep API-like URLs or XHR/fetch requests
+            if (
+                '/api/' in url or 
+                '/graphql' in url or
+                '/ajax' in url or
+                method in ['POST', 'PUT', 'PATCH', 'DELETE'] or
+                'application/json' in str(request.get('headers', {}))
+            ):
+                relevant_requests.append(request)
+                
+        return relevant_requests
+    
+    def _test_request_independently(self, request: dict[str, Any]) -> dict[str, Any]:
+        """Test a request independently to see if it works without browser context"""
+        
+        # Get current cookies from the browser to maintain session
+        browser_cookies = self.driver.get_cookies()
+        cookies_dict = {cookie['name']: cookie['value'] for cookie in browser_cookies}
+        
+        # Base headers similar to agent.py
+        base_headers = {
+            "sec-fetch-site": "same-origin",
+            "accept-language": "en-GB,en-US;q=0.9,en;q=0.8,fr;q=0.7",
+            "sec-ch-ua": '"Not)A;Brand";v="8", "Chromium";v="138", "Google Chrome";v="138"',
+            "sec-ch-ua-mobile": "?0", 
+            "sec-ch-ua-platform": '"macOS"',
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+            "x-requested-with": "XMLHttpRequest",
+            "referer": self.driver.current_url
+        }
+        
+        # Merge with original request headers
+        original_headers = request.get('headers', {})
+        headers = {**base_headers, **original_headers}
+        
+        try:
+            url = request['url']
+            method = request.get('method', 'GET').upper()
+            
+            if method == 'GET':
+                response = requests.get(url, headers=headers, cookies=cookies_dict, timeout=10)
+            elif method == 'POST':
+                post_data = request.get('post_data', '')
+                if post_data:
+                    # Try to parse as JSON first
+                    try:
+                        json_data = json.loads(post_data)
+                        response = requests.post(url, headers=headers, cookies=cookies_dict, json=json_data, timeout=10)
+                    except json.JSONDecodeError:
+                        # Send as raw data if not JSON
+                        response = requests.post(url, headers=headers, cookies=cookies_dict, data=post_data, timeout=10)
+                else:
+                    response = requests.post(url, headers=headers, cookies=cookies_dict, timeout=10)
+            else:
+                # For other methods (PUT, PATCH, DELETE)
+                response = requests.request(method, url, headers=headers, cookies=cookies_dict, timeout=10)
+            
+            # Check if request was successful
+            response.raise_for_status()
+            
+            # Try to parse response
+            try:
+                response_data = response.json()
+                # Check for GraphQL-style errors
+                if isinstance(response_data, dict) and "errors" in response_data:
+                    return {
+                        'success': False,
+                        'error': f"API returned errors: {response_data['errors']}",
+                        'status_code': response.status_code
+                    }
+                return {
+                    'success': True,
+                    'response_data': response_data,
+                    'status_code': response.status_code,
+                    'content_type': response.headers.get('content-type', 'unknown')
+                }
+            except json.JSONDecodeError:
+                # Not JSON, might be HTML or plain text
+                return {
+                    'success': True,
+                    'response_data': response.text[:1000] + ('...' if len(response.text) > 1000 else ''),
+                    'status_code': response.status_code,
+                    'content_type': response.headers.get('content-type', 'unknown')
+                }
+                
+        except requests.exceptions.Timeout:
+            return {'success': False, 'error': 'Request timed out (likely requires user interaction or session)'}
+        except requests.exceptions.ConnectionError:
+            return {'success': False, 'error': 'Connection error (possibly CORS or network restriction)'}
+        except requests.exceptions.HTTPError as e:
+            status_code = e.response.status_code if e.response else 'unknown'
+            if status_code == 401:
+                return {'success': False, 'error': 'Authentication required (401 Unauthorized)'}
+            elif status_code == 403:
+                return {'success': False, 'error': 'Access forbidden (403) - likely anti-bot protection or insufficient permissions'}
+            elif status_code == 429:
+                return {'success': False, 'error': 'Rate limited (429) - too many requests'}
+            else:
+                return {'success': False, 'error': f'HTTP error {status_code}: {str(e)}'}
+        except Exception as e:
+            return {'success': False, 'error': f'Unexpected error: {str(e)}'}
+    
+    def _generate_markdown_explanation(self, request: dict[str, Any], result: dict[str, Any]) -> str:
+        """Generate a markdown explanation for a successful request"""
+        url = request['url']
+        method = request.get('method', 'GET')
+        headers = request.get('headers', {})
+        post_data = request.get('post_data', '')
+        
+        # Parse URL components
+        parsed_url = urlparse(url)
+        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        endpoint = parsed_url.path
+        query_params = parsed_url.query
+        
+        markdown = f"""## {method} {endpoint}
+
+**Base URL**: `{base_url}`
+**Full URL**: `{url}`
+
+### Description
+This endpoint appears to handle {'data submission' if method in ['POST', 'PUT', 'PATCH'] else 'data retrieval'}{'with query parameters' if query_params else ''}.
+
+### Request Details
+- **Method**: {method}
+- **Content-Type**: {result.get('content_type', 'unknown')}
+- **Status Code**: {result.get('status_code', 'unknown')}
+
+"""
+        
+        # Add headers if significant ones exist
+        important_headers = {k: v for k, v in headers.items() 
+                           if k.lower() in ['authorization', 'content-type', 'x-api-key', 'accept']}
+        if important_headers:
+            markdown += "### Important Headers\n"
+            for header, value in important_headers.items():
+                # Mask sensitive values
+                display_value = value if 'authorization' not in header.lower() else '[MASKED]'
+                markdown += f"- `{header}`: `{display_value}`\n"
+            markdown += "\n"
+        
+        # Add query parameters if they exist
+        if query_params:
+            markdown += f"### Query Parameters\n`{query_params}`\n\n"
+        
+        # Add POST data if it exists
+        if post_data and method in ['POST', 'PUT', 'PATCH']:
+            markdown += "### Request Body\n"
+            try:
+                # Try to pretty-print JSON
+                json_data = json.loads(post_data)
+                markdown += f"```json\n{json.dumps(json_data, indent=2)}\n```\n\n"
+            except json.JSONDecodeError:
+                markdown += f"```\n{post_data}\n```\n\n"
+        
+        # Add response sample
+        response_data = result.get('response_data')
+        if response_data:
+            markdown += "### Response Sample\n"
+            if isinstance(response_data, dict):
+                markdown += f"```json\n{json.dumps(response_data, indent=2)}\n```\n\n"
+            else:
+                # Truncate long text responses
+                sample = str(response_data)[:500] + ('...' if len(str(response_data)) > 500 else '')
+                markdown += f"```\n{sample}\n```\n\n"
+        
+        # Add usage example
+        markdown += f"""### Example Usage
+
+```python
+import requests
+
+response = requests.{method.lower()}(
+    "{url}"{"," if method in ['POST', 'PUT', 'PATCH'] and post_data else ""}
+"""
+        
+        if method in ['POST', 'PUT', 'PATCH'] and post_data:
+            try:
+                json.loads(post_data)
+                markdown += f'    json={post_data}'
+            except json.JSONDecodeError:
+                markdown += f'    data="""{post_data}"""'
+        
+        markdown += f"""
+)
+
+if response.status_code == 200:
+    data = response.json()  # or response.text for non-JSON
+    # Process the data...
+```
+
+"""
+        
+        return markdown
+    
+    def _generate_failure_explanation(self, request: dict[str, Any], result: dict[str, Any]) -> str:
+        """Generate an explanation for why a request failed"""
+        url = request['url']
+        method = request.get('method', 'GET')
+        error = result.get('error', 'Unknown error')
+        
+        explanation = f"""❌ **{method} {url}**
+
+**Failure Reason**: {error}
+
+**Likely Causes**:
+"""
+        
+        if 'Authentication required' in error or '401' in error:
+            explanation += "- This endpoint requires user authentication\n- The API likely needs login tokens, API keys, or session cookies\n- Access is restricted to authenticated users only\n"
+        elif 'Access forbidden' in error or '403' in error:
+            explanation += "- Anti-bot protection is active (Cloudflare, bot detection, etc.)\n- The endpoint requires specific permissions or roles\n- Request might be missing required headers or tokens\n"
+        elif 'Rate limited' in error or '429' in error:
+            explanation += "- Too many requests were made in a short time\n- The API has rate limiting enabled\n- Would need to implement proper request throttling\n"
+        elif 'CORS' in error or 'Connection error' in error:
+            explanation += "- Cross-Origin Resource Sharing (CORS) restrictions\n- The API doesn't allow requests from external origins\n- Would only work from the original website's domain\n"
+        elif 'timed out' in error:
+            explanation += "- The request requires user interaction or real-time session data\n- The endpoint might be slow or temporarily unavailable\n- Could require specific timing or sequential requests\n"
+        else:
+            explanation += "- The endpoint might require specific request parameters\n- Could need additional headers or authentication\n- Might be a temporary server issue\n"
+        
+        explanation += f"""
+**What this endpoint likely does**:
+Based on the URL pattern `{url}`, this appears to be {'an API endpoint for data modification' if method in ['POST', 'PUT', 'PATCH', 'DELETE'] else 'a data retrieval endpoint'}.
+
+**Recommendation**: This endpoint cannot be used independently and would require the full browser context, session, and potentially user interaction to work properly.
+"""
+        
+        return explanation
     
     
