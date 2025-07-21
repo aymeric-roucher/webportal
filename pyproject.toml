@@ -14,6 +14,8 @@ dependencies = [
     "smolagents[openai,toolkit]>=1.20.0",
     "huggingface-hub>=0.33.4",
     "pillow>=11.3.0",
+    "e2b-desktop",
+    "selenium-wire>=5.1.0",
 ]
 
 [project.optional-dependencies]

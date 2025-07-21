@@ -13,11 +13,11 @@ from smolagents import (
 load_dotenv()
 
 model = OpenAIModel(
-    model_id="gpt-4o-mini" # for 200k token per minute
+    model_id="gpt-4o-mini"  # for 200k token per minute
 )  # "gpt-4o" for performance, "gpt-3.5-turbo" for testing
 
 
-with open("digested_websites/www.target.com_api_calls_short.md", "r") as f:
+with open("digested_websites/airfrance.md", "r") as f:
     interaction_description = f.read()
 
 instructions = f"""
@@ -129,15 +129,16 @@ def post_request(
         data = json.loads(data)
 
     try:
-        post_data = {**data} if data else {}
-        post_data.update(params)
         response = requests.post(
             url,
             headers=base_headers | {"content-type": "application/json", "referer": url},
-            json=post_data,
+            json=data,
+            params=params,
         )
+        print("OK")
         response.raise_for_status()
         result = response.json()
+        print("RESPONSE\n", result)
 
         # Check for GraphQL-style errors in successful responses
         if isinstance(result, dict) and "errors" in result:
@@ -156,10 +157,10 @@ if __name__ == "__main__":
         model=model,
         tools=[get_request, post_request],
         instructions=instructions,
-        additional_authorized_imports=["urllib.*"],
+        additional_authorized_imports=["urllib.*", "uuid.*"],
         verbosity_level=2,
     )
 
-    task = "What are the top 5 cheapest lamp tables on target.com?"
+    task = "Find me a ticket from NYC ('type': 'city') to PAR ('type': 'city') between the 20th of July 2025 and the 25th of July 2025"
 
     agent.run(task)

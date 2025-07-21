@@ -1,4 +1,8 @@
-```interactive_element_issue_hover
+Here is a manual for interacting with github.com.
+
+To access a specific github issue, head to https://github.com/numpy/numpy/issues/$issue_number with GET request.
+
+```issue_hover
 location_page: ^repo_name/issues
 type: Hover trigger
 visual_element: Issue links
@@ -13,7 +17,7 @@ returns: HTML with issue title, description preview, and labels
 viewport_effect: none
 ```
 
-```interactive_element_author_filter
+```issue_filter_author
 location_page: ^repo_name/issues
 type: Button/Dropdown
 visual_element: "Author" button on top of the issues list, in the filter bar
@@ -29,7 +33,7 @@ returns: JSON with suggested authors including bots and users
 viewport_effect: none
 ```
 
-```interactive_element_label_filter
+```issue_filter_label
 location_page: ^repo_name/issues
 type: Button/Dropdown
 visual_element: "Labels" button on top of the issues list, in the filter bar
@@ -45,7 +49,7 @@ returns: JSON with label data including id, color, name, nameHTML, description, 
 viewport_effect: Opens dropdown showing all repository labels with color coding and descriptions
 ```
 
-``ìnteractive_element_closed_button
+```issue_filter_closed_button
 location_page: ^repo_name/issues
 type: Button/Toggle
 visual_element: "Closed" button in the issues filter bar
@@ -59,7 +63,7 @@ returns: HTML page with filtered list of closed issues
 viewport_effect: Reloads the issues list showing only closed issues, updates URL parameters
 ```
 
-```interactive_element_sort_oldest
+```issue_sort_oldest
 location_page: ^repo_name/issues
 type: Button/Dropdown
 visual_element: Sort dropdown button with "Oldest" option in the issues list header

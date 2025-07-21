@@ -5,12 +5,9 @@ from datetime import datetime
 from io import BytesIO
 from typing import List
 
+# E2B imports
+from e2b_desktop import Sandbox
 from PIL import Image, ImageDraw
-
-# Selenium imports
-from selenium import webdriver
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
 
 # SmolaAgents imports
 from smolagents import CodeAgent, InferenceClientModel, tool
@@ -18,7 +15,7 @@ from smolagents.agent_types import AgentImage
 from smolagents.memory import ActionStep, TaskStep
 from smolagents.monitoring import LogLevel
 
-SELENIUM_SYSTEM_PROMPT_TEMPLATE = """You are a web automation assistant that can control a local browser using Selenium. The current date is <<current_date>>.
+E2B_SYSTEM_PROMPT_TEMPLATE = """You are a desktop automation assistant that can control a remote desktop environment. The current date is <<current_date>>.
 
 <action process>
 You will be given a task to solve in several steps. At each step you will perform an action.
@@ -46,74 +43,83 @@ On top of performing computations in the Python code snippets that you create, y
 </tools>
 
 <click_guidelines>
-Look at elements on the web page to determine what to click or interact with.
-The browser window has a resolution of <<resolution_x>>x<<resolution_y>> pixels, take it into account to decide clicking coordinates. NEVER USE HYPOTHETIC OR ASSUMED COORDINATES, USE TRUE COORDINATES that you can see from the screenshot.
+Look at elements on the screen to determine what to click or interact with.
+The desktop has a resolution of <<resolution_x>>x<<resolution_y>> pixels, take it into account to decide clicking coordinates. NEVER USE HYPOTHETIC OR ASSUMED COORDINATES, USE TRUE COORDINATES that you can see from the screenshot.
 Use precise coordinates based on the current screenshot for mouse movements and clicks. 
 Whenever you click, MAKE SURE to click in the middle of the button, text, link or any other clickable element. Not under, not on the side. IN THE MIDDLE, else you risk to miss it.
-For web elements it is always better to click in the middle of the text rather than edges. Calculate extremely well the coordinates. A mistake here can make the full task fail.
+In menus it is always better to click in the middle of the text rather than in the tiny icon. Calculate extremelly well the coordinates. A mistake here can make the full task fail.
 Sometimes you may have missed a click, so never assume that you're on the right page, always make sure that your previous action worked.
 In the screenshot you will see a green crosshair displayed over the position of your last click: this way can inspect if the mouse pointer is off of the targeted element, pay special attention to it.
 </click_guidelines>
 
 <task_resolution_example>
-For a task like "Go to Google and search for 'Hello World'":
+For a task like "Open a text editor and type 'Hello World'":
 Step 1:
-Short term goal: I want to open Google website.
-What I see: I see the browser is open but no specific page is loaded yet.
-Reflection: I need to navigate to Google first. I'll use the open_url tool to go directly to Google.
+Short term goal: I want to open a text editor.
+What I see: I am on the homepage of my desktop. I see the applications
+Reflection: I think that a notes application would fit in the Applications menu, let's open it. I'll carefully click in the middle of the text 'Applications'/
 Action:
 ```python
-open_url("https://google.com")
+click(51, 8) 
 ```<end_code>
 
 Step 2:
-Short term goal: I want to search for 'Hello World'.
-What I see: I can see the Google homepage with the search box in the center of the page.
-Reflection: I can see the Google search box. I need to click on it first and then type my search query.
+Short term goal: I want to open a text editor.
+What I see: I am on the homepage of my desktop, with the applications menu open. I see an Accessories section, I see it is a section in the menu thanks to the tiny white triangle after the text accessories.
+Reflection: I think that a notes application would fit the Accessories section. I SHOULD NOT try to move through the menus with scroll, it won't work:
+I'll look for Accessories and click on it being very precise, clicking in the middle of the text 'Accessories'.
 Action:
 ```python
-click(640, 360) 
+click(76, 195) 
 ```<end_code>
 
 Step 3:
-Short term goal: I want to type 'Hello World' in the search box.
-What I see: The search box is now active with a cursor visible.
-Reflection: The search box is ready for input. I'll type 'Hello World' now.
+Short term goal: I want to open a text editor.
+What I see: I am under the Accessories menu. Under the open submenu Accessories, I've found 'Text Editor'.
+Reflection: This must be my notes app. I remember that menus are navigated through clicking. I will now click on it being very precise, clicking in the middle of the text 'Text Editor'.
+Action:
+```python
+click(251, 441) 
+```<end_code>
+
+Step 4:
+Short term goal: I want to open a text editor.
+What I see: I am still under the Accessories menu. Nothing has changed compared to previous screenshot. Under the open submenu Accessories, I still see 'Text Editor'. The green cross is off from the element.
+Reflection: My last click must have been off. Let's correct this. I will click the correct place, right in the middle of the element.
+Action:
+```python
+click(241, 441) 
+```<end_code>
+
+Step 5:
+Short term goal: I want to type 'Hello World'.
+What I see: I have opened a Notepad. The Notepad app is open on an empty page
+Reflection: Now Notepad is open as intended, time to type text.
 Action:
 ```python
 type_text("Hello World")
 ```<end_code>
 
-Step 4:
-Short term goal: I want to submit the search.
-What I see: I can see 'Hello World' typed in the search box and there's a search button or I can press Enter.
-Reflection: I can either click the search button or press Enter to submit the search. I'll press Enter.
+Step 6:
+Short term goal: I want to type 'Hello World'.
+What I see: The Notepad app displays 'Hello World'
+Reflection: Now that I've 1. Opened the notepad and 2. typed 'Hello World', and 3. the result seems correct, I think the Task is completed. I will return a confirmation that the task is completed.
 Action:
 ```python
-press_key("enter")
-```<end_code>
-
-Step 5:
-Short term goal: Verify the search results.
-What I see: The Google search results page is showing results for 'Hello World'.
-Reflection: Perfect! The search has been completed successfully. I can see search results for 'Hello World' are displayed.
-Action:
-```python
-final_answer("Successfully searched for 'Hello World' on Google")
+final_answer("Done")
 ```<end_code>
 </task_resolution_example>
 
 <general_guidelines>
 Always analyze the latest screenshot carefully before performing actions.
-You can wait for appropriate loading times using the wait() tool. But don't wait forever, sometimes pages load slowly or elements need time to appear.
+You can wait for appropriate loading times using the wait() tool. But don't wait forever, sometimes you've just misclicked and the process didn't launch.
 Execute one action at a time: don't try to pack a click and typing in one action.
 On each step, look at the last screenshot and action to validate if previous steps worked and decide the next action. If you repeated an action already without effect, it means that this action is useless: don't repeat it and try something else.
-Use click to interact with web elements and scroll to navigate through web pages.
+Use click to move through menus on the desktop and scroll for web and specific applications.
 Always analyze the latest screenshot carefully before performing actions.
-Web pages may have dropdowns, modals, and interactive elements that appear on hover or click.
-Use open_url to navigate to new websites directly.
-In browser, ignore any sign-in popups, cookie banners, or ads while they don't interfere with the elements you want to interact with.
-Wait for page elements to load before interacting with them.
+Desktop menus usually expand with more options, the tiny triangle next to some text in a menu means that menu expands. For example in Office in the Applications menu expands showing presentation or writing applications. 
+NEVER CLICK THE WEB BROWSER ICON TO OPEN THE WEB BROWSER: use open_url directly.
+In browser, ignore any sign-in popups while they don't interfere with the elements you want to interact with.
 </general_guidelines>
 """.replace("<<current_date>>", datetime.now().strftime("%A, %d-%B-%Y"))
 
@@ -148,13 +154,14 @@ def get_agent_summary_erase_images(agent):
     return agent.write_memory_to_messages()
 
 
-class SeleniumVisionAgent(CodeAgent):
-    """Agent for local browser automation with Selenium and Qwen2.5VL vision capabilities"""
+class E2BVisionAgent(CodeAgent):
+    """Agent for e2b desktop automation with Qwen2.5VL vision capabilities"""
 
     def __init__(
         self,
         model: InferenceClientModel,
         data_dir: str,
+        desktop: Sandbox,
         tools: List[tool] = None,
         max_steps: int = 200,
         verbosity_level: LogLevel = 2,
@@ -162,21 +169,12 @@ class SeleniumVisionAgent(CodeAgent):
         use_v1_prompt: bool = False,
         **kwargs,
     ):
+        self.desktop = desktop
         self.data_dir = data_dir
         self.planning_interval = planning_interval
-
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--force-device-scale-factor=1")
-        chrome_options.add_argument("--window-size=1000,1350")
-        chrome_options.add_argument("--disable-pdf-viewer")
-        chrome_options.add_argument("--window-position=0,0")
-
-        self.driver = webdriver.Chrome(options=chrome_options)
-
-        # Set browser window size
-        self.width, self.height = 1000, 1350
-        self.driver.set_window_size(self.width, self.height)
-        print(f"Browser window size: {self.width}x{self.height}")
+        # Initialize Desktop
+        self.width, self.height = self.desktop.get_screen_size()
+        print(f"Screen size: {self.width}x{self.height}")
 
         # Set up temp directory
         os.makedirs(self.data_dir, exist_ok=True)
@@ -193,11 +191,9 @@ class SeleniumVisionAgent(CodeAgent):
             stream_outputs=True,
             **kwargs,
         )
-        self.prompt_templates["system_prompt"] = (
-            SELENIUM_SYSTEM_PROMPT_TEMPLATE.replace(
-                "<<resolution_x>>", str(self.width)
-            ).replace("<<resolution_y>>", str(self.height))
-        )
+        self.prompt_templates["system_prompt"] = E2B_SYSTEM_PROMPT_TEMPLATE.replace(
+            "<<resolution_x>>", str(self.width)
+        ).replace("<<resolution_y>>", str(self.height))
 
         # Add screen info to state
         self.state["screen_width"] = self.width
@@ -206,34 +202,7 @@ class SeleniumVisionAgent(CodeAgent):
         # Add default tools
         self.logger.log("Setting up agent tools...")
         self._setup_desktop_tools()
-
-    def save_screenshot(self, memory_step: ActionStep, agent: CodeAgent) -> None:
-        time.sleep(1.0)  # Let JavaScript animations happen before taking the screenshot
-
-        current_step = memory_step.step_number
-        if self.driver is not None:
-            for (
-                previous_memory_step
-            ) in agent.memory.steps:  # Remove previous screenshots for lean processing
-                if (
-                    isinstance(previous_memory_step, ActionStep)
-                    and previous_memory_step.step_number <= current_step - 2
-                ):
-                    previous_memory_step.observations_images = None
-            png_bytes = self.driver.get_screenshot_as_png()
-            image = Image.open(BytesIO(png_bytes))
-            print(f"Captured a browser screenshot: {image.size} pixels")
-            memory_step.observations_images = [
-                image.copy()
-            ]  # Create a copy to ensure it persists
-
-        # Update observations with current URL
-        url_info = f"Current url: {self.driver.current_url}"
-        memory_step.observations = (
-            url_info
-            if memory_step.observations is None
-            else memory_step.observations + "\n" + url_info
-        )
+        self.step_callbacks.append(self.take_screenshot_callback)
 
     def _setup_desktop_tools(self):
         """Register all desktop tools"""
@@ -246,9 +215,8 @@ class SeleniumVisionAgent(CodeAgent):
                 x: The x coordinate (horizontal position)
                 y: The y coordinate (vertical position)
             """
-            action = ActionChains(self.driver)
-            action.move_by_offset(x, y).click().perform()
-            action.reset_actions()
+            self.desktop.move_mouse(x, y)
+            self.desktop.left_click()
             self.click_coordinates = [x, y]
             self.logger.log(f"Clicked at coordinates ({x}, {y})")
             return f"Clicked at coordinates ({x}, {y})"
@@ -261,9 +229,8 @@ class SeleniumVisionAgent(CodeAgent):
                 x: The x coordinate (horizontal position)
                 y: The y coordinate (vertical position)
             """
-            action = ActionChains(self.driver)
-            action.move_by_offset(x, y).context_click().perform()
-            action.reset_actions()
+            self.desktop.move_mouse(x, y)
+            self.desktop.right_click()
             self.click_coordinates = [x, y]
             self.logger.log(f"Right-clicked at coordinates ({x}, {y})")
             return f"Right-clicked at coordinates ({x}, {y})"
@@ -276,9 +243,8 @@ class SeleniumVisionAgent(CodeAgent):
                 x: The x coordinate (horizontal position)
                 y: The y coordinate (vertical position)
             """
-            action = ActionChains(self.driver)
-            action.move_by_offset(x, y).double_click().perform()
-            action.reset_actions()
+            self.desktop.move_mouse(x, y)
+            self.desktop.double_click()
             self.click_coordinates = [x, y]
             self.logger.log(f"Double-clicked at coordinates ({x}, {y})")
             return f"Double-clicked at coordinates ({x}, {y})"
@@ -291,9 +257,7 @@ class SeleniumVisionAgent(CodeAgent):
                 x: The x coordinate (horizontal position)
                 y: The y coordinate (vertical position)
             """
-            action = ActionChains(self.driver)
-            action.move_by_offset(x, y).perform()
-            action.reset_actions()
+            self.desktop.move_mouse(x, y)
             self.logger.log(f"Moved mouse to coordinates ({x}, {y})")
             return f"Moved mouse to coordinates ({x}, {y})"
 
@@ -312,9 +276,7 @@ class SeleniumVisionAgent(CodeAgent):
                 text: The text to type
             """
             clean_text = normalize_text(text)
-            action = ActionChains(self.driver)
-            action.send_keys(clean_text).perform()
-            action.reset_actions()
+            self.desktop.write(clean_text, delay_in_ms=75)
             self.logger.log(f"Typed text: '{clean_text}'")
             return f"Typed text: '{clean_text}'"
 
@@ -325,23 +287,7 @@ class SeleniumVisionAgent(CodeAgent):
             Args:
                 key: The key to press (e.g. "enter", "space", "backspace", etc.).
             """
-            # Map common key names to Selenium Keys
-            key_mapping = {
-                "enter": Keys.ENTER,
-                "space": Keys.SPACE,
-                "backspace": Keys.BACKSPACE,
-                "tab": Keys.TAB,
-                "escape": Keys.ESCAPE,
-                "esc": Keys.ESCAPE,
-                "delete": Keys.DELETE,
-                "shift": Keys.SHIFT,
-                "ctrl": Keys.CONTROL,
-                "alt": Keys.ALT,
-            }
-            selenium_key = key_mapping.get(key.lower(), key)
-            action = ActionChains(self.driver)
-            action.send_keys(selenium_key).perform()
-            action.reset_actions()
+            self.desktop.press(key)
             self.logger.log(f"Pressed key: {key}")
             return f"Pressed key: {key}"
 
@@ -351,7 +297,7 @@ class SeleniumVisionAgent(CodeAgent):
             Goes back to the previous page in the browser. If using this tool doesn't work, just click the button directly.
             Args:
             """
-            self.driver.back()
+            self.desktop.press(["alt", "left"])
             self.logger.log("Went back one page")
             return "Went back one page"
 
@@ -365,11 +311,7 @@ class SeleniumVisionAgent(CodeAgent):
                 x2: end x coordinate
                 y2: end y coordinate
             """
-            action = ActionChains(self.driver)
-            action.move_by_offset(x1, y1).click_and_hold().move_by_offset(
-                x2 - x1, y2 - y1
-            ).release().perform()
-            action.reset_actions()
+            self.desktop.drag([x1, y1], [x2, y2])
             message = f"Dragged and dropped from [{x1}, {y1}] to [{x2}, {y2}]"
             self.logger.log(message)
             return message
@@ -377,22 +319,15 @@ class SeleniumVisionAgent(CodeAgent):
         @tool
         def scroll(x: int, y: int, direction: str = "down", amount: int = 2) -> str:
             """
-            Moves the mouse to selected coordinates, then scrolls the page.
+            Moves the mouse to selected coordinates, then uses the scroll button: this could scroll the page or zoom, depending on the app. DO NOT use scroll to move through linux desktop menus.
             Args:
-                x: The x coordinate (horizontal position) of the element to scroll
-                y: The y coordinate (vertical position) of the element to scroll
-                direction: The direction to scroll ("up" or "down"), defaults to "down".
+                x: The x coordinate (horizontal position) of the element to scroll/zoom
+                y: The y coordinate (vertical position) of the element to scroll/zoom
+                direction: The direction to scroll ("up" or "down"), defaults to "down". For zoom, "up" zooms in, "down" zooms out.
                 amount: The amount to scroll. A good amount is 1 or 2.
             """
-            action = ActionChains(self.driver)
-            action.move_by_offset(x, y)
-            for _ in range(amount):
-                if direction.lower() == "up":
-                    action.scroll_by_amount(0, -100)
-                else:
-                    action.scroll_by_amount(0, 100)
-            action.perform()
-            action.reset_actions()
+            self.desktop.move_mouse(x, y)
+            self.desktop.scroll(direction=direction, amount=amount)
             message = f"Scrolled {direction} by {amount}"
             self.logger.log(message)
             return message
@@ -411,7 +346,7 @@ class SeleniumVisionAgent(CodeAgent):
         @tool
         def open_url(url: str) -> str:
             """
-            Directly opens the specified URL in the browser.
+            Directly opens a browser with the specified url: use this at start of web searches rather than trying to click the browser.
             Args:
                 url: The URL to open
             """
@@ -419,7 +354,7 @@ class SeleniumVisionAgent(CodeAgent):
             if not url.startswith(("http://", "https://")):
                 url = "https://" + url
 
-            self.driver.get(url)
+            self.desktop.open(url)
             # Give it time to load
             time.sleep(2)
             self.logger.log(f"Opening URL: {url}")
@@ -428,20 +363,18 @@ class SeleniumVisionAgent(CodeAgent):
         @tool
         def find_on_page_ctrl_f(search_string: str) -> str:
             """
-            Scroll the browser viewport to the first occurrence of the search string. This is equivalent to Ctrl+F.
+            Scroll the browser viewport to the first occurrence of the search string. This is equivalent to Ctrl+F. Use this to search on a pdf for instance.
             Args:
                 search_string: The string to search for on the page.
             """
-            action = ActionChains(self.driver)
-            action.key_down(Keys.CONTROL).send_keys("f").key_up(Keys.CONTROL).perform()
+            self.desktop.press(["ctrl", "f"])
             time.sleep(0.3)
             clean_text = normalize_text(search_string)
-            action.send_keys(clean_text).perform()
+            self.desktop.write(clean_text, delay_in_ms=75)
             time.sleep(0.3)
-            action.send_keys(Keys.ENTER).perform()
+            self.desktop.press("enter")
             time.sleep(0.3)
-            action.send_keys(Keys.ESCAPE).perform()
-            action.reset_actions()
+            self.desktop.press("esc")
             output_message = f"Scrolled to the first occurrence of '{clean_text}'"
             self.logger.log(output_message)
             return output_message
@@ -466,8 +399,8 @@ class SeleniumVisionAgent(CodeAgent):
 
         current_step = memory_step.step_number
 
-        time.sleep(2.5)  # Let things happen in the browser
-        screenshot_bytes = self.driver.get_screenshot_as_png()
+        time.sleep(2.5)  # Let things happen on the desktop
+        screenshot_bytes = self.desktop.screenshot(format="bytes")
         image = Image.open(BytesIO(screenshot_bytes))
 
         # Create a filename with step number
@@ -519,30 +452,24 @@ class SeleniumVisionAgent(CodeAgent):
 
     def close(self):
         """Clean up resources"""
-        if self.driver:
-            print("Closing browser...")
-            self.driver.quit()
-            print("Browser closed")
-
-    def create_agent(self, data_dir):
-        return SeleniumVisionAgent(
-            model=self.model,
-            data_dir=data_dir,
-            step_callbacks=[
-                lambda memory_step, agent: self.save_screenshot(memory_step, agent)
-            ],
-            max_steps=20,
-            verbosity_level=2,
-            use_v1_prompt=True,
-        )
+        if self.desktop:
+            print("Stopping e2b stream and killing sandbox...")
+            self.desktop.stream.stop()
+            self.desktop.kill()
+            print("E2B sandbox terminated")
 
 
 if __name__ == "__main__":
-    model = InferenceClientModel(
-        model_id="Qwen/Qwen2.5-VL-72B-Instruct",
-        provider="nebius",
+    desktop = Sandbox(
+        api_key=os.getenv("E2B_API_KEY"),
+        resolution=(1920, 1080),
+        dpi=96,
+        timeout=600,
+        template="k0wmnzir0zuzye6dndlw",
     )
-    selenium_vision_agent = SeleniumVisionAgent(model=model, data_dir="data")
-
-    agent = selenium_vision_agent.create_agent(data_dir="data")
-    agent.run("Go to Google and search for 'Hello World'")
+    agent = E2BVisionAgent(
+        model=InferenceClientModel(model_id="Qwen/Qwen2.5-VL-72B-Instruct"),
+        data_dir="data",
+        desktop=desktop,
+    )
+    agent.run("Find me a paper on arxiv.org")
