@@ -1,5 +1,5 @@
 import pytest
-from src.webportal.get_interactive.selenium_agent import SeleniumVisionAgent, InferenceClientModel
+from webportal.get_interactive.selenium_agent import SeleniumVisionAgent, InferenceClientModel
 
 @pytest.mark.expensive
 def test_run_selenium_agent():

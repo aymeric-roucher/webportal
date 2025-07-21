@@ -261,75 +261,7 @@ class SeleniumVisionAgent(CodeAgent):
                 
         return current_requests
     
-    def _capture_network_request(self, request_data: dict[str, Any]) -> None:
-        """Capture and store network request data"""
-        # Extract relevant information from the request
-        request_info = {
-            'timestamp': time.time(),
-            'url': request_data.get('url', ''),
-            'method': request_data.get('method', 'GET'),
-            'headers': request_data.get('headers', {}),
-            'post_data': request_data.get('postData', ''),
-            'request_id': request_data.get('requestId', '')
-        }
-        self.network_requests.append(request_info)
-    
-    def get_network_requests_since_last_clear(self) -> list[dict[str, Any]]:
-        """Get all network requests since the last clear and return formatted data"""
-        return self.network_requests.copy()
-    
-    def clear_network_requests(self) -> None:
-        """Clear the network requests buffer"""
-        self.network_requests = []
-        print("Network requests buffer cleared")
-    
-    def get_network_requests_as_har_like(self) -> dict[str, Any]:
-        """Format network requests in a HAR-like structure"""
-        har_like = {
-            'version': '1.0',
-            'creator': {
-                'name': 'SeleniumVisionAgent',
-                'version': '1.0'
-            },
-            'entries': []
-        }
         
-        for req in self.network_requests:
-            entry = {
-                'startedDateTime': datetime.fromtimestamp(req['timestamp']).isoformat(),
-                'request': {
-                    'method': req['method'],
-                    'url': req['url'],
-                    'headers': [{'name': k, 'value': v} for k, v in req['headers'].items()],
-                    'postData': req['post_data'] if req['post_data'] else None
-                },
-                'response': {},  # Response data would need additional CDP events
-                'cache': {},
-                'timings': {}
-            }
-            har_like['entries'].append(entry)
-        
-        return har_like
-        
-    def save_screenshot(self, memory_step: ActionStep, agent: CodeAgent) -> None:
-        time.sleep(1.0)  # Let JavaScript animations happen before taking the screenshot
-        
-        current_step = memory_step.step_number
-        if self.driver is not None:
-            for previous_memory_step in agent.memory.steps:  # Remove previous screenshots for lean processing
-                if isinstance(previous_memory_step, ActionStep) and previous_memory_step.step_number <= current_step - 2:
-                    previous_memory_step.observations_images = None
-            png_bytes = self.driver.get_screenshot_as_png()
-            image = Image.open(BytesIO(png_bytes))
-            print(f"Captured a browser screenshot: {image.size} pixels")
-            memory_step.observations_images = [image.copy()]  # Create a copy to ensure it persists
-
-        # Update observations with current URL
-        url_info = f"Current url: {self.driver.current_url}"
-        memory_step.observations = (
-            url_info if memory_step.observations is None else memory_step.observations + "\n" + url_info
-        )
-
     def _setup_desktop_tools(self):
         """Register all desktop tools"""
 
@@ -568,46 +500,6 @@ class SeleniumVisionAgent(CodeAgent):
             
             return summary
 
-        @tool
-        def clear_network_requests_buffer() -> str:
-            """
-            Clears the buffer of captured network requests.
-            Useful to start fresh monitoring from a specific point.
-            """
-            self.clear_network_requests()
-            return "Network requests buffer cleared. Starting fresh network monitoring."
-        
-        @tool
-        def get_network_requests_json() -> str:
-            """
-            Get detailed network requests in JSON format (HAR-like structure).
-            Returns comprehensive information about all captured network requests.
-            """
-            # Capture current network activity
-            current_activity = self.capture_current_network_activity()
-            all_requests = self.network_requests + current_activity
-            
-            if not all_requests:
-                return "No network requests to export."
-            
-            # Get HAR-like structure
-            har_data = self.get_network_requests_as_har_like()
-            
-            # Update with current requests
-            har_data['entries'] = []
-            for req in all_requests:
-                entry = {
-                    'startedDateTime': datetime.fromtimestamp(req['timestamp']).isoformat(),
-                    'request': {
-                        'method': req['method'],
-                        'url': req['url'],
-                        'headers': [{'name': k, 'value': v} for k, v in req['headers'].items()],
-                        'postData': {'text': req['post_data']} if req['post_data'] else None
-                    }
-                }
-                har_data['entries'].append(entry)
-            
-            return json.dumps(har_data, indent=2)
 
         # Register the tools
         self.tools["click"] = click
@@ -689,23 +581,5 @@ class SeleniumVisionAgent(CodeAgent):
             print("Closing browser...")
             self.driver.quit()
             print("Browser closed")
-
-if __name__ == "__main__":
-    
-    model = InferenceClientModel(
-        model_id="Qwen/Qwen2.5-VL-72B-Instruct",
-        provider="nebius",
-    )
-    selenium_vision_agent = SeleniumVisionAgent(model=model, data_dir="data")
-    selenium_vision_agent.run("""
-I want you to go to github.com, to look for the numpy package and click the button to see all of the labels. 
-              
-When you are done, I want you to give me a list of the requests that were made to the server. 
-              
-              """)
-
-    selenium_vision_agent.tools["open_url"]("https://github.com/numpy/numpy/issues")
-    selenium_vision_agent.tools["get_network_requests"]()
-    pass
     
     
