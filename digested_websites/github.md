@@ -1,4 +1,5 @@
 ```interactive_element_issue_hover
+location_page: ^repo_name/issues
 type: Hover trigger
 visual_element: Issue links
 trigger: Mouseover on issue link
@@ -13,6 +14,7 @@ viewport_effect: none
 ```
 
 ```interactive_element_author_filter
+location_page: ^repo_name/issues
 type: Button/Dropdown
 visual_element: "Author" button on top of the issues list, in the filter bar
 trigger: Click
@@ -28,6 +30,7 @@ viewport_effect: none
 ```
 
 ```interactive_element_label_filter
+location_page: ^repo_name/issues
 type: Button/Dropdown
 visual_element: "Labels" button on top of the issues list, in the filter bar
 trigger: Click
@@ -43,6 +46,7 @@ viewport_effect: Opens dropdown showing all repository labels with color coding 
 ```
 
 ``ìnteractive_element_closed_button
+location_page: ^repo_name/issues
 type: Button/Toggle
 visual_element: "Closed" button in the issues filter bar
 trigger: Click
@@ -55,8 +59,8 @@ returns: HTML page with filtered list of closed issues
 viewport_effect: Reloads the issues list showing only closed issues, updates URL parameters
 ```
 
-```
-interactive_element_sort_oldest
+```interactive_element_sort_oldest
+location_page: ^repo_name/issues
 type: Button/Dropdown
 visual_element: Sort dropdown button with "Oldest" option in the issues list header
 trigger: Click on sort dropdown and select "Oldest"
