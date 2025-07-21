@@ -170,8 +170,9 @@ class SeleniumVisionAgent(CodeAgent):
         self.planning_interval = planning_interval
         
         chrome_options = webdriver.ChromeOptions()
+        self.width, self.height = 1080, 1920
         chrome_options.add_argument("--force-device-scale-factor=1")
-        chrome_options.add_argument("--window-size=1000,1350")
+        chrome_options.add_argument("--window-size=1920,1080")
         chrome_options.add_argument("--disable-pdf-viewer")
         chrome_options.add_argument("--window-position=0,0")
 
@@ -179,7 +180,6 @@ class SeleniumVisionAgent(CodeAgent):
         
         
         # Set browser window size
-        self.width, self.height = 1000, 1350
         self.driver.set_window_size(self.width, self.height)
         print(f"Browser window size: {self.width}x{self.height}")
 
