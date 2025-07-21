@@ -1,9 +1,10 @@
 import os
 import time
 import unicodedata
+import json
 from datetime import datetime
 from io import BytesIO
-from typing import List
+from typing import Any
 
 # Selenium imports
 from selenium import webdriver
@@ -159,7 +160,7 @@ class SeleniumVisionAgent(CodeAgent):
         self,
         model: InferenceClientModel,
         data_dir: str,
-        tools: List[tool] = None,
+        tools: list[tool] = None,
         max_steps: int = 200,
         verbosity_level: LogLevel = 2,
         planning_interval: int = None,
@@ -175,9 +176,19 @@ class SeleniumVisionAgent(CodeAgent):
         chrome_options.add_argument("--window-size=1920,1080")
         chrome_options.add_argument("--disable-pdf-viewer")
         chrome_options.add_argument("--window-position=0,0")
+        # Enable Chrome DevTools Protocol for network monitoring
+        chrome_options.add_experimental_option("useAutomationExtension", False)
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_argument("--enable-network-service-logging")
+        chrome_options.add_argument("--log-level=0")
+        # Enable performance logs to capture network requests
+        chrome_options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
 
         self.driver = webdriver.Chrome(options=chrome_options)
         
+        # Initialize network request tracking
+        self.network_requests = []
+        self._setup_network_monitoring()
         
         # Set browser window size
         self.driver.set_window_size(self.width, self.height)
@@ -210,6 +221,114 @@ class SeleniumVisionAgent(CodeAgent):
         self.logger.log("Setting up agent tools...")
         self._setup_desktop_tools()
         self._setup_step_callbacks([self.take_screenshot_callback])
+
+        
+    def _setup_network_monitoring(self):
+        """Setup Chrome DevTools Protocol for network monitoring"""
+        # Enable network domain
+        self.driver.execute_cdp_cmd('Network.enable', {})
+        
+        # Clear any existing network requests
+        self.network_requests = []
+        
+        # Add event listeners for network requests
+        self.driver.execute_cdp_cmd('Network.clearBrowserCache', {})
+        
+        # Set up event listener callback (note: this is a simplified approach)
+        # In practice, you'd need to use CDP event streaming for real-time capture
+        print("Network monitoring enabled")
+
+    
+    def capture_current_network_activity(self) -> list[dict[str, Any]]:
+        """Capture current network activity using CDP"""
+        # Get performance logs which include network requests
+        logs = self.driver.get_log('performance')
+        
+        current_requests = []
+        for log in logs:
+            message = json.loads(log['message'])
+            if message.get('message', {}).get('method') == 'Network.requestWillBeSent':
+                params = message.get('message', {}).get('params', {})
+                request_info = {
+                    'timestamp': log['timestamp'] / 1000,  # Convert to seconds
+                    'url': params.get('request', {}).get('url', ''),
+                    'method': params.get('request', {}).get('method', 'GET'),
+                    'headers': params.get('request', {}).get('headers', {}),
+                    'post_data': params.get('request', {}).get('postData', ''),
+                    'request_id': params.get('requestId', '')
+                }
+                current_requests.append(request_info)
+                
+        return current_requests
+    
+    def _capture_network_request(self, request_data: dict[str, Any]) -> None:
+        """Capture and store network request data"""
+        # Extract relevant information from the request
+        request_info = {
+            'timestamp': time.time(),
+            'url': request_data.get('url', ''),
+            'method': request_data.get('method', 'GET'),
+            'headers': request_data.get('headers', {}),
+            'post_data': request_data.get('postData', ''),
+            'request_id': request_data.get('requestId', '')
+        }
+        self.network_requests.append(request_info)
+    
+    def get_network_requests_since_last_clear(self) -> list[dict[str, Any]]:
+        """Get all network requests since the last clear and return formatted data"""
+        return self.network_requests.copy()
+    
+    def clear_network_requests(self) -> None:
+        """Clear the network requests buffer"""
+        self.network_requests = []
+        print("Network requests buffer cleared")
+    
+    def get_network_requests_as_har_like(self) -> dict[str, Any]:
+        """Format network requests in a HAR-like structure"""
+        har_like = {
+            'version': '1.0',
+            'creator': {
+                'name': 'SeleniumVisionAgent',
+                'version': '1.0'
+            },
+            'entries': []
+        }
+        
+        for req in self.network_requests:
+            entry = {
+                'startedDateTime': datetime.fromtimestamp(req['timestamp']).isoformat(),
+                'request': {
+                    'method': req['method'],
+                    'url': req['url'],
+                    'headers': [{'name': k, 'value': v} for k, v in req['headers'].items()],
+                    'postData': req['post_data'] if req['post_data'] else None
+                },
+                'response': {},  # Response data would need additional CDP events
+                'cache': {},
+                'timings': {}
+            }
+            har_like['entries'].append(entry)
+        
+        return har_like
+        
+    def save_screenshot(self, memory_step: ActionStep, agent: CodeAgent) -> None:
+        time.sleep(1.0)  # Let JavaScript animations happen before taking the screenshot
+        
+        current_step = memory_step.step_number
+        if self.driver is not None:
+            for previous_memory_step in agent.memory.steps:  # Remove previous screenshots for lean processing
+                if isinstance(previous_memory_step, ActionStep) and previous_memory_step.step_number <= current_step - 2:
+                    previous_memory_step.observations_images = None
+            png_bytes = self.driver.get_screenshot_as_png()
+            image = Image.open(BytesIO(png_bytes))
+            print(f"Captured a browser screenshot: {image.size} pixels")
+            memory_step.observations_images = [image.copy()]  # Create a copy to ensure it persists
+
+        # Update observations with current URL
+        url_info = f"Current url: {self.driver.current_url}"
+        memory_step.observations = (
+            url_info if memory_step.observations is None else memory_step.observations + "\n" + url_info
+        )
 
     def _setup_desktop_tools(self):
         """Register all desktop tools"""
@@ -420,6 +539,76 @@ class SeleniumVisionAgent(CodeAgent):
             self.logger.log(output_message)
             return output_message
 
+        @tool
+        def get_network_requests() -> str:
+            """
+            Retrieves all network requests made since the last interaction or since monitoring started.
+            This provides information similar to HAR (HTTP Archive) files.
+            Returns a summary of network requests with URLs, methods, and timestamps.
+            """
+            # Capture current network activity from performance logs
+            current_activity = self.capture_current_network_activity()
+            
+            # Combine with any previously stored requests
+            all_requests = self.network_requests + current_activity
+            
+            if not all_requests:
+                return "No network requests captured since last interaction."
+            
+            # Format the output for the agent
+            summary = f"Captured {len(all_requests)} network requests:\n"
+            for i, req in enumerate(all_requests, 1):
+                timestamp_str = datetime.fromtimestamp(req['timestamp']).strftime('%H:%M:%S.%f')[:-3]
+                summary += f"{i}. [{timestamp_str}] {req['method']} {req['url']}\n"
+                if req['post_data']:
+                    summary += f"   POST data: {req['post_data'][:100]}{'...' if len(req['post_data']) > 100 else ''}\n"
+            
+            # Store the requests for potential future use
+            self.network_requests.extend(current_activity)
+            
+            return summary
+
+        @tool
+        def clear_network_requests_buffer() -> str:
+            """
+            Clears the buffer of captured network requests.
+            Useful to start fresh monitoring from a specific point.
+            """
+            self.clear_network_requests()
+            return "Network requests buffer cleared. Starting fresh network monitoring."
+        
+        @tool
+        def get_network_requests_json() -> str:
+            """
+            Get detailed network requests in JSON format (HAR-like structure).
+            Returns comprehensive information about all captured network requests.
+            """
+            # Capture current network activity
+            current_activity = self.capture_current_network_activity()
+            all_requests = self.network_requests + current_activity
+            
+            if not all_requests:
+                return "No network requests to export."
+            
+            # Get HAR-like structure
+            har_data = self.get_network_requests_as_har_like()
+            
+            # Update with current requests
+            har_data['entries'] = []
+            for req in all_requests:
+                entry = {
+                    'startedDateTime': datetime.fromtimestamp(req['timestamp']).isoformat(),
+                    'request': {
+                        'method': req['method'],
+                        'url': req['url'],
+                        'headers': [{'name': k, 'value': v} for k, v in req['headers'].items()],
+                        'postData': {'text': req['post_data']} if req['post_data'] else None
+                    }
+                }
+                har_data['entries'].append(entry)
+            
+            return json.dumps(har_data, indent=2)
+
         # Register the tools
         self.tools["click"] = click
         self.tools["right_click"] = right_click
@@ -433,6 +622,9 @@ class SeleniumVisionAgent(CodeAgent):
         self.tools["go_back"] = go_back
         self.tools["drag_and_drop"] = drag_and_drop
         self.tools["find_on_page_ctrl_f"] = find_on_page_ctrl_f
+        self.tools["get_network_requests"] = get_network_requests
+        # self.tools["clear_network_requests_buffer"] = clear_network_requests_buffer
+        # self.tools["get_network_requests_json"] = get_network_requests_json
 
     def take_screenshot_callback(self, memory_step: ActionStep, agent=None) -> None:
         """Callback that takes a screenshot + memory snapshot after a step completes"""
@@ -497,15 +689,6 @@ class SeleniumVisionAgent(CodeAgent):
             print("Closing browser...")
             self.driver.quit()
             print("Browser closed")
-            
-    def create_agent(self, data_dir):
-        return SeleniumVisionAgent(
-            model=self.model,
-            data_dir=data_dir,
-            max_steps=20,
-            verbosity_level=2,
-            use_v1_prompt=True,
-        )
 
 if __name__ == "__main__":
     
@@ -514,7 +697,15 @@ if __name__ == "__main__":
         provider="nebius",
     )
     selenium_vision_agent = SeleniumVisionAgent(model=model, data_dir="data")
-
-    agent = selenium_vision_agent.create_agent(data_dir="data")
-    agent.run("""I want you to go to github.com, to look for the numpy package and give me a list of all of the labels on the issues. 
+    selenium_vision_agent.run("""
+I want you to go to github.com, to look for the numpy package and click the button to see all of the labels. 
+              
+When you are done, I want you to give me a list of the requests that were made to the server. 
+              
               """)
+
+    selenium_vision_agent.tools["open_url"]("https://github.com/numpy/numpy/issues")
+    selenium_vision_agent.tools["get_network_requests"]()
+    pass
+    
+    
