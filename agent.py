@@ -13,15 +13,11 @@ from smolagents import (
 load_dotenv()
 
 model = OpenAIModel(
-    model_id="gpt-4o-mini" # for 200k token per minute
+    model_id="gpt-4o-mini"  # for 200k token per minute
 )  # "gpt-4o" for performance, "gpt-3.5-turbo" for testing
 
 
-<<<<<<< Updated upstream
-with open("digested_websites/www.target.com_api_calls_short.md", "r") as f:
-=======
 with open("digested_websites/airfrance.md", "r") as f:
->>>>>>> Stashed changes
     interaction_description = f.read()
 
 instructions = f"""
@@ -29,15 +25,10 @@ instructions = f"""
 
 You are an advanced web automation agent specialized in performing complex tasks through API interactions. 
 
-<<<<<<< Updated upstream
 Below is a description of the API calls that you can make to the desired domain.
 You cannot use them directly, you need to use the tools provided to you.
 
 Here is the description of the API calls:
-=======
-Since you don't have access to the interactive elements, you can use the GET or POST requests described to mimick the interactions.
-
->>>>>>> Stashed changes
 {interaction_description}
 
 """
