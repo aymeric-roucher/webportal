@@ -133,7 +133,14 @@ def extract_arguments(request: Dict[str, Any]) -> Dict[str, Any]:
         if 'application/json' in content_type:
             try:
                 json_data = json.loads(post_data.get('text', '{}'))
-                args.update(json_data)
+                if isinstance(json_data, dict):
+                    args.update(json_data)
+                elif isinstance(json_data, list):
+                    # Handle list data by converting to a more readable format
+                    args['data'] = json_data
+                else:
+                    # Handle other data types
+                    args['data'] = str(json_data)
             except json.JSONDecodeError:
                 pass
         elif 'application/x-www-form-urlencoded' in content_type:
