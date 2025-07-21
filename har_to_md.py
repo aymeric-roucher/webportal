@@ -49,7 +49,8 @@ def extract_api_calls(har_data: Dict[str, Any]) -> List[Dict[str, Any]]:
             'headers': {h['name']: h['value'] for h in request.get('headers', [])},
             'postData': request.get('postData', {}),
             'status': response.get('status', 0),
-            'responseHeaders': {h['name']: h['value'] for h in response.get('headers', [])}
+            'responseHeaders': {h['name']: h['value'] for h in response.get('headers', [])},
+            'responseBody': response.get('content', {}).get('text', '') if response.get('content') else ''
         }
         
         api_calls.append(api_call)
@@ -236,6 +237,93 @@ def format_arguments(args: Dict[str, Any]) -> str:
         return formatted
 
 
+def extract_response_format(api_call: Dict[str, Any]) -> str:
+    """Extract and format the response data structure from HAR entry."""
+    response = api_call.get('responseHeaders', {})
+    content_type = response.get('content-type', '').lower()
+    
+    # Try to parse response body if available
+    response_body = None
+    if 'responseBody' in api_call and api_call['responseBody']:
+        try:
+            response_body = json.loads(api_call['responseBody'])
+        except (json.JSONDecodeError, TypeError):
+            response_body = api_call.get('responseBody', '')
+    
+    # If we have response body, format it with truncation
+    if response_body:
+        return format_response_data(response_body)
+    
+    # Fallback based on content type
+    if 'application/json' in content_type:
+        return "{}"
+    elif 'text/html' in content_type:
+        return "<html>...</html>"
+    elif 'text/plain' in content_type:
+        return "text content"
+    elif 'application/xml' in content_type:
+        return "<xml>...</xml>"
+    else:
+        return "response data"
+
+
+def format_response_data(data: Any, max_lines: int = 10, max_chars_per_line: int = 80) -> str:
+    """Format response data with truncation for long values."""
+    if isinstance(data, dict):
+        if not data:
+            return "{}"
+        
+        # Format each key-value pair
+        formatted_pairs = []
+        for key, value in data.items():
+            if isinstance(value, str) and len(value) > max_chars_per_line:
+                formatted_value = value[:max_chars_per_line] + "..."
+            elif isinstance(value, dict):
+                # Show keys of nested dictionary
+                if not value:
+                    formatted_value = "{}"
+                else:
+                    keys = list(value.keys())
+                    if len(keys) <= 5:
+                        formatted_value = f"dict with keys: {', '.join(keys)}"
+                    else:
+                        formatted_value = f"dict with keys: {', '.join(keys[:3])}... ({len(keys)} total)"
+            elif isinstance(value, list) and len(str(value)) > max_chars_per_line:
+                formatted_value = f"list with {len(value)} items"
+            else:
+                formatted_value = str(value)
+            
+            formatted_pairs.append(f'"{key}": {formatted_value}')
+        
+        # Show all keys, but limit the number of lines if there are too many
+        if len(formatted_pairs) <= max_lines:
+            return "{\n  " + ",\n  ".join(formatted_pairs) + "\n}"
+        else:
+            # Show all keys but truncate the display if too many
+            return "{\n  " + ",\n  ".join(formatted_pairs[:max_lines]) + ",\n  ... (" + str(len(formatted_pairs) - max_lines) + " more keys)\n}"
+    
+    elif isinstance(data, list):
+        if not data:
+            return "[]"
+        
+        # Show first few items
+        if len(data) <= max_lines:
+            formatted_items = [str(item) for item in data]
+            return "[\n  " + ",\n  ".join(formatted_items) + "\n]"
+        else:
+            formatted_items = [str(item) for item in data[:max_lines]]
+            return "[\n  " + ",\n  ".join(formatted_items) + ",\n  ... (" + str(len(data) - max_lines) + " more items)\n]"
+    
+    elif isinstance(data, str):
+        if len(data) > max_chars_per_line:
+            return f'"{data[:max_chars_per_line]}..."'
+        else:
+            return f'"{data}"'
+    
+    else:
+        return str(data)
+
+
 def generate_markdown(api_calls: List[Dict[str, Any]], domain: str) -> str:
     """Generate markdown content from API calls."""
     if not api_calls:
@@ -258,6 +346,9 @@ def generate_markdown(api_calls: List[Dict[str, Any]], domain: str) -> str:
         effect = determine_effect(url, method)
         viewport_effect = determine_viewport_effect(url, method)
         
+        # Extract response format
+        response_format = extract_response_format(call)
+        
         # Generate markdown block
         block = f"""```interactive_element_{element_name}
 type: {method} request
@@ -267,6 +358,7 @@ request: {method} {url}
 arguments: {format_arguments(args)}
 effect: {effect}
 returns: JSON or HTML response data
+example return: {response_format}
 viewport_effect: {viewport_effect}
 ```"""
         
