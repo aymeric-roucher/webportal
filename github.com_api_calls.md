@@ -6,6 +6,7 @@ request: POST https://collector.github.com/github/collect
 arguments: {}
 effect: Creates or submits new data
 returns: JSON or HTML response data
+example return: response data
 viewport_effect: Updates page content or shows success/error message
 ```
 
@@ -17,5 +18,6 @@ request: POST https://github.com/pull_request_review_decisions
 arguments: {}
 effect: Creates or submits new data
 returns: JSON or HTML response data
+example return: {}
 viewport_effect: Updates page content or shows success/error message
 ```
