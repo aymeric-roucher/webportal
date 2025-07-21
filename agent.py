@@ -17,7 +17,7 @@ model = OpenAIModel(
 )  # "gpt-4o" for performance, "gpt-3.5-turbo" for testing
 
 
-with open("digested_websites/github/^repo_name/issues.md", "r") as f:
+with open("digested_websites/github.md", "r") as f:
     interaction_description = f.read()
 
 instructions = f"""
