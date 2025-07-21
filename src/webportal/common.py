@@ -1,1 +1,1 @@
-TEST_WEB_PAGE = "https://github.com/numpy/numpy/issues"
+TEST_WEB_PAGE = "https://www.google.com/travel"
