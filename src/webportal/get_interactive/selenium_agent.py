@@ -1,9 +1,10 @@
 import os
 import time
 import unicodedata
+import json
 from datetime import datetime
 from io import BytesIO
-from typing import List
+from typing import List, Dict, Any
 
 # Selenium imports
 from selenium import webdriver
@@ -174,9 +175,19 @@ class SeleniumVisionAgent(CodeAgent):
         chrome_options.add_argument("--window-size=1000,1350")
         chrome_options.add_argument("--disable-pdf-viewer")
         chrome_options.add_argument("--window-position=0,0")
+        # Enable Chrome DevTools Protocol for network monitoring
+        chrome_options.add_experimental_option("useAutomationExtension", False)
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_argument("--enable-network-service-logging")
+        chrome_options.add_argument("--log-level=0")
+        # Enable performance logs to capture network requests
+        chrome_options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
 
         self.driver = webdriver.Chrome(options=chrome_options)
         
+        # Initialize network request tracking
+        self.network_requests = []
+        self._setup_network_monitoring()
         
         # Set browser window size
         self.width, self.height = 1000, 1350
@@ -209,6 +220,94 @@ class SeleniumVisionAgent(CodeAgent):
         # Add default tools
         self.logger.log("Setting up agent tools...")
         self._setup_desktop_tools()
+        
+    def _setup_network_monitoring(self):
+        """Setup Chrome DevTools Protocol for network monitoring"""
+        # Enable network domain
+        self.driver.execute_cdp_cmd('Network.enable', {})
+        
+        # Clear any existing network requests
+        self.network_requests = []
+        
+        # Add event listeners for network requests
+        self.driver.execute_cdp_cmd('Network.clearBrowserCache', {})
+        
+        # Set up event listener callback (note: this is a simplified approach)
+        # In practice, you'd need to use CDP event streaming for real-time capture
+        print("Network monitoring enabled")
+
+    
+    def capture_current_network_activity(self) -> List[Dict[str, Any]]:
+        """Capture current network activity using CDP"""
+        # Get performance logs which include network requests
+        logs = self.driver.get_log('performance')
+        
+        current_requests = []
+        for log in logs:
+            message = json.loads(log['message'])
+            if message.get('message', {}).get('method') == 'Network.requestWillBeSent':
+                params = message.get('message', {}).get('params', {})
+                request_info = {
+                    'timestamp': log['timestamp'] / 1000,  # Convert to seconds
+                    'url': params.get('request', {}).get('url', ''),
+                    'method': params.get('request', {}).get('method', 'GET'),
+                    'headers': params.get('request', {}).get('headers', {}),
+                    'post_data': params.get('request', {}).get('postData', ''),
+                    'request_id': params.get('requestId', '')
+                }
+                current_requests.append(request_info)
+                
+        return current_requests
+    
+    def _capture_network_request(self, request_data: Dict[str, Any]) -> None:
+        """Capture and store network request data"""
+        # Extract relevant information from the request
+        request_info = {
+            'timestamp': time.time(),
+            'url': request_data.get('url', ''),
+            'method': request_data.get('method', 'GET'),
+            'headers': request_data.get('headers', {}),
+            'post_data': request_data.get('postData', ''),
+            'request_id': request_data.get('requestId', '')
+        }
+        self.network_requests.append(request_info)
+    
+    def get_network_requests_since_last_clear(self) -> List[Dict[str, Any]]:
+        """Get all network requests since the last clear and return formatted data"""
+        return self.network_requests.copy()
+    
+    def clear_network_requests(self) -> None:
+        """Clear the network requests buffer"""
+        self.network_requests = []
+        print("Network requests buffer cleared")
+    
+    def get_network_requests_as_har_like(self) -> Dict[str, Any]:
+        """Format network requests in a HAR-like structure"""
+        har_like = {
+            'version': '1.0',
+            'creator': {
+                'name': 'SeleniumVisionAgent',
+                'version': '1.0'
+            },
+            'entries': []
+        }
+        
+        for req in self.network_requests:
+            entry = {
+                'startedDateTime': datetime.fromtimestamp(req['timestamp']).isoformat(),
+                'request': {
+                    'method': req['method'],
+                    'url': req['url'],
+                    'headers': [{'name': k, 'value': v} for k, v in req['headers'].items()],
+                    'postData': req['post_data'] if req['post_data'] else None
+                },
+                'response': {},  # Response data would need additional CDP events
+                'cache': {},
+                'timings': {}
+            }
+            har_like['entries'].append(entry)
+        
+        return har_like
         
     def save_screenshot(self, memory_step: ActionStep, agent: CodeAgent) -> None:
         time.sleep(1.0)  # Let JavaScript animations happen before taking the screenshot
@@ -438,6 +537,76 @@ class SeleniumVisionAgent(CodeAgent):
             self.logger.log(output_message)
             return output_message
 
+        @tool
+        def get_network_requests() -> str:
+            """
+            Retrieves all network requests made since the last interaction or since monitoring started.
+            This provides information similar to HAR (HTTP Archive) files.
+            Returns a summary of network requests with URLs, methods, and timestamps.
+            """
+            # Capture current network activity from performance logs
+            current_activity = self.capture_current_network_activity()
+            
+            # Combine with any previously stored requests
+            all_requests = self.network_requests + current_activity
+            
+            if not all_requests:
+                return "No network requests captured since last interaction."
+            
+            # Format the output for the agent
+            summary = f"Captured {len(all_requests)} network requests:\n"
+            for i, req in enumerate(all_requests, 1):
+                timestamp_str = datetime.fromtimestamp(req['timestamp']).strftime('%H:%M:%S.%f')[:-3]
+                summary += f"{i}. [{timestamp_str}] {req['method']} {req['url']}\n"
+                if req['post_data']:
+                    summary += f"   POST data: {req['post_data'][:100]}{'...' if len(req['post_data']) > 100 else ''}\n"
+            
+            # Store the requests for potential future use
+            self.network_requests.extend(current_activity)
+            
+            return summary
+
+        @tool
+        def clear_network_requests_buffer() -> str:
+            """
+            Clears the buffer of captured network requests.
+            Useful to start fresh monitoring from a specific point.
+            """
+            self.clear_network_requests()
+            return "Network requests buffer cleared. Starting fresh network monitoring."
+        
+        @tool
+        def get_network_requests_json() -> str:
+            """
+            Get detailed network requests in JSON format (HAR-like structure).
+            Returns comprehensive information about all captured network requests.
+            """
+            # Capture current network activity
+            current_activity = self.capture_current_network_activity()
+            all_requests = self.network_requests + current_activity
+            
+            if not all_requests:
+                return "No network requests to export."
+            
+            # Get HAR-like structure
+            har_data = self.get_network_requests_as_har_like()
+            
+            # Update with current requests
+            har_data['entries'] = []
+            for req in all_requests:
+                entry = {
+                    'startedDateTime': datetime.fromtimestamp(req['timestamp']).isoformat(),
+                    'request': {
+                        'method': req['method'],
+                        'url': req['url'],
+                        'headers': [{'name': k, 'value': v} for k, v in req['headers'].items()],
+                        'postData': {'text': req['post_data']} if req['post_data'] else None
+                    }
+                }
+                har_data['entries'].append(entry)
+            
+            return json.dumps(har_data, indent=2)
+
         # Register the tools
         self.tools["click"] = click
         self.tools["right_click"] = right_click
@@ -451,6 +620,9 @@ class SeleniumVisionAgent(CodeAgent):
         self.tools["go_back"] = go_back
         self.tools["drag_and_drop"] = drag_and_drop
         self.tools["find_on_page_ctrl_f"] = find_on_page_ctrl_f
+        self.tools["get_network_requests"] = get_network_requests
+        # self.tools["clear_network_requests_buffer"] = clear_network_requests_buffer
+        # self.tools["get_network_requests_json"] = get_network_requests_json
 
     def take_screenshot_callback(self, memory_step: ActionStep, agent=None) -> None:
         """Callback that takes a screenshot + memory snapshot after a step completes"""
@@ -535,4 +707,7 @@ if __name__ == "__main__":
     selenium_vision_agent = SeleniumVisionAgent(model=model, data_dir="data")
 
     agent = selenium_vision_agent.create_agent(data_dir="data")
-    agent.run("Go to Google and search for 'Hello World'")
+    agent.run("""
+I want you to go to github.com, to look for the numpy package and give me a list of all of the labels on the issues. 
+              
+              """)
