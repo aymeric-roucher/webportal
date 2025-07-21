@@ -242,24 +242,56 @@ class SeleniumVisionAgent(CodeAgent):
 
     
     def capture_current_network_activity(self) -> list[dict[str, Any]]:
-        """Capture current network activity using CDP"""
+        """Capture current network activity using CDP, including both requests and responses"""
         # Get performance logs which include network requests
         logs = self.driver.get_log('performance')
         
-        current_requests = []
+        # Temporary storage for requests and responses
+        requests_map = {}  # request_id -> request_info
+        responses_map = {}  # request_id -> response_info
+        
+        # Process all logs to build request and response mapping
         for log in logs:
             message = json.loads(log['message'])
-            if message.get('message', {}).get('method') == 'Network.requestWillBeSent':
-                params = message.get('message', {}).get('params', {})
-                request_info = {
-                    'timestamp': log['timestamp'] / 1000,  # Convert to seconds
-                    'url': params.get('request', {}).get('url', ''),
-                    'method': params.get('request', {}).get('method', 'GET'),
-                    'headers': params.get('request', {}).get('headers', {}),
-                    'post_data': params.get('request', {}).get('postData', ''),
-                    'request_id': params.get('requestId', '')
-                }
-                current_requests.append(request_info)
+            method = message.get('message', {}).get('method')
+            params = message.get('message', {}).get('params', {})
+            
+            if method == 'Network.requestWillBeSent':
+                request_id = params.get('requestId', '')
+                if request_id:
+                    requests_map[request_id] = {
+                        'timestamp': log['timestamp'] / 1000,
+                        'url': params.get('request', {}).get('url', ''),
+                        'method': params.get('request', {}).get('method', 'GET'),
+                        'headers': params.get('request', {}).get('headers', {}),
+                        'post_data': params.get('request', {}).get('postData', ''),
+                        'request_id': request_id
+                    }
+            
+            elif method == 'Network.responseReceived':
+                request_id = params.get('requestId', '')
+                if request_id:
+                    response_info = params.get('response', {})
+                    responses_map[request_id] = {
+                        'status_code': response_info.get('status', 0),
+                        'status_text': response_info.get('statusText', ''),
+                        'headers': response_info.get('headers', {}),
+                        'mime_type': response_info.get('mimeType', ''),
+                        'url': response_info.get('url', ''),
+                        'response_timestamp': log['timestamp'] / 1000
+                    }
+        
+        # Combine requests with their corresponding responses
+        current_requests = []
+        for request_id, request_info in requests_map.items():
+            # Add response information if available
+            if request_id in responses_map:
+                request_info['response'] = responses_map[request_id]
+            else:
+                # No response captured yet (maybe still pending)
+                request_info['response'] = None
+            
+            current_requests.append(request_info)
                 
         return current_requests
     
@@ -494,6 +526,16 @@ class SeleniumVisionAgent(CodeAgent):
             for i, req in enumerate(all_requests, 1):
                 timestamp_str = datetime.fromtimestamp(req['timestamp']).strftime('%H:%M:%S.%f')[:-3]
                 summary += f"{i}. [{timestamp_str}] {req['method']} {req['url']}\n"
+                
+                # Add response info if available
+                if req.get('response'):
+                    response = req['response']
+                    status_code = response.get('status_code', 'unknown')
+                    mime_type = response.get('mime_type', 'unknown')
+                    summary += f"   Response: {status_code} {response.get('status_text', '')} ({mime_type})\n"
+                else:
+                    summary += f"   Response: Pending or not captured\n"
+                
                 if req['post_data']:
                     summary += f"   POST data: {req['post_data'][:100]}{'...' if len(req['post_data']) > 100 else ''}\n"
             
@@ -671,6 +713,12 @@ class SeleniumVisionAgent(CodeAgent):
     def _test_request_independently(self, request: dict[str, Any]) -> dict[str, Any]:
         """Test a request independently to see if it works without browser context"""
         
+        # If we already have response data from browser capture, use it as reference
+        original_response = request.get('response')
+        if original_response:
+            original_status = original_response.get('status_code')
+            print(f"Original browser response: {original_status} {original_response.get('status_text', '')}")
+        
         # Get current cookies from the browser to maintain session
         browser_cookies = self.driver.get_cookies()
         cookies_dict = {cookie['name']: cookie['value'] for cookie in browser_cookies}
@@ -732,7 +780,8 @@ class SeleniumVisionAgent(CodeAgent):
                     'success': True,
                     'response_data': response_data,
                     'status_code': response.status_code,
-                    'content_type': response.headers.get('content-type', 'unknown')
+                    'content_type': response.headers.get('content-type', 'unknown'),
+                    'original_response': original_response
                 }
             except json.JSONDecodeError:
                 # Not JSON, might be HTML or plain text
@@ -740,7 +789,8 @@ class SeleniumVisionAgent(CodeAgent):
                     'success': True,
                     'response_data': response.text[:1000] + ('...' if len(response.text) > 1000 else ''),
                     'status_code': response.status_code,
-                    'content_type': response.headers.get('content-type', 'unknown')
+                    'content_type': response.headers.get('content-type', 'unknown'),
+                    'original_response': original_response
                 }
                 
         except requests.exceptions.Timeout:
@@ -773,6 +823,10 @@ class SeleniumVisionAgent(CodeAgent):
         endpoint = parsed_url.path
         query_params = parsed_url.query
         
+        # Get original response info if available
+        original_response = result.get('original_response')
+        original_status = original_response.get('status_code') if original_response else None
+        
         markdown = f"""## {method} {endpoint}
 
 **Base URL**: `{base_url}`
@@ -784,9 +838,13 @@ This endpoint appears to handle {'data submission' if method in ['POST', 'PUT', 
 ### Request Details
 - **Method**: {method}
 - **Content-Type**: {result.get('content_type', 'unknown')}
-- **Status Code**: {result.get('status_code', 'unknown')}
+- **Status Code**: {result.get('status_code', 'unknown')}"""
 
-"""
+        if original_status and original_status != result.get('status_code'):
+            markdown += f"""
+- **Original Browser Status**: {original_status} (may differ from independent test)"""
+
+        markdown += "\n\n"
         
         # Add headers if significant ones exist
         important_headers = {k: v for k, v in headers.items() 

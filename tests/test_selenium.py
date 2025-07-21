@@ -23,4 +23,7 @@ def test_return_requests():
     )
     selenium_vision_agent = SeleniumVisionAgent(model=model, data_dir="data")
     selenium_vision_agent.tools["open_url"]("https://github.com/numpy/numpy/issues")
+    output = selenium_vision_agent.tools["filter_and_test_requests"]()
     selenium_vision_agent.tools["get_network_requests"]()
+    
+test_return_requests()
