@@ -423,31 +423,14 @@ class FastJSCrawler:
         # Group URLs by path structure for tree display, avoiding duplicates
         path_to_title = {}
 
-        # Add actual visited URLs, but skip those that match templates
-        for url in sorted(self.visited):
-            parsed = urlparse(url)
-            path = parsed.path.rstrip("/")
-            title = self.page_titles.get(url, "No title")
-
-            # Handle root path
-            if not path or path == "/":
-                path = "/"
-
-            # Skip if this URL matches any template pattern
-
-            # Only keep the first title for each path (or prefer non-"No title")
-            if path not in path_to_title or (
-                path_to_title[path] == "No title" and title != "No title"
-            ):
-                path_to_title[path] = title
-
         # Add structural pattern templates with examples first (higher priority)
         template_paths_added = set()
         for template in self.pattern_templates:
             template_path = ""
             for segment in template.segments:
                 if isinstance(segment, FixedTemplateSegment):
-                    template_path += segment.example + "/"
+                    if segment.example != "https:":
+                        template_path += segment.example + "/"
                 else:
                     template_path += (
                         "["
