@@ -1,6 +1,7 @@
 import json
 from collections import Counter
 
+
 def count_unique_apis(json_path):
     """
     Counts the number of unique APIs in the given github2.json file.
@@ -8,7 +9,7 @@ def count_unique_apis(json_path):
     """
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
-    
+
     unique_apis = set()
     for api_key, api_info in data.items():
         # Try to get method and path from the value, else parse from the key
@@ -21,9 +22,10 @@ def count_unique_apis(json_path):
             except Exception:
                 continue
         unique_apis.add((method.upper(), path))
-    
+
     print(f"Number of unique APIs: {len(unique_apis)}")
     return len(unique_apis)
+
 
 if __name__ == "__main__":
     # Adjust the path as needed

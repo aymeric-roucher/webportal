@@ -15,52 +15,63 @@ def _safe_json_parse(text):
 
 
 def extract_api_info(har_file_path):
-    with open(har_file_path, 'r') as f:
+    with open(har_file_path, "r") as f:
         har = json.load(f)
-    
+
     api_calls = {}
-    
-    for entry in har['log']['entries']:
-        request = entry['request']
-        response = entry['response']
-        
+
+    for entry in har["log"]["entries"]:
+        request = entry["request"]
+        response = entry["response"]
+
         # Skip non-API calls (images, css, etc)
-        content_type = response.get('content', {}).get('mimeType', '')
-        if not ('json' in content_type or 'xml' in content_type):
+        content_type = response.get("content", {}).get("mimeType", "")
+        if not ("json" in content_type or "xml" in content_type):
             continue
-            
+
         # Create endpoint pattern (replace IDs with placeholders)
-        url = request['url']
+        url = request["url"]
         path = urlparse(url).path
         # Replace common ID patterns
-        path_pattern = re.sub(r'/\d+', '/{id}', path)
-        path_pattern = re.sub(r'/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}', '/{uuid}', path_pattern)
-        
+        path_pattern = re.sub(r"/\d+", "/{id}", path)
+        path_pattern = re.sub(
+            r"/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}",
+            "/{uuid}",
+            path_pattern,
+        )
+
         # Store unique endpoints
         key = f"{request['method']} {path_pattern}"
         if key not in api_calls:
             api_calls[key] = {
-                'method': request['method'],
-                'url': url,
-                'path': path_pattern,
-                'queryParams': parse_qs(urlparse(url).query),
-                'requestHeaders': {h['name']: h['value'] for h in request.get('headers', [])},
-                'requestBody': _safe_json_parse(request.get('postData', {}).get('text')) if request.get('postData') and request.get('postData', {}).get('text') else None,
-                'responseStatus': response['status'],
-                'responseBody': _safe_json_parse(response.get('content', {}).get('text')) if response.get('content') and response.get('content', {}).get('text') else None
+                "method": request["method"],
+                "url": url,
+                "path": path_pattern,
+                "queryParams": parse_qs(urlparse(url).query),
+                "requestHeaders": {
+                    h["name"]: h["value"] for h in request.get("headers", [])
+                },
+                "requestBody": _safe_json_parse(request.get("postData", {}).get("text"))
+                if request.get("postData") and request.get("postData", {}).get("text")
+                else None,
+                "responseStatus": response["status"],
+                "responseBody": _safe_json_parse(
+                    response.get("content", {}).get("text")
+                )
+                if response.get("content") and response.get("content", {}).get("text")
+                else None,
             }
-    
+
     return api_calls
 
 
 if __name__ == "__main__":
-
     har_folder = "har_data"
-    har_files = [f for f in os.listdir(har_folder) if f.endswith('.har')]
+    har_files = [f for f in os.listdir(har_folder) if f.endswith(".har")]
 
     print("Found HAR files:")
     for idx, fname in enumerate(har_files):
-        print(f"{idx+1}: {fname}")
+        print(f"{idx + 1}: {fname}")
 
     if not har_files:
         print("No HAR files found in the 'har_data' folder.")

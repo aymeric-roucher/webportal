@@ -12,6 +12,7 @@ import re
 #     matches = api_call_pattern.findall(content)
 #     return len(matches)
 
+
 def count_api_calls_by_triple_backticks(md_file_path):
     """
     Counts the number of code blocks (delimited by ```) in a markdown file.
@@ -25,6 +26,7 @@ def count_api_calls_by_triple_backticks(md_file_path):
     # Each code block has an opening and closing ```, so divide by 2
     return len(matches) // 2
 
+
 def main():
     folder = os.path.dirname(os.path.abspath(__file__))
     md_files = [f for f in os.listdir(folder) if f.endswith(".md")]
@@ -37,6 +39,6 @@ def main():
         count = count_api_calls_by_triple_backticks(path)
         print(f"{md_file}: {count} distinct API calls")
 
+
 if __name__ == "__main__":
     main()
-

@@ -33,8 +33,8 @@ response = requests.post(
     json={"query": query, "variables": variables},
     headers={
         "Authorization": f"Bearer {GITHUB_TOKEN}",
-        "Content-Type": "application/json"
-    }
+        "Content-Type": "application/json",
+    },
 )
 
 # Print results

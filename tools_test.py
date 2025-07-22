@@ -5,10 +5,11 @@ from smolagents import (
     tool,
 )
 
+
 def get_numpy_pulse_committer_data():
     """
     Fetches the pulse committer data for the numpy/numpy repository from GitHub.
-    
+
     Returns:
         list: A list of dictionaries containing committer information with fields:
             - name: Committer's name
@@ -16,11 +17,11 @@ def get_numpy_pulse_committer_data():
             - gravatar: URL to avatar image
             - commits: Number of commits
             - hovercard_url: URL for user hovercard (optional)
-        
+
         Returns None if the request fails.
     """
     url = "https://github.com/numpy/numpy/pulse_committer_data"
-    
+
     headers = {
         "accept": "application/json",
         "accept-encoding": "gzip, deflate, br, zstd",
@@ -33,9 +34,9 @@ def get_numpy_pulse_committer_data():
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-origin",
         "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
-        "x-requested-with": "XMLHttpRequest"
+        "x-requested-with": "XMLHttpRequest",
     }
-    
+
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()  # Raise an exception for bad status codes
@@ -48,19 +49,19 @@ def get_numpy_pulse_committer_data():
 def get_pull_request_review_decisions(pull_request_ids, authenticity_token=None):
     """
     Fetches review decisions for multiple pull requests from GitHub.
-    
+
     Args:
         pull_request_ids (list): List of pull request IDs to check
         authenticity_token (str, optional): GitHub authenticity token for the session
-    
+
     Returns:
-        dict: A dictionary with keys like "item-0", "item-1", etc. containing 
+        dict: A dictionary with keys like "item-0", "item-1", etc. containing
               HTML snippets for review status (empty string if no special status)
-        
+
         Returns None if the request fails.
     """
     url = "https://github.com/pull_request_review_decisions"
-    
+
     headers = {
         "accept": "application/json",
         "accept-encoding": "gzip, deflate, br, zstd",
@@ -74,19 +75,19 @@ def get_pull_request_review_decisions(pull_request_ids, authenticity_token=None)
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-origin",
         "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
-        "x-requested-with": "XMLHttpRequest"
+        "x-requested-with": "XMLHttpRequest",
     }
-    
+
     # Prepare the multipart form data
     # Note: The actual form data structure wasn't provided in the HAR extract
     # This is a typical structure based on the endpoint name
     files = {
-        'pull_request_ids[]': (None, ','.join(map(str, pull_request_ids))),
+        "pull_request_ids[]": (None, ",".join(map(str, pull_request_ids))),
     }
-    
+
     if authenticity_token:
-        files['authenticity_token'] = (None, authenticity_token)
-    
+        files["authenticity_token"] = (None, authenticity_token)
+
     try:
         response = requests.post(url, headers=headers, files=files)
         response.raise_for_status()
@@ -99,16 +100,16 @@ def get_pull_request_review_decisions(pull_request_ids, authenticity_token=None)
 def get_branch_and_tag_count(owner, repo):
     """
     Simple version that just gets the branch and tag counts.
-    
+
     Args:
         owner (str): Repository owner
         repo (str): Repository name
-    
+
     Returns:
         dict: {'branches': int, 'tags': int} or None if request fails
     """
     url = f"https://github.com/{owner}/{repo}/branch-and-tag-count"
-    
+
     headers = {
         "accept": "application/json",
         "accept-encoding": "gzip, deflate, br, zstd",
@@ -123,9 +124,9 @@ def get_branch_and_tag_count(owner, repo):
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-origin",
         "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
-        "x-requested-with": "XMLHttpRequest"
+        "x-requested-with": "XMLHttpRequest",
     }
-    
+
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
@@ -133,7 +134,7 @@ def get_branch_and_tag_count(owner, repo):
     except requests.exceptions.RequestException as e:
         print(f"Error fetching branch and tag count: {e}")
         return None
-    
+
 
 @tool
 def get_branch_and_tag_count_simple():
@@ -148,13 +149,16 @@ def get_branch_and_tag_count_simple():
 
 # Example usage:
 if __name__ == "__main__":
-
     committers = get_numpy_pulse_committer_data()
     if committers:
         print(f"Found {len(committers)} committers:")
         for committer in committers:
-            print(f"- {committer['name']} ({committer.get('login', 'No login')}) - {committer['commits']} commits")
+            print(
+                f"- {committer['name']} ({committer.get('login', 'No login')}) - {committer['commits']} commits"
+            )
 
     counts = get_branch_and_tag_count("numpy", "numpy")
     if counts:
-        print(f"NumPy repository has {counts['branches']} branches and {counts['tags']} tags")
+        print(
+            f"NumPy repository has {counts['branches']} branches and {counts['tags']} tags"
+        )
