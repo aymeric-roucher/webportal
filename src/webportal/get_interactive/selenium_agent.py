@@ -903,7 +903,6 @@ Based on the URL pattern `{url}`, this appears to be {'an API endpoint for data 
             
             if browserless_instruction:
                 print("✅ Generated browserless instruction:")
-                print(browserless_instruction)
                 
                 # Save the instruction for this step
                 self._save_step_instruction(step_number, request, browserless_instruction, action_description)

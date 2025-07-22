@@ -22,8 +22,10 @@ def test_return_requests():
         provider="nebius",
     )
     selenium_vision_agent = SeleniumVisionAgent(model=model, data_dir="data")
-    selenium_vision_agent.tools["open_url"]("https://github.com/numpy/numpy/issues")
-    output = selenium_vision_agent.tools["filter_and_test_requests"]()
-    selenium_vision_agent.tools["get_network_requests"]()
+    selenium_vision_agent.tools["open_url"]("https://github.com")
+    selenium_vision_agent.tools["click"](874, 34)
+    selenium_vision_agent.tools["type_text"]("numpy")
+    selenium_vision_agent.tools["press_key"]("enter")
+    selenium_vision_agent.tools["click"](254, 308)
     
-test_return_requests()
+
