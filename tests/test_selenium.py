@@ -1,5 +1,9 @@
 import pytest
-from webportal.get_interactive.selenium_agent import SeleniumVisionAgent, InferenceClientModel
+from webportal.get_interactive.selenium_agent import (
+    SeleniumVisionAgent,
+    InferenceClientModel,
+)
+
 
 @pytest.mark.expensive
 def test_run_selenium_agent():
@@ -27,5 +31,3 @@ def test_return_requests():
     selenium_vision_agent.tools["type_text"]("numpy")
     selenium_vision_agent.tools["press_key"]("enter")
     selenium_vision_agent.tools["click"](254, 308)
-    
-

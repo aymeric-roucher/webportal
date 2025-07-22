@@ -13,7 +13,7 @@ from smolagents import (
 load_dotenv()
 
 model = OpenAIModel(
-    model_id="gpt-4o-mini" # for 200k token per minute
+    model_id="gpt-4o-mini"  # for 200k token per minute
 )  # "gpt-4o" for performance, "gpt-3.5-turbo" for testing
 
 

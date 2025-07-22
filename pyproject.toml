@@ -17,6 +17,7 @@ dependencies = [
     "datasets>=4.0.0",
     "pytest>=8.4.1",
     "tqdm>=4.66.0",
+    "ruff>=0.12.4",
 ]
 
 [project.optional-dependencies]
