@@ -10,9 +10,9 @@ import json
 import re
 import time
 from collections import defaultdict
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import urlparse
 
-from playwright.async_api import async_playwright
+from playwright.async_api import Page, async_playwright
 from pydantic import BaseModel
 
 
@@ -104,14 +104,36 @@ class FastJSCrawler:
 
         return False
 
+    def _replace_with_generic_pattern_if_necessary(self, url: str) -> str:
+        """Apply generic pattern detection to a single segment, return pattern name if matched"""
+        generic_patterns = [
+            # Numeric IDs
+            (r"^\d+$", "{id}"),
+            # Alphanumeric hashes (like commit hashes, session IDs)
+            (r"^[a-f0-9]{8,}$", "{hash}"),
+            # Version numbers (like v1.2.3, 2024.1.1)
+            (r"^v?\d+\.\d+[\.\d]*$", "{version}"),
+            # UUIDs
+            (
+                r"^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$",
+                "{uuid}",
+            ),
+        ]
+
+        for pattern_regex, pattern_name in generic_patterns:
+            if re.match(pattern_regex, url):
+                return pattern_name
+        return url
+
     def log_new_fixed_template(self, url: str):
-        """Log a new fixed template"""
+        """Log a new fixed template, applying generic pattern detection to segments"""
         segments = [seg for seg in url.split("/") if seg]
-        self.pattern_templates.append(
-            Template(
-                segments=[FixedTemplateSegment(example=segment) for segment in segments]
-            )
-        )
+        template_segments = []
+
+        for segment in segments:
+            template_segments.append(FixedTemplateSegment(example=segment))
+
+        self.pattern_templates.append(Template(segments=template_segments))
 
     def matches_existing_template(self, url: str) -> int:
         """Check if a specific URL path matches any of our discovered templates. Criterion for belonging to a template:
@@ -170,7 +192,7 @@ class FastJSCrawler:
                             if not segment_index == differing_segment_index
                         ]
                     )
-                    == 0
+                    <= 1
                 ):
                     if isinstance(
                         template_segments[differing_segment_index],
@@ -185,10 +207,10 @@ class FastJSCrawler:
                         # We've discovered a new variable segment!
                         template_segments[differing_segment_index] = (
                             VariableTemplateSegment(
-                                examples=[
+                                examples={
                                     segment,
                                     template_segments[differing_segment_index].example,
-                                ]
+                                }
                             )
                         )
                         return template_index
@@ -198,73 +220,9 @@ class FastJSCrawler:
         """Normalize URL by removing/parameterizing query parameters and recognizing patterns"""
         parsed = urlparse(url)
         path = parsed.path
+        return parsed.scheme + "://" + parsed.netloc + path
 
-        # Generic patterns - detect numeric/hash IDs in URLs
-        generic_patterns = [
-            # Numeric IDs at end of path segments
-            (r"^(.*/)(\d+)/?$", r"\1{id}"),
-            # Alphanumeric hashes (like commit hashes, session IDs)
-            (r"^(.*/)([a-f0-9]{8,})/?$", r"\1{hash}"),
-            # Version numbers (like v1.2.3, 2024.1.1)
-            (r"^(.*/)(v?\d+\.\d+[\.\d]*)/?$", r"\1{version}"),
-            # UUIDs
-            (
-                r"^(.*/)([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/?$",
-                r"\1{uuid}",
-            ),
-        ]
-
-        # Apply generic pattern matching
-        for pattern_regex, template in generic_patterns:
-            match = re.match(pattern_regex, path)
-            if match:
-                normalized_path = re.sub(pattern_regex, template, path)
-                self.generic_url_patterns.add(normalized_path)
-                return parsed.scheme + "://" + parsed.netloc + normalized_path
-
-        # Handle query parameters that are just pagination/filtering
-        if parsed.query:
-            query_params = parse_qs(parsed.query)
-
-            # Common pagination/filter parameters to parameterize
-            pagination_params = {
-                "skip",
-                "show",
-                "page",
-                "offset",
-                "limit",
-                "start",
-                "count",
-                "size",
-            }
-            search_params = {
-                "q",
-                "query",
-                "search",
-                "searchtype",
-                "author",
-                "title",
-                "keyword",
-                "filter",
-                "sort",
-            }
-
-            has_pagination = any(param in query_params for param in pagination_params)
-            has_search = any(param in query_params for param in search_params)
-
-            if has_pagination or has_search:
-                # Create a parameterized version
-                if has_search:
-                    template = path + "?{search_params}"
-                else:
-                    template = path + "?{pagination_params}"
-
-                self.generic_url_patterns.add(template)
-                return parsed.scheme + "://" + parsed.netloc + template
-
-        return url
-
-    async def extract_link_patterns(self, page, url, current_depth):
+    async def extract_link_patterns(self, page: Page, url, current_depth):
         """Extract all link patterns from the page after JavaScript execution, merges them with existing patterns"""
         try:
             # Wait for initial load
@@ -319,6 +277,9 @@ class FastJSCrawler:
 
                     # Check if this URL matches an existing structural template
                     normalized_url = self.normalize_url(clean_url)
+                    normalized_url = self._replace_with_generic_pattern_if_necessary(
+                        normalized_url
+                    )
                     matching_template_index = self.matches_existing_template(
                         normalized_url
                     )
@@ -369,6 +330,7 @@ class FastJSCrawler:
                 print(
                     f"Crawled: {url} ({len(self.visited)}/{self.max_pages}) - Found {len(new_links)} new links, on top of our current {pattern_count} patterns so far"
                 )
+                print(self.pattern_templates)
 
             except Exception as e:
                 print(f"Error crawling {url}: {str(e)[:50]}")
@@ -479,14 +441,8 @@ class FastJSCrawler:
             ):
                 path_to_title[path] = title
 
-        # Add discovered URL patterns (templates)
-        for pattern in sorted(self.generic_url_patterns):
-            parsed = urlparse(pattern)
-            path = parsed.path.rstrip("/")
-            if path and path not in path_to_title:
-                path_to_title[path] = "URL Pattern"
-
-        # Add structural pattern templates with examples
+        # Add structural pattern templates with examples first (higher priority)
+        template_paths_added = set()
         for template in self.pattern_templates:
             template_path = ""
             for segment in template.segments:
@@ -504,6 +460,16 @@ class FastJSCrawler:
                     )
             if template_path and template_path not in path_to_title:
                 path_to_title[template_path] = "Template Pattern"
+                template_paths_added.add(template_path.rstrip("/"))
+
+        # Add discovered generic URL patterns only if they don't overlap with templates
+        for pattern in sorted(self.generic_url_patterns):
+            parsed = urlparse(pattern)
+            path = parsed.path.rstrip("/")
+            # Only add if path doesn't conflict with existing templates or paths
+            if path and path not in path_to_title and path not in template_paths_added:
+                # Check if this generic pattern semantically overlaps with any template
+                path_to_title[path] = "URL Pattern"
 
         # Convert to list and sort paths
         paths = list(path_to_title.items())
@@ -565,6 +531,16 @@ def test_crawler_logs_variable_template():
     assert crawler.pattern_templates[0].segments[-1].examples == {"abs", "pdf"}
     assert crawler.matches_existing_template("https://arxiv.org/html/") == 0
     assert crawler.pattern_templates[0].segments[-1].examples == {"abs", "pdf", "html"}
+
+    crawler = FastJSCrawler(
+        "https://arxiv.org/abs/2507.09001",
+        max_pages=10,
+        max_depth=5,
+        concurrency=1,
+    )
+    crawler.log_new_fixed_template("https://arxiv.org/abs/2507.14279")
+    assert crawler.matches_existing_template("https://arxiv.org/abs/2507.14280") == 0
+    assert crawler.matches_existing_template("https://arxiv.org/abs/2507.14260") == 0
 
 
 async def main():
