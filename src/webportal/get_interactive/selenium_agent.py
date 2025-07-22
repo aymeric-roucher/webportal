@@ -226,7 +226,7 @@ class SeleniumVisionAgent(CodeAgent):
         # Add default tools
         self.logger.log("Setting up agent tools...")
         self._setup_desktop_tools()
-        self._setup_step_callbacks([self.take_screenshot_callback])
+        self._setup_step_callbacks([self.take_screenshot_callback, self.capture_requests_callback])
 
     def _setup_network_monitoring(self):
         """Setup Chrome DevTools Protocol for network monitoring"""
@@ -531,16 +531,13 @@ class SeleniumVisionAgent(CodeAgent):
         self.tools["go_back"] = go_back
         self.tools["drag_and_drop"] = drag_and_drop
         self.tools["find_on_page_ctrl_f"] = find_on_page_ctrl_f
-
-    def take_screenshot_callback(self, memory_step: ActionStep, agent=None) -> None:
-        """Callback that takes a screenshot + memory snapshot after a step completes"""
-        self.logger.log("Analyzing screen content...")
-
-        current_step = memory_step.step_number
-
-        time.sleep(2.5)  # Let things happen in the browser
-
+        
+    def capture_requests_callback(self, memory_step: ActionStep, agent: CodeAgent | None =None) -> None:
+        """Callback that captures the requests for a step"""
         # Capture network requests for this specific step
+        current_step = memory_step.step_number
+        self.logger.log(f"Capturing network requests for step {current_step}")
+        
         step_requests = self.capture_step_network_activity(current_step)
         if step_requests:
             self.logger.log(
@@ -548,6 +545,14 @@ class SeleniumVisionAgent(CodeAgent):
             )
             # Analyze the requests for this step
             self._analyze_step_requests(current_step, step_requests, memory_step)
+            
+    def take_screenshot_callback(self, memory_step: ActionStep, agent: CodeAgent | None =None) -> None:
+        """Callback that takes a screenshot + memory snapshot after a step completes"""
+        self.logger.log("Analyzing screen content...")
+
+        current_step = memory_step.step_number
+
+        time.sleep(2.5)  # Let things happen in the browser
 
         screenshot_bytes = self.driver.get_screenshot_as_png()
         image = Image.open(BytesIO(screenshot_bytes))
