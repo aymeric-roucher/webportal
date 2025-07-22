@@ -3,7 +3,7 @@ from webportal.get_interactive.selenium_agent import (
     SeleniumVisionAgent,
     InferenceClientModel,
 )
-
+from time import sleep
 
 @pytest.mark.expensive
 def test_run_selenium_agent():
@@ -19,7 +19,6 @@ When you are done, I want you to give me a list of the requests that were made t
               
               """)
 
-
 def test_return_requests():
     model = InferenceClientModel(
         model_id="Qwen/Qwen2.5-VL-72B-Instruct",
@@ -27,7 +26,7 @@ def test_return_requests():
     )
     selenium_vision_agent = SeleniumVisionAgent(model=model, data_dir="data")
     selenium_vision_agent.tools["open_url"]("https://github.com")
-    selenium_vision_agent.tools["click"](874, 34)
-    selenium_vision_agent.tools["type_text"]("numpy")
-    selenium_vision_agent.tools["press_key"]("enter")
-    selenium_vision_agent.tools["click"](254, 308)
+    input("Press Enter to continue...")
+    selenium_vision_agent.capture_requests_callback()
+
+test_return_requests()

@@ -276,6 +276,7 @@ class SeleniumVisionAgent(CodeAgent):
                         "post_data": params.get("request", {}).get("postData", ""),
                         "request_id": request_id,
                         "step_number": step_number,
+                        "type": params.get("type", ""),
                     }
 
             elif method == "Network.responseReceived":
@@ -284,7 +285,7 @@ class SeleniumVisionAgent(CodeAgent):
                     request_id and request_id in requests_map
                 ):  # Only for requests we captured in this step
                     response_info = params.get("response", {})
-                    responses_map[request_id] = {
+                    response_data = {
                         "status_code": response_info.get("status", 0),
                         "status_text": response_info.get("statusText", ""),
                         "headers": response_info.get("headers", {}),
@@ -292,6 +293,19 @@ class SeleniumVisionAgent(CodeAgent):
                         "url": response_info.get("url", ""),
                         "response_timestamp": log["timestamp"] / 1000,
                     }
+                    
+                    # Try to get the response body
+                    try:
+                        body_result = self.driver.execute_cdp_cmd(
+                            "Network.getResponseBody", {"requestId": request_id}
+                        )
+                        response_data["body"] = body_result.get("body")
+                        response_data["base64Encoded"] = body_result.get("base64Encoded", False)
+                    except Exception as e:
+                        response_data["body"] = None
+                        response_data["body_error"] = str(e)
+                    
+                    responses_map[request_id] = response_data
 
         # Combine requests with responses for this step
         step_requests = []
@@ -613,7 +627,7 @@ class SeleniumVisionAgent(CodeAgent):
 
     def _filter_relevant_requests(
         self, requests_list: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         """Filter requests to keep only relevant API calls (fetch/XHR, not static assets)"""
         relevant_requests = []
 
@@ -640,6 +654,7 @@ class SeleniumVisionAgent(CodeAgent):
         for request in requests_list:
             url = request.get("url", "")
             method = request.get("method", "GET")
+            request_type = request.get("type", "")
 
             # Skip empty URLs
             if not url:
@@ -657,9 +672,10 @@ class SeleniumVisionAgent(CodeAgent):
             if not url.startswith(("http://", "https://")):
                 continue
 
-            # Keep API-like URLs or XHR/fetch requests
+            # Keep XHR/Fetch requests or API-like URLs
             if (
-                "/api/" in url
+                request_type in ["XHR", "Fetch"]  # Direct type checking for XHR/Fetch
+                or "/api/" in url
                 or "/graphql" in url
                 or "/ajax" in url
                 or method in ["POST", "PUT", "PATCH", "DELETE"]
@@ -667,7 +683,32 @@ class SeleniumVisionAgent(CodeAgent):
             ):
                 relevant_requests.append(request)
 
-        return relevant_requests
+        relevant_requests_filtered_by_type_and_body = []
+        for request in relevant_requests:
+            if request.get("type") == "XHR" or request.get("type") == "Fetch":
+                if request.get("response", {}).get("body"):
+                    relevant_requests_filtered_by_type_and_body.append(request)
+            else:
+                continue
+            
+        relevant_requests_filtered_by_json_body = []
+        for request in relevant_requests_filtered_by_type_and_body:
+            if request.get("response", {}).get("body"):
+                try:
+                    json.loads(request.get("response", {}).get("body"))
+                    relevant_requests_filtered_by_json_body.append(request)
+                except json.JSONDecodeError:
+                    continue
+                
+        relevant_requests_filtered_by_html_body = []
+        for request in relevant_requests_filtered_by_type_and_body:
+            if request.get("response", {}).get("body"):
+                body = request.get("response", {}).get("body")
+                if "DOCTYPE" in body:
+                    relevant_requests_filtered_by_html_body.append(request)
+                else:
+                    continue
+        return relevant_requests_filtered_by_json_body, relevant_requests_filtered_by_html_body
 
     def _test_request_independently(self, request: dict[str, Any]) -> dict[str, Any]:
         """Test a request independently to see if it works without browser context"""
@@ -964,6 +1005,11 @@ Based on the URL pattern `{url}`, this appears to be {"an API endpoint for data 
 
         # Filter out obviously irrelevant requests first
         relevant_requests = self._filter_relevant_requests(requests)
+        
+        # all you have to do is to make sure that the variables are correct and that the response is here so that it can be given to a LLM for the next step
+        # the next step would be to:
+        # 1. from all of the different queries, find the good ones and generalise them
+        # 2. map the website and the urls, sometimes the urls are the best.
 
         if not relevant_requests:
             return
