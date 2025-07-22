@@ -532,10 +532,10 @@ class SeleniumVisionAgent(CodeAgent):
         self.tools["drag_and_drop"] = drag_and_drop
         self.tools["find_on_page_ctrl_f"] = find_on_page_ctrl_f
         
-    def capture_requests_callback(self, memory_step: ActionStep, agent: CodeAgent | None =None) -> None:
+    def capture_requests_callback(self, memory_step: ActionStep| None = None, agent: CodeAgent | None =None) -> None:
         """Callback that captures the requests for a step"""
         # Capture network requests for this specific step
-        current_step = memory_step.step_number
+        current_step = memory_step.step_number if memory_step else 0
         self.logger.log(f"Capturing network requests for step {current_step}")
         
         step_requests = self.capture_step_network_activity(current_step)
@@ -958,7 +958,7 @@ Based on the URL pattern `{url}`, this appears to be {"an API endpoint for data 
         return explanation
 
     def _analyze_step_requests(
-        self, step_number: int, requests: list[dict[str, Any]], memory_step: ActionStep
+        self, step_number: int, requests: list[dict[str, Any]], memory_step: ActionStep | None = None
     ):
         """Analyze requests from a specific step using LLM to identify the most relevant one"""
 
@@ -989,9 +989,9 @@ Based on the URL pattern `{url}`, this appears to be {"an API endpoint for data 
                     step_number, request, browserless_instruction, action_description
                 )
 
-    def _get_step_action_description(self, memory_step: ActionStep) -> str:
+    def _get_step_action_description(self, memory_step: ActionStep | None = None) -> str:
         """Extract a description of what action was performed in this step"""
-        if memory_step.tool_calls:
+        if memory_step and memory_step.tool_calls:
             tool_call = memory_step.tool_calls[0]
             tool_name = tool_call.name
             args = getattr(tool_call, "arguments", {})
