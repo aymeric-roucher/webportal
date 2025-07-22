@@ -1,29 +1,25 @@
+import json
 import os
 import time
 import unicodedata
-import json
-import requests
 from datetime import datetime
 from io import BytesIO
 from typing import Any
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlparse
+
+import requests
+from PIL import Image, ImageDraw
 
 # Selenium imports
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
-from PIL import Image, ImageDraw
 
 # SmolaAgents imports
-from smolagents import CodeAgent, tool
+from smolagents import CodeAgent, InferenceClientModel, tool
 from smolagents.agent_types import AgentImage
 from smolagents.memory import ActionStep, TaskStep
 from smolagents.monitoring import LogLevel
-from smolagents import InferenceClientModel
 
 SELENIUM_SYSTEM_PROMPT_TEMPLATE = """You are a web automation assistant that can control a local browser using Selenium. The current date is <<current_date>>.
 
@@ -903,7 +899,7 @@ response = requests.{method.lower()}(
             except json.JSONDecodeError:
                 markdown += f'    data="""{post_data}"""'
 
-        markdown += f"""
+        markdown += """
 )
 
 if response.status_code == 200:
@@ -1100,15 +1096,15 @@ base_url = "{base_url}"
 # Parameters"""
 
         if params:
-            instruction += f"""
-params = {{"""
+            instruction += """
+params = {"""
             for key, value in params.items():
                 # Try to decode URL-encoded values
                 try:
                     decoded_value = requests.utils.unquote(value)
                     instruction += f"""
     "{key}": "{decoded_value}","""
-                except:
+                except Exception:
                     instruction += f"""
     "{key}": "{value}","""
             instruction += """

@@ -1,5 +1,5 @@
 import asyncio
-from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig
+from crawl4ai import AsyncWebCrawler
 from webportal.common import TEST_WEB_PAGE
 
 
