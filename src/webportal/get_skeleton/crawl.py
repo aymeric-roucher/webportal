@@ -33,7 +33,7 @@ class Template(BaseModel):
 
 
 class FastJSCrawler:
-    def __init__(self, start_url, max_pages=500, max_depth=5, concurrency=10):
+    def __init__(self, start_url, max_pages=100, max_depth=5, concurrency=10):
         self.start_url = start_url
         self.domain = urlparse(start_url).netloc
         self.max_pages = max_pages
@@ -104,26 +104,117 @@ class FastJSCrawler:
 
         return False
 
+    def is_same_domain_or_subdomain(self, url_domain: str) -> bool:
+        """Check if a domain is the same or a subdomain of the original domain"""
+        if url_domain == self.domain:
+            return True
+
+        # Handle subdomains (e.g., idp.nature.com should match nature.com)
+        if url_domain.endswith("." + self.domain):
+            return True
+
+        # Handle www variations
+        if url_domain.startswith("www.") and url_domain[4:] == self.domain:
+            return True
+        if self.domain.startswith("www.") and url_domain == self.domain[4:]:
+            return True
+
+        return False
+
+    async def handle_cookie_banners(self, page: Page):
+        """Handle common cookie banners and consent dialogs"""
+        try:
+            # Wait a moment for banners to load
+            await asyncio.sleep(1)
+
+            # Common cookie banner selectors and their accept buttons
+            cookie_selectors = [
+                # Generic patterns
+                '[data-cc-action="accept"]',
+                '[data-action="accept"]',
+                'button[id*="accept"]',
+                'button[class*="accept"]',
+                'button:has-text("Accept")',
+                'button:has-text("Accept all")',
+                'button:has-text("Allow all")',
+                'button:has-text("I agree")',
+                'button:has-text("OK")',
+                # Specific to nature.com and common providers
+                ".cc-banner__button-accept",
+                "#onetrust-accept-btn-handler",
+                "#hs-eu-confirmation-button",
+                ".osano-cm-accept-all",
+                ".cookie-consent-accept",
+                ".gdpr-accept",
+                # Other common patterns
+                '.btn:has-text("Accept")',
+                '.button:has-text("Accept")',
+                'a:has-text("Accept")',
+                '[aria-label*="Accept"]',
+                '[title*="Accept"]',
+            ]
+
+            # Try each selector
+            for selector in cookie_selectors:
+                try:
+                    # Check if element exists and is visible
+                    element = await page.query_selector(selector)
+                    if element:
+                        is_visible = await element.is_visible()
+                        if is_visible:
+                            await element.click()
+                            # Wait for the banner to disappear
+                            await asyncio.sleep(0.5)
+                            print(
+                                f"Clicked cookie accept button with selector: {selector}"
+                            )
+                            return
+                except Exception:
+                    # Continue to next selector if this one fails
+                    continue
+
+        except Exception as e:
+            # Don't let cookie handling break the crawler
+            print(f"Cookie banner handling failed: {str(e)[:50]}")
+
     def _replace_with_generic_pattern_if_necessary(self, url: str) -> str:
-        """Apply generic pattern detection to a single segment, return pattern name if matched"""
-        generic_patterns = [
-            # Numeric IDs
-            (r"^\d+$", "{id}"),
-            # Alphanumeric hashes (like commit hashes, session IDs)
-            (r"^[a-f0-9]{8,}$", "{hash}"),
-            # Version numbers (like v1.2.3, 2024.1.1)
-            (r"^v?\d+\.\d+[\.\d]*$", "{version}"),
+        """Apply generic pattern detection to individual URL segments"""
+        # Handle the protocol part separately to preserve double slashes
+        if "://" in url:
+            protocol_part, path_part = url.split("://", 1)
+            protocol_prefix = protocol_part + "://"
+        else:
+            protocol_prefix = ""
+            path_part = url
+
+        segments = path_part.split("/")
+
+        # Pattern definitions for individual segments (without slashes)
+        segment_patterns = [
             # UUIDs
             (
                 r"^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$",
                 "{uuid}",
             ),
+            # Alphanumeric hashes (like commit hashes, session IDs) - must contain at least one letter and be 8+ chars
+            (r"^[a-f0-9]{8,}$", "{hash}"),
+            # Numeric IDs
+            (r"^\d+$", "{id}"),
+            # Version numbers (like v1.2.3, 2024.1.1)
+            (r"^v?\d+(\.\d+)*$", "{version}"),
+            # Version numbers
+            (r"^(?!.*[a-zA-Z]{3}).*$", "{id}"),
         ]
 
-        for pattern_regex, pattern_name in generic_patterns:
-            if re.match(pattern_regex, url):
-                return pattern_name
-        return url
+        # Apply pattern matching to each segment
+        for i, segment in enumerate(segments):
+            if segment:  # Skip empty segments
+                for pattern_regex, pattern_name in segment_patterns:
+                    if re.match(pattern_regex, segment):
+                        segments[i] = pattern_name
+                        break
+
+        return protocol_prefix + "/".join(segments)
 
     def log_new_fixed_template(self, url: str):
         """Log a new fixed template, applying generic pattern detection to segments"""
@@ -224,9 +315,16 @@ class FastJSCrawler:
 
     async def extract_link_patterns(self, page: Page, url, current_depth):
         """Extract all link patterns from the page after JavaScript execution, merges them with existing patterns"""
+        new_links = []
         try:
             # Wait for initial load
             await page.wait_for_load_state("networkidle", timeout=10000)
+            # await page.wait_for_selector("body", timeout=15000)
+
+            # visible_text = await page.evaluate("() => document.body.innerHTML")
+            # print(f"\n=== VISIBLE TEXT FOR {url} ===")
+            # print(visible_text[:10000])  # First 1000 characters
+            # print("=" * 50)
 
             # Extract title
             title = await page.title()
@@ -261,13 +359,12 @@ class FastJSCrawler:
             """)
 
             # Filter links to same domain and apply normalization
-            new_links = []
             for link in links:
                 if link in self.visited:
                     continue
 
                 parsed = urlparse(link)
-                if parsed.netloc == self.domain:
+                if self.is_same_domain_or_subdomain(parsed.netloc):
                     # Remove fragment
                     clean_url = link.split("#")[0].split("?")[0]
 
@@ -295,6 +392,13 @@ class FastJSCrawler:
                         self.log_new_fixed_template(normalized_url)
                         if current_depth < self.max_depth:
                             await self.to_visit.put((normalized_url, current_depth + 1))
+                            print(
+                                "Remaining links to visit: ",
+                                self.to_visit.qsize(),
+                                self.to_visit,
+                            )
+                            if self.to_visit.qsize() > 25:
+                                print(self.pattern_templates)
             return new_links
 
         except Exception as e:
@@ -313,12 +417,16 @@ class FastJSCrawler:
             context = await browser.new_context(
                 viewport={"width": 1920, "height": 1080},
                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                extra_http_headers={"Cookie": "cc-accept=true"},
             )
             page = await context.new_page()
 
             try:
                 # Navigate to the page
                 await page.goto(url, wait_until="domcontentloaded", timeout=15000)
+
+                # Handle cookie banners and consent dialogs
+                await self.handle_cookie_banners(page)
 
                 # Extract links after JS execution
                 new_links = await self.extract_link_patterns(page, url, depth)
@@ -328,9 +436,8 @@ class FastJSCrawler:
                     self.pattern_templates
                 )
                 print(
-                    f"Crawled: {url} ({len(self.visited)}/{self.max_pages}) - Found {len(new_links)} new links, on top of our current {pattern_count} patterns so far"
+                    f"Crawled: {url} ({len(self.visited)}/{self.max_pages}) - Found {len(new_links)} new links, totaling {pattern_count} patterns so far"
                 )
-                print(self.pattern_templates)
 
             except Exception as e:
                 print(f"Error crawling {url}: {str(e)[:50]}")
@@ -435,8 +542,8 @@ class FastJSCrawler:
                     template_path += (
                         "["
                         + (
-                            "/".join(list(segment.examples)[:4])
-                            + ("..." if len(segment.examples) > 4 else "")
+                            "|".join(list(segment.examples)[:3])
+                            + ("|..." if len(segment.examples) > 3 else "")
                         )
                         + "]"
                         + "/"
@@ -525,6 +632,14 @@ def test_crawler_logs_variable_template():
     assert crawler.matches_existing_template("https://arxiv.org/abs/2507.14280") == 0
     assert crawler.matches_existing_template("https://arxiv.org/abs/2507.14260") == 0
 
+    replaced_url = crawler._replace_with_generic_pattern_if_necessary(
+        "https://www.nature.com/naturecareers/job/12841799/687/v1.2.3/139941a0/v12/postdoctoral-researchers-in-experimental-condensed-matter-physics/"
+    )
+    assert (
+        replaced_url
+        == "https://www.nature.com/naturecareers/job/{hash}/{id}/{version}/{hash}/{version}/postdoctoral-researchers-in-experimental-condensed-matter-physics/"
+    ), replaced_url
+
 
 async def main():
     test_crawler_logs_variable_template()
@@ -537,8 +652,8 @@ async def main():
     parser.add_argument(
         "--max-pages",
         type=int,
-        default=500,
-        help="Maximum pages to crawl (default: 500)",
+        default=100,
+        help="Maximum pages to crawl (default: 100)",
     )
     parser.add_argument(
         "--max-depth", type=int, default=5, help="Maximum depth to crawl (default: 5)"
@@ -546,7 +661,7 @@ async def main():
     parser.add_argument(
         "--concurrency",
         type=int,
-        default=1,
+        default=8,
         help="Number of concurrent browser contexts (default: 1)",
     )
     parser.add_argument(
