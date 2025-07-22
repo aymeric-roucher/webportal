@@ -190,6 +190,8 @@ class SeleniumVisionAgent(CodeAgent):
         
         # Initialize network request tracking
         self.network_requests = []
+        self.step_requests = {}  # step_number -> list of requests for that step
+        self.last_processed_log_count = 0  # Track processed logs to get only new ones
         self._setup_network_monitoring()
         
         # Set browser window size
@@ -241,17 +243,25 @@ class SeleniumVisionAgent(CodeAgent):
         print("Network monitoring enabled")
 
     
-    def capture_current_network_activity(self) -> list[dict[str, Any]]:
-        """Capture current network activity using CDP, including both requests and responses"""
-        # Get performance logs which include network requests
+    
+    def capture_step_network_activity(self, step_number: int) -> list[dict[str, Any]]:
+        """Capture network activity that happened during a specific step"""
+        # Get all current logs
         logs = self.driver.get_log('performance')
         
-        # Temporary storage for requests and responses
-        requests_map = {}  # request_id -> request_info
-        responses_map = {}  # request_id -> response_info
+        # Only process new logs since last capture
+        new_logs = logs[self.last_processed_log_count:]
+        self.last_processed_log_count = len(logs)
         
-        # Process all logs to build request and response mapping
-        for log in logs:
+        if not new_logs:
+            return []
+        
+        # Temporary storage for this step's requests and responses
+        requests_map = {}
+        responses_map = {}
+        
+        # Process new logs only
+        for log in new_logs:
             message = json.loads(log['message'])
             method = message.get('message', {}).get('method')
             params = message.get('message', {}).get('params', {})
@@ -265,12 +275,13 @@ class SeleniumVisionAgent(CodeAgent):
                         'method': params.get('request', {}).get('method', 'GET'),
                         'headers': params.get('request', {}).get('headers', {}),
                         'post_data': params.get('request', {}).get('postData', ''),
-                        'request_id': request_id
+                        'request_id': request_id,
+                        'step_number': step_number
                     }
             
             elif method == 'Network.responseReceived':
                 request_id = params.get('requestId', '')
-                if request_id:
+                if request_id and request_id in requests_map:  # Only for requests we captured in this step
                     response_info = params.get('response', {})
                     responses_map[request_id] = {
                         'status_code': response_info.get('status', 0),
@@ -281,20 +292,19 @@ class SeleniumVisionAgent(CodeAgent):
                         'response_timestamp': log['timestamp'] / 1000
                     }
         
-        # Combine requests with their corresponding responses
-        current_requests = []
+        # Combine requests with responses for this step
+        step_requests = []
         for request_id, request_info in requests_map.items():
-            # Add response information if available
             if request_id in responses_map:
                 request_info['response'] = responses_map[request_id]
             else:
-                # No response captured yet (maybe still pending)
                 request_info['response'] = None
-            
-            current_requests.append(request_info)
-                
-        return current_requests
-    
+            step_requests.append(request_info)
+        
+        # Store step requests for later analysis
+        self.step_requests[step_number] = step_requests
+        
+        return step_requests
         
     def _setup_desktop_tools(self):
         """Register all desktop tools"""
@@ -505,87 +515,6 @@ class SeleniumVisionAgent(CodeAgent):
             self.logger.log(output_message)
             return output_message
 
-        @tool
-        def get_network_requests() -> str:
-            """
-            Retrieves all network requests made since the last interaction or since monitoring started.
-            This provides information similar to HAR (HTTP Archive) files.
-            Returns a summary of network requests with URLs, methods, and timestamps.
-            """
-            # Capture current network activity from performance logs
-            current_activity = self.capture_current_network_activity()
-            
-            # Combine with any previously stored requests
-            all_requests = self.network_requests + current_activity
-            
-            if not all_requests:
-                return "No network requests captured since last interaction."
-            
-            # Format the output for the agent
-            summary = f"Captured {len(all_requests)} network requests:\n"
-            for i, req in enumerate(all_requests, 1):
-                timestamp_str = datetime.fromtimestamp(req['timestamp']).strftime('%H:%M:%S.%f')[:-3]
-                summary += f"{i}. [{timestamp_str}] {req['method']} {req['url']}\n"
-                
-                # Add response info if available
-                if req.get('response'):
-                    response = req['response']
-                    status_code = response.get('status_code', 'unknown')
-                    mime_type = response.get('mime_type', 'unknown')
-                    summary += f"   Response: {status_code} {response.get('status_text', '')} ({mime_type})\n"
-                else:
-                    summary += f"   Response: Pending or not captured\n"
-                
-                if req['post_data']:
-                    summary += f"   POST data: {req['post_data'][:100]}{'...' if len(req['post_data']) > 100 else ''}\n"
-            
-            # Store the requests for potential future use
-            self.network_requests.extend(current_activity)
-            
-            return summary
-
-        @tool
-        def filter_and_test_requests() -> str:
-            """
-            Filters network requests to find relevant API calls (fetch/XHR requests), 
-            tests them independently, and generates markdown explanations for successful ones.
-            """
-            # Get all current network requests
-            current_activity = self.capture_current_network_activity()
-            all_requests = self.network_requests + current_activity
-            
-            # Filter for relevant requests (fetch/XHR, not static assets)
-            relevant_requests = self._filter_relevant_requests(all_requests)
-            
-            if not relevant_requests:
-                return "No relevant API requests found to test."
-            
-            markdown_explanations = []
-            successful_count = 0
-            failed_count = 0
-            
-            for request in relevant_requests:
-                result = self._test_request_independently(request)
-                if result['success']:
-                    successful_count += 1
-                    markdown_explanation = self._generate_markdown_explanation(request, result)
-                    markdown_explanations.append(markdown_explanation)
-                    print(f"✅ Successfully tested: {request['method']} {request['url']}")
-                    print(markdown_explanation)
-                    print("-" * 80)
-                else:
-                    failed_count += 1
-                    # For failed requests, generate an explanation of why it failed
-                    explanation = self._generate_failure_explanation(request, result)
-                    print(f"❌ Failed to test: {request['method']} {request['url']}")
-                    print(explanation)
-                    print("-" * 80)
-            
-            summary = f"Tested {len(relevant_requests)} relevant requests: {successful_count} successful, {failed_count} failed."
-            if markdown_explanations:
-                summary += f"\n\nGenerated {len(markdown_explanations)} API documentation entries."
-            
-            return summary
 
 
         # Register the tools
@@ -601,8 +530,6 @@ class SeleniumVisionAgent(CodeAgent):
         self.tools["go_back"] = go_back
         self.tools["drag_and_drop"] = drag_and_drop
         self.tools["find_on_page_ctrl_f"] = find_on_page_ctrl_f
-        self.tools["get_network_requests"] = get_network_requests
-        self.tools["filter_and_test_requests"] = filter_and_test_requests
 
     def take_screenshot_callback(self, memory_step: ActionStep, agent=None) -> None:
         """Callback that takes a screenshot + memory snapshot after a step completes"""
@@ -611,6 +538,14 @@ class SeleniumVisionAgent(CodeAgent):
         current_step = memory_step.step_number
 
         time.sleep(2.5)  # Let things happen in the browser
+        
+        # Capture network requests for this specific step
+        step_requests = self.capture_step_network_activity(current_step)
+        if step_requests:
+            self.logger.log(f"Captured {len(step_requests)} network requests for step {current_step}")
+            # Analyze the requests for this step
+            self._analyze_step_requests(current_step, step_requests, memory_step)
+        
         screenshot_bytes = self.driver.get_screenshot_as_png()
         image = Image.open(BytesIO(screenshot_bytes))
 
@@ -945,5 +880,293 @@ Based on the URL pattern `{url}`, this appears to be {'an API endpoint for data 
 """
         
         return explanation
+    
+    def _analyze_step_requests(self, step_number: int, requests: list[dict[str, Any]], memory_step: ActionStep):
+        """Analyze requests from a specific step using LLM to identify the most relevant one"""
+        
+        # Filter out obviously irrelevant requests first
+        relevant_requests = self._filter_relevant_requests(requests)
+        
+        if not relevant_requests:
+            return
+            
+        print(f"\n=== STEP {step_number} REQUEST ANALYSIS ===")
+        
+        # Get the action that was performed in this step
+        action_description = self._get_step_action_description(memory_step)
+        
+        for request in relevant_requests:
+            print(f"\n🔍 Analyzing request: {request['method']} {request['url']}")
+            
+            # Try to determine if this is a simple URL pattern or requires API testing
+            browserless_instruction = self._create_browserless_instruction(request, action_description)
+            
+            if browserless_instruction:
+                print("✅ Generated browserless instruction:")
+                print(browserless_instruction)
+                
+                # Save the instruction for this step
+                self._save_step_instruction(step_number, request, browserless_instruction, action_description)
+                
+    def _get_step_action_description(self, memory_step: ActionStep) -> str:
+        """Extract a description of what action was performed in this step"""
+        if memory_step.tool_calls:
+            tool_call = memory_step.tool_calls[0]
+            tool_name = tool_call.name
+            args = getattr(tool_call, 'arguments', {})
+            
+            if tool_name == 'click':
+                return f"clicked at coordinates ({args.get('x', '?')}, {args.get('y', '?')})"
+            elif tool_name == 'type_text':
+                return f"typed text: '{args.get('text', '?')}'"
+            elif tool_name == 'open_url':
+                return f"opened URL: {args.get('url', '?')}"
+            elif tool_name == 'scroll':
+                direction = args.get('direction', 'down')
+                return f"scrolled {direction}"
+            elif tool_name == 'press_key':
+                return f"pressed key: {args.get('key', '?')}"
+            else:
+                return f"performed {tool_name} action"
+        
+        return "performed unknown action"
+    
+    def _create_browserless_instruction(self, request: dict[str, Any], action_description: str) -> str | None:
+        """Create browserless instruction for a request, testing if it works independently"""
+        
+        url = request['url']
+        method = request['method']
+        
+        # First, try to identify if this is a simple URL pattern (like GitHub search)
+        simple_pattern = self._detect_simple_url_pattern(url)
+        if simple_pattern:
+            return self._generate_simple_url_instruction(url, method, simple_pattern, action_description)
+        
+        # If not a simple pattern, test if the API call works independently
+        test_result = self._test_request_independently(request)
+        
+        if test_result['success']:
+            return self._generate_api_instruction(request, test_result, action_description)
+        else:
+            # Cannot be done browserless
+            print(f"❌ Cannot be done browserless: {test_result['error']}")
+            return None
+    
+    def _detect_simple_url_pattern(self, url: str) -> dict[str, Any] | None:
+        """Detect if this is a simple URL pattern that can be easily replicated"""
+        
+        parsed = urlparse(url)
+        
+        # GitHub search pattern
+        if 'github.com/search' in url:
+            return {
+                'type': 'github_search',
+                'base_url': f"{parsed.scheme}://{parsed.netloc}/search",
+                'params': dict([p.split('=', 1) for p in parsed.query.split('&') if '=' in p])
+            }
+        
+        # Generic search patterns
+        if 'search' in parsed.path and parsed.query:
+            params = dict([p.split('=', 1) for p in parsed.query.split('&') if '=' in p])
+            if any(key in ['q', 'query', 'search', 'term'] for key in params.keys()):
+                return {
+                    'type': 'search_pattern',
+                    'base_url': f"{parsed.scheme}://{parsed.netloc}{parsed.path}",
+                    'params': params
+                }
+        
+        # Simple GET with query parameters
+        if parsed.query and len(parsed.query.split('&')) <= 5:  # Not too complex
+            return {
+                'type': 'simple_get',
+                'base_url': f"{parsed.scheme}://{parsed.netloc}{parsed.path}",
+                'params': dict([p.split('=', 1) for p in parsed.query.split('&') if '=' in p])
+            }
+        
+        return None
+    
+    def _generate_simple_url_instruction(self, url: str, method: str, pattern: dict[str, Any], action: str) -> str:
+        """Generate instruction for simple URL patterns"""
+        
+        pattern_type = pattern['type']
+        base_url = pattern['base_url']
+        params = pattern['params']
+        
+        instruction = f"""## Browserless Alternative for: {action}
+
+**Pattern Detected**: {pattern_type.replace('_', ' ').title()}
+**Method**: {method}
+**URL**: `{url}`
+
+### How to replicate browserlessly:
+
+```python
+import requests
+from urllib.parse import urlencode
+
+# Base URL
+base_url = "{base_url}"
+
+# Parameters"""
+        
+        if params:
+            instruction += f"""
+params = {{"""
+            for key, value in params.items():
+                # Try to decode URL-encoded values
+                try:
+                    decoded_value = requests.utils.unquote(value)
+                    instruction += f"""
+    "{key}": "{decoded_value}","""
+                except:
+                    instruction += f"""
+    "{key}": "{value}","""
+            instruction += """
+}
+
+# Make the request
+url = f"{base_url}?{urlencode(params)}"
+response = requests.get(url)
+
+if response.status_code == 200:
+    # Parse the response (HTML or JSON)
+    data = response.text  # or response.json() if JSON
+    # Process the data as needed
+else:
+    print(f"Request failed: {response.status_code}")
+```
+
+### Notes:
+- This action can be easily replicated by constructing the URL with the appropriate parameters
+- No authentication or special headers appear to be required
+- The parameters can be modified to change search terms or filters
+"""
+        else:
+            instruction += """
+
+# No parameters needed
+response = requests.get(base_url)
+```
+
+### Notes:
+- Simple GET request to the URL
+- No parameters or authentication required
+"""
+        
+        return instruction
+    
+    def _generate_api_instruction(self, request: dict[str, Any], test_result: dict[str, Any], action: str) -> str:
+        """Generate instruction for API calls that work independently"""
+        
+        url = request['url']
+        method = request['method']
+        headers = request.get('headers', {})
+        post_data = request.get('post_data', '')
+        
+        instruction = f"""## Browserless Alternative for: {action}
+
+**Type**: API Call
+**Method**: {method}
+**URL**: `{url}`
+**Status**: ✅ Works independently
+
+### How to replicate browserlessly:
+
+```python
+import requests
+import json
+
+# Request details
+url = "{url}"
+method = "{method.upper()}"
+"""
+        
+        # Add headers if needed
+        important_headers = {k: v for k, v in headers.items() 
+                           if k.lower() in ['content-type', 'accept', 'authorization', 'x-api-key']}
+        if important_headers:
+            instruction += """
+headers = {"""
+            for key, value in important_headers.items():
+                if 'authorization' in key.lower():
+                    instruction += f"""
+    "{key}": "[YOUR_TOKEN_HERE]",  # Replace with actual token"""
+                else:
+                    instruction += f"""
+    "{key}": "{value}","""
+            instruction += """
+}
+"""
+        
+        # Add request body for POST/PUT/PATCH
+        if post_data and method in ['POST', 'PUT', 'PATCH']:
+            instruction += """
+# Request body"""
+            try:
+                json_data = json.loads(post_data)
+                instruction += f"""
+data = {json.dumps(json_data, indent=4)}
+
+response = requests.{method.lower()}(url, headers=headers, json=data)
+"""
+            except json.JSONDecodeError:
+                instruction += f"""
+data = '''{post_data}'''
+
+response = requests.{method.lower()}(url, headers=headers, data=data)
+"""
+        else:
+            instruction += f"""
+response = requests.{method.lower()}(url{"" if not important_headers else ", headers=headers"})
+"""
+        
+        instruction += f"""
+if response.status_code == {test_result['status_code']}:
+    data = response.json()  # or response.text for non-JSON
+    # Process the data...
+    return data
+else:
+    print(f"Request failed: {{response.status_code}} - {{response.text}}")
+```
+
+### Response Example:
+"""
+        
+        # Add response sample
+        response_data = test_result.get('response_data')
+        if response_data:
+            if isinstance(response_data, dict):
+                instruction += f"""```json
+{json.dumps(response_data, indent=2)}
+```"""
+            else:
+                sample = str(response_data)[:500] + ('...' if len(str(response_data)) > 500 else '')
+                instruction += f"""```
+{sample}
+```"""
+        
+        instruction += f"""
+
+### Notes:
+- This API call works independently without browser context
+- Status code: {test_result['status_code']}
+- Content type: {test_result.get('content_type', 'unknown')}
+- Can be used to get the same data that the browser action retrieved
+"""
+        
+        return instruction
+        
+    def _save_step_instruction(self, step_number: int, request: dict[str, Any], instruction: str, action: str):
+        """Save the browserless instruction for a step to a file"""
+        
+        # Create a filename based on step number and action
+        filename = f"step_{step_number:03d}_browserless_instruction.md"
+        filepath = os.path.join(self.data_dir, filename)
+        
+        with open(filepath, 'w') as f:
+            f.write(instruction)
+        
+        print(f"💾 Saved browserless instruction to: {filepath}")
+    
     
     
