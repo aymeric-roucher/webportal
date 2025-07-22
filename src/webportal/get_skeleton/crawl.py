@@ -283,7 +283,7 @@ class FastJSCrawler:
                             if not segment_index == differing_segment_index
                         ]
                     )
-                    <= 1
+                    == 0
                 ):
                     if isinstance(
                         template_segments[differing_segment_index],
@@ -395,7 +395,6 @@ class FastJSCrawler:
                             print(
                                 "Remaining links to visit: ",
                                 self.to_visit.qsize(),
-                                self.to_visit,
                             )
                             if self.to_visit.qsize() > 25:
                                 print(self.pattern_templates)
