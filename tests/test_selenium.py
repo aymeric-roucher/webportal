@@ -14,10 +14,9 @@ def test_run_selenium_agent():
     selenium_vision_agent = SeleniumVisionAgent(model=model, data_dir="data")
     selenium_vision_agent.run("""
 I want you to go to github.com, to look for the numpy package and click the button to see all of the labels. 
-              
-When you are done, I want you to give me a list of the requests that were made to the server. 
-              
+                            
               """)
+test_run_selenium_agent()
 
 def test_return_requests():
     model = InferenceClientModel(
@@ -28,5 +27,3 @@ def test_return_requests():
     selenium_vision_agent.tools["open_url"]("https://github.com")
     input("Press Enter to continue...")
     selenium_vision_agent.capture_requests_callback()
-
-test_return_requests()

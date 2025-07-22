@@ -652,6 +652,10 @@ class SeleniumVisionAgent(CodeAgent):
         }
 
         for request in requests_list:
+            # Skip None requests
+            if request is None:
+                continue
+                
             url = request.get("url", "")
             method = request.get("method", "GET")
             request_type = request.get("type", "")
@@ -685,6 +689,9 @@ class SeleniumVisionAgent(CodeAgent):
 
         relevant_requests_filtered_by_type_and_body = []
         for request in relevant_requests:
+            # Skip None requests
+            if request is None:
+                continue
             if request.get("type") == "XHR" or request.get("type") == "Fetch":
                 if request.get("response", {}).get("body"):
                     relevant_requests_filtered_by_type_and_body.append(request)
@@ -693,6 +700,9 @@ class SeleniumVisionAgent(CodeAgent):
             
         relevant_requests_filtered_by_json_body = []
         for request in relevant_requests_filtered_by_type_and_body:
+            # Skip None requests
+            if request is None:
+                continue
             if request.get("response", {}).get("body"):
                 try:
                     json.loads(request.get("response", {}).get("body"))
@@ -702,9 +712,12 @@ class SeleniumVisionAgent(CodeAgent):
                 
         relevant_requests_filtered_by_html_body = []
         for request in relevant_requests_filtered_by_type_and_body:
+            # Skip None requests
+            if request is None:
+                continue
             if request.get("response", {}).get("body"):
                 body = request.get("response", {}).get("body")
-                if "DOCTYPE" in body:
+                if body and "DOCTYPE" in body:
                     relevant_requests_filtered_by_html_body.append(request)
                 else:
                     continue
@@ -1001,39 +1014,28 @@ Based on the URL pattern `{url}`, this appears to be {"an API endpoint for data 
     def _analyze_step_requests(
         self, step_number: int, requests: list[dict[str, Any]], memory_step: ActionStep | None = None
     ):
-        """Analyze requests from a specific step using LLM to identify the most relevant one"""
+        """Analyze requests from a specific step and generate markdown summaries"""
 
-        # Filter out obviously irrelevant requests first
-        relevant_requests = self._filter_relevant_requests(requests)
+        # Filter requests to get JSON and HTML responses separately
+        json_requests, html_requests = self._filter_relevant_requests(requests)
         
-        # all you have to do is to make sure that the variables are correct and that the response is here so that it can be given to a LLM for the next step
-        # the next step would be to:
-        # 1. from all of the different queries, find the good ones and generalise them
-        # 2. map the website and the urls, sometimes the urls are the best.
-
-        if not relevant_requests:
+        if not json_requests and not html_requests:
             return
 
         print(f"\n=== STEP {step_number} REQUEST ANALYSIS ===")
+        print(f"Found {len(json_requests)} JSON requests and {len(html_requests)} HTML requests")
 
         # Get the action that was performed in this step
         action_description = self._get_step_action_description(memory_step)
-
-        for request in relevant_requests:
-            print(f"\n🔍 Analyzing request: {request['method']} {request['url']}")
-
-            # Try to determine if this is a simple URL pattern or requires API testing
-            browserless_instruction = self._create_browserless_instruction(
-                request, action_description
-            )
-
-            if browserless_instruction:
-                print("✅ Generated browserless instruction:")
-
-                # Save the instruction for this step
-                self._save_step_instruction(
-                    step_number, request, browserless_instruction, action_description
-                )
+        tool_call_info = self._get_tool_call_info(memory_step)
+        
+        # Generate markdown for this step
+        markdown_summary = self._generate_step_markdown(
+            step_number, action_description, tool_call_info, json_requests, html_requests
+        )
+        
+        if markdown_summary:
+            self._save_step_markdown(step_number, markdown_summary)
 
     def _get_step_action_description(self, memory_step: ActionStep | None = None) -> str:
         """Extract a description of what action was performed in this step"""
@@ -1057,263 +1059,317 @@ Based on the URL pattern `{url}`, this appears to be {"an API endpoint for data 
                 return f"performed {tool_name} action"
 
         return "performed unknown action"
-
-    def _create_browserless_instruction(
-        self, request: dict[str, Any], action_description: str
-    ) -> str | None:
-        """Create browserless instruction for a request, testing if it works independently"""
-
-        url = request["url"]
-        method = request["method"]
-
-        # First, try to identify if this is a simple URL pattern (like GitHub search)
-        simple_pattern = self._detect_simple_url_pattern(url)
-        if simple_pattern:
-            return self._generate_simple_url_instruction(
-                url, method, simple_pattern, action_description
-            )
-
-        # If not a simple pattern, test if the API call works independently
-        test_result = self._test_request_independently(request)
-
-        if test_result["success"]:
-            return self._generate_api_instruction(
-                request, test_result, action_description
-            )
-        else:
-            # Cannot be done browserless
-            print(f"❌ Cannot be done browserless: {test_result['error']}")
-            return None
-
-    def _detect_simple_url_pattern(self, url: str) -> dict[str, Any] | None:
-        """Detect if this is a simple URL pattern that can be easily replicated"""
-
-        parsed = urlparse(url)
-
-        # GitHub search pattern
-        if "github.com/search" in url:
+    
+    def _get_tool_call_info(self, memory_step: ActionStep | None = None) -> dict[str, Any]:
+        """Extract tool call information for markdown generation"""
+        if memory_step and memory_step.tool_calls:
+            tool_call = memory_step.tool_calls[0]
             return {
-                "type": "github_search",
-                "base_url": f"{parsed.scheme}://{parsed.netloc}/search",
-                "params": dict(
-                    [p.split("=", 1) for p in parsed.query.split("&") if "=" in p]
-                ),
+                "tool_name": tool_call.name,
+                "arguments": getattr(tool_call, "arguments", {})
             }
-
-        # Generic search patterns
-        if "search" in parsed.path and parsed.query:
-            params = dict(
-                [p.split("=", 1) for p in parsed.query.split("&") if "=" in p]
-            )
-            if any(key in ["q", "query", "search", "term"] for key in params.keys()):
-                return {
-                    "type": "search_pattern",
-                    "base_url": f"{parsed.scheme}://{parsed.netloc}{parsed.path}",
-                    "params": params,
-                }
-
-        # Simple GET with query parameters
-        if parsed.query and len(parsed.query.split("&")) <= 5:  # Not too complex
-            return {
-                "type": "simple_get",
-                "base_url": f"{parsed.scheme}://{parsed.netloc}{parsed.path}",
-                "params": dict(
-                    [p.split("=", 1) for p in parsed.query.split("&") if "=" in p]
-                ),
-            }
-
-        return None
-
-    def _generate_simple_url_instruction(
-        self, url: str, method: str, pattern: dict[str, Any], action: str
+        return {"tool_name": "unknown", "arguments": {}}
+    
+    def _generate_step_markdown(
+        self, 
+        step_number: int, 
+        action_description: str, 
+        tool_call_info: dict[str, Any],
+        json_requests: list[dict[str, Any]], 
+        html_requests: list[dict[str, Any]]
     ) -> str:
-        """Generate instruction for simple URL patterns"""
-
-        pattern_type = pattern["type"]
-        base_url = pattern["base_url"]
-        params = pattern["params"]
-
-        instruction = f"""## Browserless Alternative for: {action}
-
-**Pattern Detected**: {pattern_type.replace("_", " ").title()}
-**Method**: {method}
-**URL**: `{url}`
-
-### How to replicate browserlessly:
-
-```python
-import requests
-from urllib.parse import urlencode
-
-# Base URL
-base_url = "{base_url}"
-
-# Parameters"""
-
-        if params:
-            instruction += f"""
-params = {{"""
-            for key, value in params.items():
-                # Try to decode URL-encoded values
+        """Generate markdown summary for a step in the interactive_element format"""
+        
+        if not json_requests and not html_requests:
+            return ""
+        
+        # Try to infer element type from action
+        element_type = self._infer_element_type(tool_call_info, action_description)
+        
+        # Get current page location (simplified)
+        current_url = self.driver.current_url if hasattr(self, 'driver') else "unknown"
+        location_page = self._extract_location_page(current_url)
+        
+        markdown = f"""```interactive_element_step_{step_number}
+location_page: {location_page}
+type: {element_type}
+visual_element: {action_description}
+trigger: {tool_call_info['tool_name']} with args {tool_call_info['arguments']}
+"""
+        
+        # Generate separate markdown sections for JSON and HTML requests
+        if json_requests:
+            markdown += self._generate_json_requests_section(json_requests, action_description)
+        
+        if html_requests:
+            markdown += self._generate_html_requests_section(html_requests, action_description)
+        
+        # Add viewport effect
+        viewport_effect = self._describe_viewport_effect(action_description)
+        markdown += f"viewport_effect: {viewport_effect}\n"
+        
+        markdown += "```\n"
+        return markdown
+    
+    def _generate_json_requests_section(self, json_requests: list[dict[str, Any]], action_description: str) -> str:
+        """Generate markdown section for JSON API requests"""
+        section = ""
+        
+        for i, request in enumerate(json_requests):
+            url = request.get('url', '')
+            method = request.get('method', 'GET')
+            
+            if i == 0:  # Primary request
+                section += f"request: {method} {url}\n"
+                
+                # Add request arguments if it's a POST with data
+                post_data = request.get('post_data', '')
+                if post_data and method in ['POST', 'PUT', 'PATCH']:
+                    section += f"arguments:\n"
+                    try:
+                        json_data = json.loads(post_data)
+                        # Truncate large JSON for readability
+                        json_str = json.dumps(json_data)
+                        if len(json_str) > 500:
+                            json_str = json_str[:500] + "..."
+                        section += f'  "body" (json): {json_str}\n'
+                    except json.JSONDecodeError:
+                        post_data_truncated = post_data[:200] + ("..." if len(post_data) > 200 else "")
+                        section += f'  "body" (raw): {post_data_truncated}\n'
+                
+                # Add effect description
+                effect = self._describe_request_effect(request, action_description)
+                section += f"effect: {effect}\n"
+            
+            # Add response details for all JSON requests
+            response_data = request.get('response', {})
+            response_body = response_data.get('body', '')
+            
+            if response_body:
                 try:
-                    decoded_value = requests.utils.unquote(value)
-                    instruction += f"""
-    "{key}": "{decoded_value}","""
-                except:
-                    instruction += f"""
-    "{key}": "{value}","""
-            instruction += """
-}
-
-# Make the request
-url = f"{base_url}?{urlencode(params)}"
-response = requests.get(url)
-
-if response.status_code == 200:
-    # Parse the response (HTML or JSON)
-    data = response.text  # or response.json() if JSON
-    # Process the data as needed
-else:
-    print(f"Request failed: {response.status_code}")
-```
-
-### Notes:
-- This action can be easily replicated by constructing the URL with the appropriate parameters
-- No authentication or special headers appear to be required
-- The parameters can be modified to change search terms or filters
-"""
+                    json_response = json.loads(response_body)
+                    
+                    if i == 0:  # Primary request gets detailed response info
+                        section += f"returns: JSON API response\n"
+                        section += f"response_structure:\n"
+                        
+                        if isinstance(json_response, dict):
+                            keys = list(json_response.keys())[:10]  # More keys for LLM
+                            section += f"  keys: {keys}\n"
+                            
+                            # Extract important data patterns for LLM
+                            if 'data' in json_response:
+                                data_info = self._describe_data_field(json_response['data'])
+                                section += f"  data: {data_info}\n"
+                            
+                            if 'errors' in json_response:
+                                section += f"  has_errors: true\n"
+                            
+                            # Look for pagination info
+                            if any(key in json_response for key in ['pageInfo', 'pagination', 'hasNextPage']):
+                                section += f"  has_pagination: true\n"
+                            
+                            # Look for common GraphQL/API patterns
+                            if 'nodes' in json_response:
+                                nodes_info = self._describe_nodes_field(json_response['nodes'])
+                                section += f"  nodes: {nodes_info}\n"
+                                
+                        elif isinstance(json_response, list):
+                            section += f"  type: array\n"
+                            section += f"  length: {len(json_response)}\n"
+                            if json_response and isinstance(json_response[0], dict):
+                                first_keys = list(json_response[0].keys())[:5]
+                                section += f"  item_keys: {first_keys}\n"
+                    
+                    else:  # Additional requests get brief info
+                        section += f"additional_request_{i}: {method} {url}\n"
+                        if isinstance(json_response, dict):
+                            keys = list(json_response.keys())[:5]
+                            section += f"  keys: {keys}\n"
+                        elif isinstance(json_response, list):
+                            section += f"  array_length: {len(json_response)}\n"
+                            
+                except json.JSONDecodeError:
+                    section += f"response_parsing_error: could not parse as JSON\n"
+        
+        return section
+    
+    def _generate_html_requests_section(self, html_requests: list[dict[str, Any]], action_description: str) -> str:
+        """Generate markdown section for HTML page requests"""
+        section = ""
+        
+        for i, request in enumerate(html_requests):
+            url = request.get('url', '')
+            method = request.get('method', 'GET')
+            
+            if i == 0:  # Primary request
+                section += f"request: {method} {url}\n"
+                
+                # Add request arguments if it's a POST with data
+                post_data = request.get('post_data', '')
+                if post_data and method in ['POST', 'PUT', 'PATCH']:
+                    section += f"arguments:\n"
+                    section += f'  "body" (form-data): {post_data[:200]}...\n'
+                
+                # Add effect description
+                effect = self._describe_request_effect(request, action_description)
+                section += f"effect: {effect}\n"
+                section += f"returns: HTML page content\n"
+            
+            # Add HTML response analysis
+            response_data = request.get('response', {})
+            response_body = response_data.get('body', '')
+            
+            if response_body:
+                if i == 0:  # Primary request gets detailed HTML info
+                    section += f"page_analysis:\n"
+                    
+                    # Extract page title
+                    if "<title>" in response_body:
+                        title_start = response_body.find("<title>") + 7
+                        title_end = response_body.find("</title>", title_start)
+                        if title_end > title_start:
+                            title = response_body[title_start:title_end][:100]
+                            section += f"  title: {title}\n"
+                    
+                    # Look for common HTML elements that indicate page type
+                    html_indicators = []
+                    if 'class="search' in response_body.lower():
+                        html_indicators.append('search_page')
+                    if 'class="issue' in response_body.lower():
+                        html_indicators.append('issues_page')
+                    if 'class="repository' in response_body.lower():
+                        html_indicators.append('repository_page')
+                    if '<form' in response_body.lower():
+                        html_indicators.append('has_forms')
+                    if 'data-' in response_body.lower():
+                        html_indicators.append('has_data_attributes')
+                    
+                    if html_indicators:
+                        section += f"  page_indicators: {html_indicators}\n"
+                    
+                    # Extract some key content hints for LLM
+                    content_preview = response_body[:1000].replace('\n', ' ').replace('\t', ' ')
+                    # Clean up multiple spaces
+                    import re
+                    content_preview = re.sub(r'\s+', ' ', content_preview)
+                    section += f"  content_preview: {content_preview}...\n"
+                
+                else:  # Additional HTML requests
+                    section += f"additional_html_request_{i}: {method} {url}\n"
+                    if "<title>" in response_body:
+                        title_start = response_body.find("<title>") + 7
+                        title_end = response_body.find("</title>", title_start)
+                        if title_end > title_start:
+                            title = response_body[title_start:title_end][:50]
+                            section += f"  title: {title}\n"
+        
+        return section
+    
+    def _describe_data_field(self, data) -> str:
+        """Describe the structure of a 'data' field in JSON response"""
+        if isinstance(data, dict):
+            keys = list(data.keys())[:5]
+            return f"object with keys: {keys}"
+        elif isinstance(data, list):
+            return f"array with {len(data)} items"
         else:
-            instruction += """
-
-# No parameters needed
-response = requests.get(base_url)
-```
-
-### Notes:
-- Simple GET request to the URL
-- No parameters or authentication required
-"""
-
-        return instruction
-
-    def _generate_api_instruction(
-        self, request: dict[str, Any], test_result: dict[str, Any], action: str
-    ) -> str:
-        """Generate instruction for API calls that work independently"""
-
-        url = request["url"]
-        method = request["method"]
-        headers = request.get("headers", {})
-        post_data = request.get("post_data", "")
-
-        instruction = f"""## Browserless Alternative for: {action}
-
-**Type**: API Call
-**Method**: {method}
-**URL**: `{url}`
-**Status**: ✅ Works independently
-
-### How to replicate browserlessly:
-
-```python
-import requests
-import json
-
-# Request details
-url = "{url}"
-method = "{method.upper()}"
-"""
-
-        # Add headers if needed
-        important_headers = {
-            k: v
-            for k, v in headers.items()
-            if k.lower() in ["content-type", "accept", "authorization", "x-api-key"]
-        }
-        if important_headers:
-            instruction += """
-headers = {"""
-            for key, value in important_headers.items():
-                if "authorization" in key.lower():
-                    instruction += f"""
-    "{key}": "[YOUR_TOKEN_HERE]",  # Replace with actual token"""
-                else:
-                    instruction += f"""
-    "{key}": "{value}","""
-            instruction += """
-}
-"""
-
-        # Add request body for POST/PUT/PATCH
-        if post_data and method in ["POST", "PUT", "PATCH"]:
-            instruction += """
-# Request body"""
-            try:
-                json_data = json.loads(post_data)
-                instruction += f"""
-data = {json.dumps(json_data, indent=4)}
-
-response = requests.{method.lower()}(url, headers=headers, json=data)
-"""
-            except json.JSONDecodeError:
-                instruction += f"""
-data = '''{post_data}'''
-
-response = requests.{method.lower()}(url, headers=headers, data=data)
-"""
-        else:
-            instruction += f"""
-response = requests.{method.lower()}(url{"" if not important_headers else ", headers=headers"})
-"""
-
-        instruction += f"""
-if response.status_code == {test_result["status_code"]}:
-    data = response.json()  # or response.text for non-JSON
-    # Process the data...
-    return data
-else:
-    print(f"Request failed: {{response.status_code}} - {{response.text}}")
-```
-
-### Response Example:
-"""
-
-        # Add response sample
-        response_data = test_result.get("response_data")
-        if response_data:
-            if isinstance(response_data, dict):
-                instruction += f"""```json
-{json.dumps(response_data, indent=2)}
-```"""
+            return f"value of type {type(data).__name__}"
+    
+    def _describe_nodes_field(self, nodes) -> str:
+        """Describe the structure of a 'nodes' field (common in GraphQL)"""
+        if isinstance(nodes, list):
+            if nodes and isinstance(nodes[0], dict):
+                first_keys = list(nodes[0].keys())[:5]
+                return f"array of {len(nodes)} objects with keys: {first_keys}"
             else:
-                sample = str(response_data)[:500] + (
-                    "..." if len(str(response_data)) > 500 else ""
-                )
-                instruction += f"""```
-{sample}
-```"""
-
-        instruction += f"""
-
-### Notes:
-- This API call works independently without browser context
-- Status code: {test_result["status_code"]}
-- Content type: {test_result.get("content_type", "unknown")}
-- Can be used to get the same data that the browser action retrieved
-"""
-
-        return instruction
-
-    def _save_step_instruction(
-        self, step_number: int, request: dict[str, Any], instruction: str, action: str
-    ):
-        """Save the browserless instruction for a step to a file"""
-
-        # Create a filename based on step number and action
-        filename = f"step_{step_number:03d}_browserless_instruction.md"
+                return f"array with {len(nodes)} items"
+        else:
+            return f"non-array type: {type(nodes).__name__}"
+    
+    def _infer_element_type(self, tool_call_info: dict[str, Any], action_description: str) -> str:
+        """Infer the UI element type from the action"""
+        tool_name = tool_call_info.get('tool_name', '')
+        
+        if tool_name == 'click':
+            if 'button' in action_description.lower():
+                return 'Button'
+            elif 'dropdown' in action_description.lower() or 'select' in action_description.lower():
+                return 'Button/Dropdown'
+            elif 'link' in action_description.lower():
+                return 'Link'
+            else:
+                return 'Clickable Element'
+        elif tool_name == 'type_text':
+            return 'Input Field'
+        elif tool_name == 'scroll':
+            return 'Scrollable Area'
+        else:
+            return 'Interactive Element'
+    
+    def _extract_location_page(self, url: str) -> str:
+        """Extract a meaningful location page identifier from URL"""
+        if not url or url == 'unknown':
+            return 'unknown_page'
+        
+        parsed = urlparse(url)
+        path = parsed.path.strip('/')
+        
+        # Handle GitHub-style URLs
+        if 'github.com' in parsed.netloc:
+            path_parts = path.split('/')
+            if len(path_parts) >= 2:
+                return f"{path_parts[0]}/{path_parts[1]}/{'/'.join(path_parts[2:])}"
+        
+        return path if path else parsed.netloc
+    
+    def _describe_request_effect(self, request: dict[str, Any], action_description: str) -> str:
+        """Describe what effect the request has"""
+        method = request.get('method', 'GET')
+        url = request.get('url', '')
+        
+        if method == 'GET':
+            if 'search' in url.lower():
+                return f"Performs search based on {action_description}"
+            elif 'sort' in url.lower():
+                return f"Sorts content based on {action_description}"
+            elif 'filter' in url.lower():
+                return f"Filters content based on {action_description}"
+            else:
+                return f"Retrieves data triggered by {action_description}"
+        else:
+            return f"Submits data from {action_description}"
+    
+    
+    def _describe_viewport_effect(self, action_description: str) -> str:
+        """Describe the visual effect on the viewport"""
+        if 'click' in action_description:
+            if 'sort' in action_description.lower():
+                return "Updates the content display with new sort order"
+            elif 'filter' in action_description.lower():
+                return "Updates the content display with filtered results"
+            elif 'search' in action_description.lower():
+                return "Updates the page with search results"
+            else:
+                return "Updates the page content or navigation"
+        elif 'type' in action_description:
+            return "Updates input field with typed text"
+        elif 'scroll' in action_description:
+            return "Changes visible content area"
+        else:
+            return "Modifies page display or interaction state"
+    
+    def _save_step_markdown(self, step_number: int, markdown: str):
+        """Save the markdown summary for a step"""
+        filename = f"step_{step_number:03d}_interactive_element.md"
         filepath = os.path.join(self.data_dir, filename)
+        
+        with open(filepath, 'w') as f:
+            f.write(markdown)
+        
+        print(f"💾 Saved interactive element summary to: {filepath}")
 
-        with open(filepath, "w") as f:
-            f.write(instruction)
 
-        print(f"💾 Saved browserless instruction to: {filepath}")
+
+
+
