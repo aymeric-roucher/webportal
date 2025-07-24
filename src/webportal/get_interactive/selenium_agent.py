@@ -676,9 +676,9 @@ class SeleniumVisionAgent(CodeAgent):
             if not url.startswith(("http://", "https://")):
                 continue
 
-            # Keep XHR/Fetch requests or API-like URLs
+            # Keep XHR/Fetch requests, API-like URLs, or Document requests (initial page loads)
             if (
-                request_type in ["XHR", "Fetch"]  # Direct type checking for XHR/Fetch
+                request_type in ["XHR", "Fetch", "Document"]  # Include Document type for initial page loads
                 or "/api/" in url
                 or "/graphql" in url
                 or "/ajax" in url
@@ -692,9 +692,10 @@ class SeleniumVisionAgent(CodeAgent):
             # Skip None requests
             if request is None:
                 continue
-            if request.get("type") == "XHR" or request.get("type") == "Fetch":
-                if request.get("response", {}).get("body"):
-                    relevant_requests_filtered_by_type_and_body.append(request)
+            if request.get("type") in ["XHR", "Fetch", "Document"]:
+                if request.get("response") is not None:
+                    if request.get("response").get("body"):
+                        relevant_requests_filtered_by_type_and_body.append(request)
             else:
                 continue
             

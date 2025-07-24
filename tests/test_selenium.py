@@ -14,6 +14,8 @@ def test_run_selenium_agent():
     selenium_vision_agent = SeleniumVisionAgent(model=model, data_dir="data")
     selenium_vision_agent.run("""
 I want you to go to github.com, to look for the numpy package and click the button to see all of the labels. 
+
+Then I want you to go back, and to sort the issues by oldest order
                             
               """)
 test_run_selenium_agent()
