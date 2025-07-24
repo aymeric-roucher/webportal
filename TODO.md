@@ -1,0 +1,3 @@
+- vérifier que le markdown est généré correctement lorsque l'agent fait plusieurs étapes
+- rajouter les champs manquants dans le markdown
+- rajouter un test pour parser le markdown et vérifier de manière déterministe que les requêtes fonctionnent
