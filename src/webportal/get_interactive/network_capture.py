@@ -1,32 +1,14 @@
-from webportal.get_interactive.selenium_agent import SeleniumVisionAgent
-
 import os
-import time
-import unicodedata
 import json
+import time
 import requests
-from datetime import datetime
-from io import BytesIO
 from typing import Any
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlparse
 
-# Selenium imports
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
-from PIL import Image, ImageDraw
+from smolagents import CodeAgent
+from smolagents.memory import ActionStep
 
-# SmolaAgents imports
-from smolagents import CodeAgent, tool
-from smolagents.agent_types import AgentImage
-from smolagents.memory import ActionStep, TaskStep
-from smolagents.monitoring import LogLevel
-from smolagents import InferenceClientModel
-
+from webportal.get_interactive.selenium_agent import SeleniumVisionAgent
 
 class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
     def __init__(self, *args, **kwargs):
@@ -35,7 +17,6 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
         # Initialize network request tracking
         self.network_requests = []
         self.step_requests = {}  # step_number -> list of requests for that step
-        self.last_processed_log_count = 0  # Track processed logs to get only new ones
         self._setup_network_monitoring()
 
     def setup_step_callbacks(self) -> None:
@@ -63,11 +44,7 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
         # Get all current logs
         logs = self.driver.get_log("performance")
 
-        # Only process new logs since last capture
-        new_logs = logs[self.last_processed_log_count :]
-        self.last_processed_log_count = len(logs)
-
-        if not new_logs:
+        if not logs:
             return []
 
         # Temporary storage for this step's requests and responses
@@ -75,7 +52,7 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
         responses_map = {}
 
         # Process new logs only
-        for log in new_logs:
+        for log in logs:
             message = json.loads(log["message"])
             method = message.get("message", {}).get("method")
             params = message.get("message", {}).get("params", {})
