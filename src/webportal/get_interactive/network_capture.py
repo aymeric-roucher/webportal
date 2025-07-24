@@ -27,23 +27,22 @@ from smolagents.memory import ActionStep, TaskStep
 from smolagents.monitoring import LogLevel
 from smolagents import InferenceClientModel
 
+
 class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
 
         # Initialize network request tracking
         self.network_requests = []
         self.step_requests = {}  # step_number -> list of requests for that step
         self.last_processed_log_count = 0  # Track processed logs to get only new ones
         self._setup_network_monitoring()
-        
-    
-        
+
     def setup_step_callbacks(self) -> None:
-        self._setup_step_callbacks([self.take_screenshot_callback, self.capture_requests_callback])
-        
-    
+        self._setup_step_callbacks(
+            [self.take_screenshot_callback, self.capture_requests_callback]
+        )
+
     def _setup_network_monitoring(self):
         """Setup Chrome DevTools Protocol for network monitoring"""
         # Enable network domain
@@ -109,18 +108,20 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
                         "url": response_info.get("url", ""),
                         "response_timestamp": log["timestamp"] / 1000,
                     }
-                    
+
                     # Try to get the response body
                     try:
                         body_result = self.driver.execute_cdp_cmd(
                             "Network.getResponseBody", {"requestId": request_id}
                         )
                         response_data["body"] = body_result.get("body")
-                        response_data["base64Encoded"] = body_result.get("base64Encoded", False)
+                        response_data["base64Encoded"] = body_result.get(
+                            "base64Encoded", False
+                        )
                     except Exception as e:
                         response_data["body"] = None
                         response_data["body_error"] = str(e)
-                    
+
                     responses_map[request_id] = response_data
 
         # Combine requests with responses for this step
@@ -137,12 +138,14 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
 
         return step_requests
 
-    def capture_requests_callback(self, memory_step: ActionStep| None = None, agent: CodeAgent | None =None) -> None:
+    def capture_requests_callback(
+        self, memory_step: ActionStep | None = None, agent: CodeAgent | None = None
+    ) -> None:
         """Callback that captures the requests for a step"""
         # Capture network requests for this specific step
         current_step = memory_step.step_number if memory_step else 0
         self.logger.log(f"Capturing network requests for step {current_step}")
-        
+
         step_requests = self.capture_step_network_activity(current_step)
         if step_requests:
             self.logger.log(
@@ -181,7 +184,7 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
             # Skip None requests
             if request is None:
                 continue
-                
+
             url = request.get("url", "")
             method = request.get("method", "GET")
             request_type = request.get("type", "")
@@ -204,7 +207,12 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
 
             # Keep XHR/Fetch requests, API-like URLs, or Document requests (initial page loads)
             if (
-                request_type in ["XHR", "Fetch", "Document"]  # Include Document type for initial page loads
+                request_type
+                in [
+                    "XHR",
+                    "Fetch",
+                    "Document",
+                ]  # Include Document type for initial page loads
                 or "/api/" in url
                 or "/graphql" in url
                 or "/ajax" in url
@@ -224,7 +232,7 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
                         relevant_requests_filtered_by_type_and_body.append(request)
             else:
                 continue
-            
+
         relevant_requests_filtered_by_json_body = []
         for request in relevant_requests_filtered_by_type_and_body:
             # Skip None requests
@@ -236,7 +244,7 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
                     relevant_requests_filtered_by_json_body.append(request)
                 except json.JSONDecodeError:
                     continue
-                
+
         relevant_requests_filtered_by_html_body = []
         for request in relevant_requests_filtered_by_type_and_body:
             # Skip None requests
@@ -248,7 +256,10 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
                     relevant_requests_filtered_by_html_body.append(request)
                 else:
                     continue
-        return relevant_requests_filtered_by_json_body, relevant_requests_filtered_by_html_body
+        return (
+            relevant_requests_filtered_by_json_body,
+            relevant_requests_filtered_by_html_body,
+        )
 
     def _test_request_independently(self, request: dict[str, Any]) -> dict[str, Any]:
         """Test a request independently to see if it works without browser context"""
@@ -539,32 +550,43 @@ Based on the URL pattern `{url}`, this appears to be {"an API endpoint for data 
         return explanation
 
     def _analyze_step_requests(
-        self, step_number: int, requests: list[dict[str, Any]], memory_step: ActionStep | None = None
+        self,
+        step_number: int,
+        requests: list[dict[str, Any]],
+        memory_step: ActionStep | None = None,
     ):
         """Analyze requests from a specific step and generate markdown summaries"""
 
         # Filter requests to get JSON and HTML responses separately
         json_requests, html_requests = self._filter_relevant_requests(requests)
-        
+
         if not json_requests and not html_requests:
             return
 
         print(f"\n=== STEP {step_number} REQUEST ANALYSIS ===")
-        print(f"Found {len(json_requests)} JSON requests and {len(html_requests)} HTML requests")
+        print(
+            f"Found {len(json_requests)} JSON requests and {len(html_requests)} HTML requests"
+        )
 
         # Get the action that was performed in this step
         action_description = self._get_step_action_description(memory_step)
         tool_call_info = self._get_tool_call_info(memory_step)
-        
+
         # Generate markdown for this step
         markdown_summary = self._generate_step_markdown(
-            step_number, action_description, tool_call_info, json_requests, html_requests
+            step_number,
+            action_description,
+            tool_call_info,
+            json_requests,
+            html_requests,
         )
-        
+
         if markdown_summary:
             self._save_step_markdown(step_number, markdown_summary)
 
-    def _get_step_action_description(self, memory_step: ActionStep | None = None) -> str:
+    def _get_step_action_description(
+        self, memory_step: ActionStep | None = None
+    ) -> str:
         """Extract a description of what action was performed in this step"""
         if memory_step and memory_step.tool_calls:
             tool_call = memory_step.tool_calls[0]
@@ -586,72 +608,80 @@ Based on the URL pattern `{url}`, this appears to be {"an API endpoint for data 
                 return f"performed {tool_name} action"
 
         return "performed unknown action"
-    
-    def _get_tool_call_info(self, memory_step: ActionStep | None = None) -> dict[str, Any]:
+
+    def _get_tool_call_info(
+        self, memory_step: ActionStep | None = None
+    ) -> dict[str, Any]:
         """Extract tool call information for markdown generation"""
         if memory_step and memory_step.tool_calls:
             tool_call = memory_step.tool_calls[0]
             return {
                 "tool_name": tool_call.name,
-                "arguments": getattr(tool_call, "arguments", {})
+                "arguments": getattr(tool_call, "arguments", {}),
             }
         return {"tool_name": "unknown", "arguments": {}}
-    
+
     def _generate_step_markdown(
-        self, 
-        step_number: int, 
-        action_description: str, 
+        self,
+        step_number: int,
+        action_description: str,
         tool_call_info: dict[str, Any],
-        json_requests: list[dict[str, Any]], 
-        html_requests: list[dict[str, Any]]
+        json_requests: list[dict[str, Any]],
+        html_requests: list[dict[str, Any]],
     ) -> str:
         """Generate markdown summary for a step in the interactive_element format"""
-        
+
         if not json_requests and not html_requests:
             return ""
-        
+
         # Try to infer element type from action
         element_type = self._infer_element_type(tool_call_info, action_description)
-        
+
         # Get current page location (simplified)
-        current_url = self.driver.current_url if hasattr(self, 'driver') else "unknown"
+        current_url = self.driver.current_url if hasattr(self, "driver") else "unknown"
         location_page = self._extract_location_page(current_url)
-        
+
         markdown = f"""```interactive_element_step_{step_number}
 location_page: {location_page}
 type: {element_type}
 visual_element: {action_description}
-trigger: {tool_call_info['tool_name']} with args {tool_call_info['arguments']}
+trigger: {tool_call_info["tool_name"]} with args {tool_call_info["arguments"]}
 """
-        
+
         # Generate separate markdown sections for JSON and HTML requests
         if json_requests:
-            markdown += self._generate_json_requests_section(json_requests, action_description)
-        
+            markdown += self._generate_json_requests_section(
+                json_requests, action_description
+            )
+
         if html_requests:
-            markdown += self._generate_html_requests_section(html_requests, action_description)
-        
+            markdown += self._generate_html_requests_section(
+                html_requests, action_description
+            )
+
         # Add viewport effect
         viewport_effect = self._describe_viewport_effect(action_description)
         markdown += f"viewport_effect: {viewport_effect}\n"
-        
+
         markdown += "```\n"
         return markdown
-    
-    def _generate_json_requests_section(self, json_requests: list[dict[str, Any]], action_description: str) -> str:
+
+    def _generate_json_requests_section(
+        self, json_requests: list[dict[str, Any]], action_description: str
+    ) -> str:
         """Generate markdown section for JSON API requests"""
         section = ""
-        
+
         for i, request in enumerate(json_requests):
-            url = request.get('url', '')
-            method = request.get('method', 'GET')
-            
+            url = request.get("url", "")
+            method = request.get("method", "GET")
+
             if i == 0:  # Primary request
                 section += f"request: {method} {url}\n"
-                
+
                 # Add request arguments if it's a POST with data
-                post_data = request.get('post_data', '')
-                if post_data and method in ['POST', 'PUT', 'PATCH']:
+                post_data = request.get("post_data", "")
+                if post_data and method in ["POST", "PUT", "PATCH"]:
                     section += f"arguments:\n"
                     try:
                         json_data = json.loads(post_data)
@@ -661,53 +691,62 @@ trigger: {tool_call_info['tool_name']} with args {tool_call_info['arguments']}
                             json_str = json_str[:500] + "..."
                         section += f'  "body" (json): {json_str}\n'
                     except json.JSONDecodeError:
-                        post_data_truncated = post_data[:200] + ("..." if len(post_data) > 200 else "")
+                        post_data_truncated = post_data[:200] + (
+                            "..." if len(post_data) > 200 else ""
+                        )
                         section += f'  "body" (raw): {post_data_truncated}\n'
-                
+
                 # Add effect description
                 effect = self._describe_request_effect(request, action_description)
                 section += f"effect: {effect}\n"
-            
+
             # Add response details for all JSON requests
-            response_data = request.get('response', {})
-            response_body = response_data.get('body', '')
-            
+            response_data = request.get("response", {})
+            response_body = response_data.get("body", "")
+
             if response_body:
                 try:
                     json_response = json.loads(response_body)
-                    
+
                     if i == 0:  # Primary request gets detailed response info
                         section += f"returns: JSON API response\n"
                         section += f"response_structure:\n"
-                        
+
                         if isinstance(json_response, dict):
                             keys = list(json_response.keys())[:10]  # More keys for LLM
                             section += f"  keys: {keys}\n"
-                            
+
                             # Extract important data patterns for LLM
-                            if 'data' in json_response:
-                                data_info = self._describe_data_field(json_response['data'])
+                            if "data" in json_response:
+                                data_info = self._describe_data_field(
+                                    json_response["data"]
+                                )
                                 section += f"  data: {data_info}\n"
-                            
-                            if 'errors' in json_response:
+
+                            if "errors" in json_response:
                                 section += f"  has_errors: true\n"
-                            
+
                             # Look for pagination info
-                            if any(key in json_response for key in ['pageInfo', 'pagination', 'hasNextPage']):
+                            if any(
+                                key in json_response
+                                for key in ["pageInfo", "pagination", "hasNextPage"]
+                            ):
                                 section += f"  has_pagination: true\n"
-                            
+
                             # Look for common GraphQL/API patterns
-                            if 'nodes' in json_response:
-                                nodes_info = self._describe_nodes_field(json_response['nodes'])
+                            if "nodes" in json_response:
+                                nodes_info = self._describe_nodes_field(
+                                    json_response["nodes"]
+                                )
                                 section += f"  nodes: {nodes_info}\n"
-                                
+
                         elif isinstance(json_response, list):
                             section += f"  type: array\n"
                             section += f"  length: {len(json_response)}\n"
                             if json_response and isinstance(json_response[0], dict):
                                 first_keys = list(json_response[0].keys())[:5]
                                 section += f"  item_keys: {first_keys}\n"
-                    
+
                     else:  # Additional requests get brief info
                         section += f"additional_request_{i}: {method} {url}\n"
                         if isinstance(json_response, dict):
@@ -715,42 +754,44 @@ trigger: {tool_call_info['tool_name']} with args {tool_call_info['arguments']}
                             section += f"  keys: {keys}\n"
                         elif isinstance(json_response, list):
                             section += f"  array_length: {len(json_response)}\n"
-                            
+
                 except json.JSONDecodeError:
                     section += f"response_parsing_error: could not parse as JSON\n"
-        
+
         return section
-    
-    def _generate_html_requests_section(self, html_requests: list[dict[str, Any]], action_description: str) -> str:
+
+    def _generate_html_requests_section(
+        self, html_requests: list[dict[str, Any]], action_description: str
+    ) -> str:
         """Generate markdown section for HTML page requests"""
         section = ""
-        
+
         for i, request in enumerate(html_requests):
-            url = request.get('url', '')
-            method = request.get('method', 'GET')
-            
+            url = request.get("url", "")
+            method = request.get("method", "GET")
+
             if i == 0:  # Primary request
                 section += f"request: {method} {url}\n"
-                
+
                 # Add request arguments if it's a POST with data
-                post_data = request.get('post_data', '')
-                if post_data and method in ['POST', 'PUT', 'PATCH']:
+                post_data = request.get("post_data", "")
+                if post_data and method in ["POST", "PUT", "PATCH"]:
                     section += f"arguments:\n"
                     section += f'  "body" (form-data): {post_data[:200]}...\n'
-                
+
                 # Add effect description
                 effect = self._describe_request_effect(request, action_description)
                 section += f"effect: {effect}\n"
                 section += f"returns: HTML page content\n"
-            
+
             # Add HTML response analysis
-            response_data = request.get('response', {})
-            response_body = response_data.get('body', '')
-            
+            response_data = request.get("response", {})
+            response_body = response_data.get("body", "")
+
             if response_body:
                 if i == 0:  # Primary request gets detailed HTML info
                     section += f"page_analysis:\n"
-                    
+
                     # Extract page title
                     if "<title>" in response_body:
                         title_start = response_body.find("<title>") + 7
@@ -758,30 +799,33 @@ trigger: {tool_call_info['tool_name']} with args {tool_call_info['arguments']}
                         if title_end > title_start:
                             title = response_body[title_start:title_end][:100]
                             section += f"  title: {title}\n"
-                    
+
                     # Look for common HTML elements that indicate page type
                     html_indicators = []
                     if 'class="search' in response_body.lower():
-                        html_indicators.append('search_page')
+                        html_indicators.append("search_page")
                     if 'class="issue' in response_body.lower():
-                        html_indicators.append('issues_page')
+                        html_indicators.append("issues_page")
                     if 'class="repository' in response_body.lower():
-                        html_indicators.append('repository_page')
-                    if '<form' in response_body.lower():
-                        html_indicators.append('has_forms')
-                    if 'data-' in response_body.lower():
-                        html_indicators.append('has_data_attributes')
-                    
+                        html_indicators.append("repository_page")
+                    if "<form" in response_body.lower():
+                        html_indicators.append("has_forms")
+                    if "data-" in response_body.lower():
+                        html_indicators.append("has_data_attributes")
+
                     if html_indicators:
                         section += f"  page_indicators: {html_indicators}\n"
-                    
+
                     # Extract some key content hints for LLM
-                    content_preview = response_body[:1000].replace('\n', ' ').replace('\t', ' ')
+                    content_preview = (
+                        response_body[:1000].replace("\n", " ").replace("\t", " ")
+                    )
                     # Clean up multiple spaces
                     import re
-                    content_preview = re.sub(r'\s+', ' ', content_preview)
+
+                    content_preview = re.sub(r"\s+", " ", content_preview)
                     section += f"  content_preview: {content_preview}...\n"
-                
+
                 else:  # Additional HTML requests
                     section += f"additional_html_request_{i}: {method} {url}\n"
                     if "<title>" in response_body:
@@ -790,9 +834,9 @@ trigger: {tool_call_info['tool_name']} with args {tool_call_info['arguments']}
                         if title_end > title_start:
                             title = response_body[title_start:title_end][:50]
                             section += f"  title: {title}\n"
-        
+
         return section
-    
+
     def _describe_data_field(self, data) -> str:
         """Describe the structure of a 'data' field in JSON response"""
         if isinstance(data, dict):
@@ -802,7 +846,7 @@ trigger: {tool_call_info['tool_name']} with args {tool_call_info['arguments']}
             return f"array with {len(data)} items"
         else:
             return f"value of type {type(data).__name__}"
-    
+
     def _describe_nodes_field(self, nodes) -> str:
         """Describe the structure of a 'nodes' field (common in GraphQL)"""
         if isinstance(nodes, list):
@@ -813,85 +857,91 @@ trigger: {tool_call_info['tool_name']} with args {tool_call_info['arguments']}
                 return f"array with {len(nodes)} items"
         else:
             return f"non-array type: {type(nodes).__name__}"
-    
-    def _infer_element_type(self, tool_call_info: dict[str, Any], action_description: str) -> str:
+
+    def _infer_element_type(
+        self, tool_call_info: dict[str, Any], action_description: str
+    ) -> str:
         """Infer the UI element type from the action"""
-        tool_name = tool_call_info.get('tool_name', '')
-        
-        if tool_name == 'click':
-            if 'button' in action_description.lower():
-                return 'Button'
-            elif 'dropdown' in action_description.lower() or 'select' in action_description.lower():
-                return 'Button/Dropdown'
-            elif 'link' in action_description.lower():
-                return 'Link'
+        tool_name = tool_call_info.get("tool_name", "")
+
+        if tool_name == "click":
+            if "button" in action_description.lower():
+                return "Button"
+            elif (
+                "dropdown" in action_description.lower()
+                or "select" in action_description.lower()
+            ):
+                return "Button/Dropdown"
+            elif "link" in action_description.lower():
+                return "Link"
             else:
-                return 'Clickable Element'
-        elif tool_name == 'type_text':
-            return 'Input Field'
-        elif tool_name == 'scroll':
-            return 'Scrollable Area'
+                return "Clickable Element"
+        elif tool_name == "type_text":
+            return "Input Field"
+        elif tool_name == "scroll":
+            return "Scrollable Area"
         else:
-            return 'Interactive Element'
-    
+            return "Interactive Element"
+
     def _extract_location_page(self, url: str) -> str:
         """Extract a meaningful location page identifier from URL"""
-        if not url or url == 'unknown':
-            return 'unknown_page'
-        
+        if not url or url == "unknown":
+            return "unknown_page"
+
         parsed = urlparse(url)
-        path = parsed.path.strip('/')
-        
+        path = parsed.path.strip("/")
+
         # Handle GitHub-style URLs
-        if 'github.com' in parsed.netloc:
-            path_parts = path.split('/')
+        if "github.com" in parsed.netloc:
+            path_parts = path.split("/")
             if len(path_parts) >= 2:
                 return f"{path_parts[0]}/{path_parts[1]}/{'/'.join(path_parts[2:])}"
-        
+
         return path if path else parsed.netloc
-    
-    def _describe_request_effect(self, request: dict[str, Any], action_description: str) -> str:
+
+    def _describe_request_effect(
+        self, request: dict[str, Any], action_description: str
+    ) -> str:
         """Describe what effect the request has"""
-        method = request.get('method', 'GET')
-        url = request.get('url', '')
-        
-        if method == 'GET':
-            if 'search' in url.lower():
+        method = request.get("method", "GET")
+        url = request.get("url", "")
+
+        if method == "GET":
+            if "search" in url.lower():
                 return f"Performs search based on {action_description}"
-            elif 'sort' in url.lower():
+            elif "sort" in url.lower():
                 return f"Sorts content based on {action_description}"
-            elif 'filter' in url.lower():
+            elif "filter" in url.lower():
                 return f"Filters content based on {action_description}"
             else:
                 return f"Retrieves data triggered by {action_description}"
         else:
             return f"Submits data from {action_description}"
-    
-    
+
     def _describe_viewport_effect(self, action_description: str) -> str:
         """Describe the visual effect on the viewport"""
-        if 'click' in action_description:
-            if 'sort' in action_description.lower():
+        if "click" in action_description:
+            if "sort" in action_description.lower():
                 return "Updates the content display with new sort order"
-            elif 'filter' in action_description.lower():
+            elif "filter" in action_description.lower():
                 return "Updates the content display with filtered results"
-            elif 'search' in action_description.lower():
+            elif "search" in action_description.lower():
                 return "Updates the page with search results"
             else:
                 return "Updates the page content or navigation"
-        elif 'type' in action_description:
+        elif "type" in action_description:
             return "Updates input field with typed text"
-        elif 'scroll' in action_description:
+        elif "scroll" in action_description:
             return "Changes visible content area"
         else:
             return "Modifies page display or interaction state"
-    
+
     def _save_step_markdown(self, step_number: int, markdown: str):
         """Save the markdown summary for a step"""
         filename = f"step_{step_number:03d}_interactive_element.md"
         filepath = os.path.join(self.data_dir, filename)
-        
-        with open(filepath, 'w') as f:
+
+        with open(filepath, "w") as f:
             f.write(markdown)
-        
+
         print(f"💾 Saved interactive element summary to: {filepath}")

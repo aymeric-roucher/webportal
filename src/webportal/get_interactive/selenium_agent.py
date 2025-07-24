@@ -162,7 +162,7 @@ class SeleniumVisionAgent(CodeAgent):
     ):
         self.data_dir = data_dir
         self.planning_interval = planning_interval
-        
+
         self.chrome_options = webdriver.ChromeOptions()
         self.width, self.height = 1080, 1920
         self.chrome_options.add_argument("--force-device-scale-factor=1")
@@ -171,12 +171,13 @@ class SeleniumVisionAgent(CodeAgent):
         self.chrome_options.add_argument("--window-position=0,0")
         # Enable Chrome DevTools Protocol for network monitoring
         self.chrome_options.add_experimental_option("useAutomationExtension", False)
-        self.chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        self.chrome_options.add_experimental_option(
+            "excludeSwitches", ["enable-automation"]
+        )
         self.chrome_options.add_argument("--enable-network-service-logging")
         self.chrome_options.add_argument("--log-level=0")
         # Enable performance logs to capture network requests
         self.chrome_options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
-        
 
         self.driver = webdriver.Chrome(options=self.chrome_options)
 
@@ -213,11 +214,13 @@ class SeleniumVisionAgent(CodeAgent):
         self.logger.log("Setting up agent tools...")
         self._setup_desktop_tools()
         self.setup_step_callbacks()
-        
+
     def setup_step_callbacks(self) -> None:
         self._setup_step_callbacks([self.take_screenshot_callback])
-            
-    def take_screenshot_callback(self, memory_step: ActionStep, agent: CodeAgent | None =None) -> None:
+
+    def take_screenshot_callback(
+        self, memory_step: ActionStep, agent: CodeAgent | None = None
+    ) -> None:
         """Callback that takes a screenshot + memory snapshot after a step completes"""
         self.logger.log("Analyzing screen content...")
 
@@ -274,8 +277,6 @@ class SeleniumVisionAgent(CodeAgent):
         # memory_step.observations_images = [screenshot_path] # IF YOU USE THIS INSTEAD OF ABOVE, LAUNCHING A SECOND TASK BREAKS
 
         self.click_coordinates = None  # Reset click marker
-        
-
 
     def _setup_desktop_tools(self):
         """Register all desktop tools"""
@@ -508,8 +509,3 @@ class SeleniumVisionAgent(CodeAgent):
             print("Closing browser...")
             self.driver.quit()
             print("Browser closed")
-
-
-
-
-
