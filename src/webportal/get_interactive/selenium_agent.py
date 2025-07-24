@@ -79,7 +79,7 @@ What I see: I can see the Google homepage with the search box in the center of t
 Reflection: I can see the Google search box. I need to click on it first and then type my search query.
 Action:
 ```python
-click(640, 360) 
+click(640, 360, "white rectangular search box in center of page")
 ```<end_code>
 
 Step 3:
@@ -282,49 +282,61 @@ class SeleniumVisionAgent(CodeAgent):
         """Register all desktop tools"""
 
         @tool
-        def click(x: int, y: int) -> str:
+        def click(x: int, y: int, description: str = "") -> str:
             """
             Performs a left-click at the specified coordinates
             Args:
                 x: The x coordinate (horizontal position)
                 y: The y coordinate (vertical position)
+                description: Visual description of what you see at these coordinates (e.g., "blue button with text 'Submit'")
             """
             action = ActionChains(self.driver)
             action.move_by_offset(x, y).click().perform()
             action.reset_actions()
             self.click_coordinates = [x, y]
-            self.logger.log(f"Clicked at coordinates ({x}, {y})")
-            return f"Clicked at coordinates ({x}, {y})"
+            log_msg = f"Clicked at coordinates ({x}, {y})"
+            if description:
+                log_msg += f" on: {description}"
+            self.logger.log(log_msg)
+            return log_msg
 
         @tool
-        def right_click(x: int, y: int) -> str:
+        def right_click(x: int, y: int, description: str = "") -> str:
             """
             Performs a right-click at the specified coordinates
             Args:
                 x: The x coordinate (horizontal position)
                 y: The y coordinate (vertical position)
+                description: Visual description of what you see at these coordinates
             """
             action = ActionChains(self.driver)
             action.move_by_offset(x, y).context_click().perform()
             action.reset_actions()
             self.click_coordinates = [x, y]
-            self.logger.log(f"Right-clicked at coordinates ({x}, {y})")
-            return f"Right-clicked at coordinates ({x}, {y})"
+            log_msg = f"Right-clicked at coordinates ({x}, {y})"
+            if description:
+                log_msg += f" on: {description}"
+            self.logger.log(log_msg)
+            return log_msg
 
         @tool
-        def double_click(x: int, y: int) -> str:
+        def double_click(x: int, y: int, description: str = "") -> str:
             """
             Performs a double-click at the specified coordinates
             Args:
                 x: The x coordinate (horizontal position)
                 y: The y coordinate (vertical position)
+                description: Visual description of what you see at these coordinates
             """
             action = ActionChains(self.driver)
             action.move_by_offset(x, y).double_click().perform()
             action.reset_actions()
             self.click_coordinates = [x, y]
-            self.logger.log(f"Double-clicked at coordinates ({x}, {y})")
-            return f"Double-clicked at coordinates ({x}, {y})"
+            log_msg = f"Double-clicked at coordinates ({x}, {y})"
+            if description:
+                log_msg += f" on: {description}"
+            self.logger.log(log_msg)
+            return log_msg
 
         @tool
         def move_mouse(x: int, y: int) -> str:
