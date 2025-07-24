@@ -721,7 +721,7 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
         
         # Simple patterns
         if "_graphql" in url:
-            return "graphql_request"
+            return "_graphql"
         elif "search" in url:
             return "search"
         elif "hovercard" in url:
@@ -730,62 +730,3 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
             return f"{path_parts[-1]}"
         else:
             return "request"
-
-    def generate_complete_markdown_documentation(self, output_file: str = None) -> str:
-        """Generate a complete markdown documentation file from all captured requests"""
-        if not self.step_requests:
-            return "No requests captured to generate documentation."
-        
-        markdown_sections = []
-        
-        for step_number, requests in self.step_requests.items():
-            if not requests:
-                continue
-                
-            # Get step action information
-            memory_step = None  # You might need to store this if you want full action info
-            action_description = f"step {step_number} action"
-            tool_call_info = {"tool_name": "unknown", "arguments": {}}
-            
-            # Filter requests
-            json_requests, html_requests = self._filter_relevant_requests(requests)
-            
-            if not json_requests and not html_requests:
-                continue
-            
-            # Generate markdown for this step
-            current_url = self.driver.current_url if hasattr(self, "driver") else "unknown"
-            location_page = self._extract_location_page(current_url)
-            element_type = self._infer_element_type(tool_call_info, action_description)
-            
-            step_markdown = f"""```interactive_element_step_{step_number}
-location_page: {location_page}
-type: {element_type}
-visual_element: {action_description}
-trigger: {tool_call_info["tool_name"]} with args {tool_call_info["arguments"]}
-"""
-            
-            # Add JSON requests
-            if json_requests:
-                step_markdown += self._generate_json_requests_section(json_requests, action_description)
-            
-            # Add HTML requests
-            if html_requests:
-                step_markdown += self._generate_html_requests_section(html_requests, action_description)
-            
-            # Add viewport effect
-            viewport_effect = self._describe_viewport_effect(action_description)
-            step_markdown += f"viewport_effect: {viewport_effect}\n"
-            step_markdown += "```\n"
-            
-            markdown_sections.append(step_markdown)
-        
-        complete_markdown = "\n\n".join(markdown_sections)
-        
-        # Save to file if specified
-        if output_file:
-            with open(output_file, "w") as f:
-                f.write(complete_markdown)
-            print(f"💾 Saved complete documentation to: {output_file}")
-        
-        return complete_markdown
