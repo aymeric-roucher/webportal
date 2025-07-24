@@ -42,6 +42,7 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
     def capture_step_network_activity(self, step_number: int) -> list[dict[str, Any]]:
         """Capture network activity that happened during a specific step"""
         # Get all current logs
+        time.sleep(1) # making sure the response is received
         logs = self.driver.get_log("performance")
 
         if not logs:
