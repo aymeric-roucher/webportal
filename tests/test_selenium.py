@@ -5,7 +5,7 @@ from webportal.get_interactive.selenium_agent import (
     InferenceClientModel,
 )
 from webportal.get_interactive.network_capture import SeleniumNetworkCaptureAgent
-from webportal.common import MOCK_REQUESTS_PATH
+from webportal.common import MOCK_REQUESTS_PATH, TEST_PATH
 
 
 @pytest.mark.expensive
@@ -51,6 +51,19 @@ def test_analysing_requests():
     html_requests = json.loads((MOCK_REQUESTS_PATH / "github_html.json").read_text())
     json_requests = json.loads((MOCK_REQUESTS_PATH / "github_json.json").read_text())
     
-    
+    model = InferenceClientModel(
+        model_id="Qwen/Qwen2.5-VL-72B-Instruct",
+        provider="nebius",
+    )
+    selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data")
+
+    markdown = selenium_vision_agent._generate_step_markdown(
+        step_number=1,
+        action_description="",
+        tool_call_info={"tool_name": "open_url", "arguments": {"url": "https://github.com"}},
+        json_requests=json_requests,
+        html_requests=html_requests,
+    )
+    (TEST_PATH / "markdown.md").write_text(markdown)    
     
 test_analysing_requests()
