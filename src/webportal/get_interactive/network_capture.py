@@ -458,53 +458,135 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
         json_requests: list[dict[str, Any]],
         html_requests: list[dict[str, Any]],
     ) -> str:
-        """Generate markdown summary for a step in the interactive_element format"""
+        """Generate markdown summary for a step with individual blocks per request"""
 
         if not json_requests and not html_requests:
             return ""
 
-        # Try to infer element type from action
-        element_type = self._infer_element_type(tool_call_info, action_description)
-
-        # Get current page location (simplified)
+        # Get current page location
         current_url = self.driver.current_url if hasattr(self, "driver") else "unknown"
         location_page = self._extract_location_page(current_url)
-
-        markdown = f"""```interactive_element_step_{step_number}
-location_page: {location_page}
-type: {element_type}
-visual_element: {action_description}
-trigger: {tool_call_info["tool_name"]} with args {tool_call_info["arguments"]}
-"""
-
-        # Generate separate markdown sections for JSON and HTML requests
-        if json_requests:
-            markdown += self._generate_json_requests_section(
-                json_requests, action_description
+        
+        # Combine all requests for processing
+        all_requests = json_requests + html_requests
+        markdown_blocks = []
+        
+        for request in all_requests:
+            block = self._generate_individual_request_block(
+                request, action_description, tool_call_info, location_page, step_number
             )
+            if block:
+                markdown_blocks.append(block)
+        
+        return "\n\n".join(markdown_blocks)
 
-        if html_requests:
-            markdown += self._generate_html_requests_section(
-                html_requests, action_description
-            )
-
-        # Add viewport effect
-        viewport_effect = self._describe_viewport_effect(action_description)
-        markdown += f"viewport_effect: {viewport_effect}\n"
-
-        markdown += "```\n"
+    def _generate_individual_request_block(
+        self,
+        request: dict[str, Any],
+        action_description: str,
+        tool_call_info: dict[str, Any],
+        location_page: str,
+        step_number: int,
+    ) -> str:
+        """Generate an individual markdown block for a single request"""
+        
+        url = request.get("url", "")
+        method = request.get("method", "GET")
+        response = request.get("response", {})
+        response_body = response.get("body", "") if response else ""
+        
+        # Simple block name from URL path
+        block_name = self._generate_simple_block_name(url)
+        
+        # Extract arguments
+        arguments = self._extract_request_arguments(request)
+        
+        # Simple descriptions
+        returns = self._describe_response_format(response_body)
+        
+        # Build the markdown block with minimal inference
+        markdown = f"```interactive_element_{block_name}\n"
+        markdown += f"location_page: {location_page}\n"
+        markdown += f"type: \n"  # Leave empty for LLM to fill
+        markdown += f"visual_element: \n"  # Leave empty for LLM to fill
+        markdown += f"trigger: \n"  # Leave empty for LLM to fill
+        markdown += f"request: {method} {url}\n"
+        
+        if arguments:
+            markdown += f"arguments: {arguments}\n"
+        
+        markdown += f"effect: \n"  # Leave empty for LLM to fill
+        markdown += f"returns: {returns}\n"
+        markdown += f"viewport_effect: \n"  # Leave empty for LLM to fill
+        markdown += "```"
+        
         return markdown
 
     def _generate_json_requests_section(
         self, json_requests: list[dict[str, Any]], action_description: str
     ) -> str:
         """Generate markdown section for JSON API requests"""
+        if not json_requests:
+            return ""
+        
+        markdown = ""
+        for i, request in enumerate(json_requests):
+            url = request.get("url", "")
+            method = request.get("method", "GET")
+            post_data = request.get("post_data", "")
+            response = request.get("response", {})
+            response_body = response.get("body", "") if response else ""
+            
+            # Extract arguments from POST data or URL parameters
+            arguments = self._extract_request_arguments(request)
+            
+            # Determine effect and returns
+            effect = self._infer_request_effect(action_description, url, response_body)
+            returns = self._describe_response_format(response_body)
+            
+            if i > 0:
+                markdown += "\n"
+            
+            markdown += f"request: {method} {url}\n"
+            if arguments:
+                markdown += f"arguments: {arguments}\n"
+            markdown += f"effect: {effect}\n"
+            markdown += f"returns: {returns}\n"
+        
+        return markdown
 
 
     def _generate_html_requests_section(
         self, html_requests: list[dict[str, Any]], action_description: str
     ) -> str:
         """Generate markdown section for HTML page requests"""
+        if not html_requests:
+            return ""
+        
+        markdown = ""
+        for i, request in enumerate(html_requests):
+            url = request.get("url", "")
+            method = request.get("method", "GET")
+            response = request.get("response", {})
+            response_body = response.get("body", "") if response else ""
+            
+            # Extract arguments from URL parameters
+            arguments = self._extract_request_arguments(request)
+            
+            # Determine effect and returns for HTML requests
+            effect = self._infer_request_effect(action_description, url, response_body)
+            returns = "HTML page content"
+            
+            if i > 0:
+                markdown += "\n"
+            
+            markdown += f"request: {method} {url}\n"
+            if arguments:
+                markdown += f"arguments: {arguments}\n"
+            markdown += f"effect: {effect}\n"
+            markdown += f"returns: {returns}\n"
+        
+        return markdown
 
     def _save_step_markdown(self, step_number: int, markdown: str):
         """Save the markdown summary for a step"""
@@ -515,3 +597,195 @@ trigger: {tool_call_info["tool_name"]} with args {tool_call_info["arguments"]}
             f.write(markdown)
 
         print(f"💾 Saved interactive element summary to: {filepath}")
+
+    def _extract_request_arguments(self, request: dict[str, Any]) -> str:
+        """Extract arguments from request (POST data or URL parameters)"""
+        method = request.get("method", "GET")
+        url = request.get("url", "")
+        post_data = request.get("post_data", "")
+        
+        arguments = []
+        
+        # Handle POST data
+        if method == "POST" and post_data:
+            try:
+                # Try to parse as JSON first
+                json_data = json.loads(post_data)
+                if isinstance(json_data, dict):
+                    formatted_json = json.dumps(json_data, indent=2)
+                    arguments.append(f'"body" (JSON): \n{formatted_json}')
+                else:
+                    arguments.append(f'"body": {json.dumps(json_data)}')
+            except json.JSONDecodeError:
+                # Handle form data or other formats
+                if "multipart/form-data" in str(request.get("headers", {})):
+                    arguments.append('"body" (form-data): [multipart form data]')
+                elif "application/x-www-form-urlencoded" in str(request.get("headers", {})):
+                    arguments.append(f'"body" (url-encoded): {post_data[:200]}...' if len(post_data) > 200 else f'"body" (url-encoded): {post_data}')
+                else:
+                    arguments.append(f'"body": {post_data[:200]}...' if len(post_data) > 200 else f'"body": {post_data}')
+        
+        # Handle URL parameters - specifically for GraphQL queries in GET requests
+        if "?" in url:
+            from urllib.parse import urlparse, parse_qs, unquote
+            parsed = urlparse(url)
+            params = parse_qs(parsed.query)
+            
+            # Special handling for GraphQL queries passed as URL parameters
+            if "body" in params and "_graphql" in url:
+                try:
+                    # Decode the URL-encoded body parameter
+                    body_param = unquote(params["body"][0])
+                    json_data = json.loads(body_param)
+                    formatted_json = json.dumps(json_data, indent=2)
+                    arguments.append(f'"body" (url-encoded): \n{formatted_json}')
+                except (json.JSONDecodeError, KeyError, IndexError):
+                    # Fallback to regular parameter handling
+                    param_strs = []
+                    for key, values in params.items():
+                        if len(values) == 1:
+                            param_strs.append(f'{key}="{values[0]}"')
+                        else:
+                            param_strs.append(f'{key}={values}')
+                    arguments.append(f"URL params: {', '.join(param_strs)}")
+            else:
+                # Regular URL parameter handling
+                param_strs = []
+                for key, values in params.items():
+                    if len(values) == 1:
+                        param_strs.append(f'{key}="{values[0]}"')
+                    else:
+                        param_strs.append(f'{key}={values}')
+                arguments.append(f"URL params: {', '.join(param_strs)}")
+        
+        return "\n".join(arguments) if arguments else ""
+
+
+    def _describe_response_format(self, response_body: str) -> str:
+        """Describe the format and content of the response"""
+        if not response_body:
+            return "Empty response"
+        
+        try:
+            # Try to parse as JSON
+            json_data = json.loads(response_body)
+            if isinstance(json_data, dict):
+                # Analyze JSON structure
+                keys = list(json_data.keys())
+                if "data" in keys:
+                    return "JSON with data object containing structured information"
+                elif "results" in keys or "items" in keys:
+                    return "JSON with results array containing search/list data"
+                elif "payload" in keys:
+                    return "JSON with payload containing response data"
+                else:
+                    return f"JSON object with keys: {', '.join(keys[:5])}" + ("..." if len(keys) > 5 else "")
+            elif isinstance(json_data, list):
+                return f"JSON array with {len(json_data)} items"
+            else:
+                return "JSON response"
+        except json.JSONDecodeError:
+            if "DOCTYPE" in response_body:
+                return "HTML page content"
+            else:
+                return "Text/other format response"
+
+
+    def _extract_location_page(self, url: str) -> str:
+        """Extract a simplified page location from URL"""
+        from urllib.parse import urlparse
+        
+        if not url or url == "unknown":
+            return "unknown"
+        
+        parsed = urlparse(url)
+        path = parsed.path.strip("/")
+        
+        if not path:
+            return "home"
+        
+        # Simplify common GitHub patterns
+        path_parts = path.split("/")
+        if len(path_parts) >= 2:
+            return f"^{path_parts[0]}/{path_parts[1]}" + ("/" + "/".join(path_parts[2:]) if len(path_parts) > 2 else "")
+        else:
+            return f"^{path}"
+
+
+    def _generate_simple_block_name(self, url: str) -> str:
+        """Generate a simple block name from URL"""
+        from urllib.parse import urlparse
+        
+        parsed = urlparse(url)
+        path_parts = [p for p in parsed.path.strip("/").split("/") if p]
+        
+        # Simple patterns
+        if "_graphql" in url:
+            return "graphql_request"
+        elif "search" in url:
+            return "search"
+        elif "hovercard" in url:
+            return "hovercard"
+        elif len(path_parts) >= 2:
+            return f"{path_parts[-1]}"
+        else:
+            return "request"
+
+    def generate_complete_markdown_documentation(self, output_file: str = None) -> str:
+        """Generate a complete markdown documentation file from all captured requests"""
+        if not self.step_requests:
+            return "No requests captured to generate documentation."
+        
+        markdown_sections = []
+        
+        for step_number, requests in self.step_requests.items():
+            if not requests:
+                continue
+                
+            # Get step action information
+            memory_step = None  # You might need to store this if you want full action info
+            action_description = f"step {step_number} action"
+            tool_call_info = {"tool_name": "unknown", "arguments": {}}
+            
+            # Filter requests
+            json_requests, html_requests = self._filter_relevant_requests(requests)
+            
+            if not json_requests and not html_requests:
+                continue
+            
+            # Generate markdown for this step
+            current_url = self.driver.current_url if hasattr(self, "driver") else "unknown"
+            location_page = self._extract_location_page(current_url)
+            element_type = self._infer_element_type(tool_call_info, action_description)
+            
+            step_markdown = f"""```interactive_element_step_{step_number}
+location_page: {location_page}
+type: {element_type}
+visual_element: {action_description}
+trigger: {tool_call_info["tool_name"]} with args {tool_call_info["arguments"]}
+"""
+            
+            # Add JSON requests
+            if json_requests:
+                step_markdown += self._generate_json_requests_section(json_requests, action_description)
+            
+            # Add HTML requests
+            if html_requests:
+                step_markdown += self._generate_html_requests_section(html_requests, action_description)
+            
+            # Add viewport effect
+            viewport_effect = self._describe_viewport_effect(action_description)
+            step_markdown += f"viewport_effect: {viewport_effect}\n"
+            step_markdown += "```\n"
+            
+            markdown_sections.append(step_markdown)
+        
+        complete_markdown = "\n\n".join(markdown_sections)
+        
+        # Save to file if specified
+        if output_file:
+            with open(output_file, "w") as f:
+                f.write(complete_markdown)
+            print(f"💾 Saved complete documentation to: {output_file}")
+        
+        return complete_markdown
