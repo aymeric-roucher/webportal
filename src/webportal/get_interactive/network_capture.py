@@ -601,20 +601,15 @@ Each element shows the API calls triggered by user interactions.
         if not response_body:
             return "Empty response"
         
+        max_keys = 30
+        
         try:
             # Try to parse as JSON
             json_data = json.loads(response_body)
             if isinstance(json_data, dict):
                 # Analyze JSON structure
                 keys = list(json_data.keys())
-                if "data" in keys:
-                    return "JSON with data object containing structured information"
-                elif "results" in keys or "items" in keys:
-                    return "JSON with results array containing search/list data"
-                elif "payload" in keys:
-                    return "JSON with payload containing response data"
-                else:
-                    return f"JSON object with keys: {', '.join(keys[:5])}" + ("..." if len(keys) > 5 else "")
+                return f"JSON object with keys: {', '.join(keys[:max_keys])}" + ("..." if len(keys) > max_keys else "")
             elif isinstance(json_data, list):
                 return f"JSON array with {len(json_data)} items"
             else:

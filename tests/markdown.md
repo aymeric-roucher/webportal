@@ -3,7 +3,7 @@ location_page: data:,
 trigger: {'url': 'https://github.com'}
 request: GET https://github.com/search
 arguments: URL params: q="numpy", type="repositories"
-returns: JSON with payload containing response data
+returns: JSON object with keys: payload, title
 ```
 
 ```interactive_element_batch_deferred_sponsor_buttons
@@ -18,7 +18,7 @@ returns: JSON object with keys: item-288276-908607, item-327203-20206590, item-2
 location_page: data:,
 trigger: {'url': 'https://github.com'}
 request: GET https://github.com/numpy/numpy/latest-commit/main
-returns: JSON object with keys: oid, url, date, shortMessageHtmlLink, bodyMessageHtml...
+returns: JSON object with keys: oid, url, date, shortMessageHtmlLink, bodyMessageHtml, author, authors, committerAttribution, committer, pusher, pushedDate, status, isSpoofed
 ```
 
 ```interactive_element_refs
@@ -33,7 +33,7 @@ returns: JSON object with keys: refs, cacheKey
 location_page: data:,
 trigger: {'url': 'https://github.com'}
 request: GET https://github.com/numpy/numpy/tree-commit-info/main
-returns: JSON object with keys: .circleci, .devcontainer, .github, .spin, benchmarks...
+returns: JSON object with keys: .circleci, .devcontainer, .github, .spin, benchmarks, branding/logo, doc, meson_cpu, numpy, requirements, tools, vendored-meson, .cirrus.star, .clang-format, .codecov.yml, .coveragerc, .ctags.d, .editorconfig, .gitattributes, .gitignore, .gitmodules, .mailmap, CITATION.bib, CONTRIBUTING.rst, INSTALL.rst, LICENSE.txt, LICENSES_bundled.txt, README.md, THANKS.txt, azure-pipelines.yml...
 ```
 
 ```interactive_element_main
@@ -63,7 +63,7 @@ arguments: "body" (url-encoded):
     "query": "is:issue archived:false repo:numpy/numpy sort:created-desc"
   }
 }
-returns: JSON with data object containing structured information
+returns: JSON object with keys: data
 ```
 
 ```interactive_element__graphql
@@ -104,7 +104,7 @@ arguments: "body" (url-encoded):
     ]
   }
 }
-returns: JSON with data object containing structured information
+returns: JSON object with keys: data
 ```
 
 ```interactive_element__graphql
@@ -149,7 +149,7 @@ arguments: "body" (url-encoded):
     ]
   }
 }
-returns: JSON with data object containing structured information
+returns: JSON object with keys: data, extensions
 ```
 
 ```interactive_element_search
