@@ -13,11 +13,12 @@ from webportal.common import WEBPORTAL_REPO_PATH
 load_dotenv()
 
 model = OpenAIModel(
-    model_id="gpt-4o-mini"  # for 200k token per minute
-)  # "gpt-4o" for performance, "gpt-3.5-turbo" for testing
+    model_id="gpt-4.1"  # for 200k token per minute
+)
 
 
 with open(WEBPORTAL_REPO_PATH / "digested_websites/github_generated.md", "r") as f:
+# with open(WEBPORTAL_REPO_PATH / "data/interactive_elements.md", "r") as f:
     interaction_description = f.read()
 
 instructions = f"""
@@ -28,7 +29,7 @@ You are an advanced web automation agent specialized in performing complex tasks
 Below is a description of the API calls that you can make to the desired domain.
 You cannot use them directly, you need to use the tools provided to you.
 
-Here is the description of the API calls:
+We used a crawler to extract the following API calls:
 {interaction_description}
 
 """

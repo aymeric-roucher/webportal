@@ -12,12 +12,13 @@ def main():
         provider="nebius",
     )
     selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data")
+    selenium_vision_agent.capture_requests_callback()
     selenium_vision_agent.run("""
 I want you to go to github.com, navigate to the numpy package, and perform the following actions to extract all interactive elements:
 
 - Go to the issues page (numpy/numpy/issues)
-- Click on the "Author" filter button to load author suggestions
-- Click on the "Labels" filter button to see all available labels with their colors and descriptions.
+- Click on the "Labels" filter button (between the "Author" and the "Labels" button) to see all available labels with their colors and descriptions.
+- Click on a label to see the issues that have this label.
 - Click on the "Closed" button to toggle and view closed issues
 - Use the sort dropdown to sort issues by "Oldest" order (creation date ascending)
 Make sure to interact with each element completely to capture all the network requests and API calls that these interactive elements generate.

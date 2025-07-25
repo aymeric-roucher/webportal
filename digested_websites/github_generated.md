@@ -1,103 +1,138 @@
-```interactive_element_search
-location_page: ^owner/^repo_name
+```interactive_element_search_repository
+location_page: ^root/search
 type: Search Bar
-visual_element: Search bar at the top-right corner of the GitHub homepage
-trigger: Type '^query' in the search bar and press enter
+visual_element: Top navigation search bar with magnifying glass icon
+trigger: Type repository name (e.g., "^owner/^repo_name") and submit search
 request: GET https://github.com/search
-arguments: 
-  URL params: q="^query", type="repositories"
-returns: HTML page content
-viewport_effect: Displays search results for repositories matching the query
+arguments:
+  URL params:
+    q: "^owner/^repo_name"
+    type: "repositories"
+returns: HTML page content with repository search results
+effect: Searches for repositories matching the query
+viewport_effect: Displays a list of repositories matching the search term
 ```
 
-```interactive_element_repo_navigation
-location_page: ^owner/^repo_name
+```interactive_element_repository_link
+location_page: ^root/search?q=^owner%2F^repo_name&type=repositories
 type: Link
-visual_element: Blue hyperlink text for a repository in search results
-trigger: Click on the repository link
+visual_element: Blue hyperlink text with repository name (e.g., "^owner/^repo_name") in search results
+trigger: Click on the repository name link in the search results
 request: GET https://github.com/^owner/^repo_name
-returns: HTML page content
-viewport_effect: Navigates to the repository's main page
+returns: HTML page content for the repository main page
+effect: Navigates to the selected repository's main page
+viewport_effect: Loads the repository overview, showing code, issues, and other tabs
 ```
 
 ```interactive_element_issues_tab
 location_page: ^owner/^repo_name
-type: Tab
-visual_element: Gray tab labeled 'Issues' near the top of the repository page
-trigger: Click on the 'Issues' tab
+type: Tab Button
+visual_element: Gray tab labeled "Issues" in the repository navigation bar
+trigger: Click on the "Issues" tab
 request: GET https://github.com/^owner/^repo_name/issues
-returns: HTML page content
-viewport_effect: Displays the issues list for the repository
+returns: HTML page content for the issues list
+effect: Navigates to the issues list for the repository
+viewport_effect: Displays the issues list with filtering and sorting options
 ```
 
-```interactive_element_author_filter
+```interactive_element_issues_list_graphql
 location_page: ^owner/^repo_name/issues
-type: Button
-visual_element: Gray button labeled 'Author' near the top of the issues list
-trigger: Click on the 'Author' button
+type: Data Fetch (GraphQL)
+visual_element: (Not directly visible; triggered when issues page loads or filters change)
+trigger: Load issues page or change filters (e.g., state, label, sort)
 request: GET https://github.com/_graphql
-arguments: 
+arguments:
   "body" (url-encoded): {
-    "query": "76143934e91fc5d431ea7b83f63b08b9",
+    "query": "29746fd23262d23f528e1f5b9b427437",
     "variables": {
-      "capabilities": [],
-      "first": 30,
-      "loginNames": null,
       "name": "^repo_name",
       "owner": "^owner",
-      "query": ""
+      "query": "^query"
     }
   }
-returns: JSON object with keys: data
-viewport_effect: Displays a list of authors who have contributed to the issues
+returns: JSON with issues data matching the query/filter
+effect: Fetches issues matching the current filter/sort/search criteria
+viewport_effect: Updates the issues list display according to the applied filters
 ```
 
-```interactive_element_labels_filter
+```interactive_element_labels_dropdown
 location_page: ^owner/^repo_name/issues
-type: Button
-visual_element: Gray button labeled 'Labels' next to the 'Author' button
-trigger: Click on the 'Labels' button
+type: Dropdown
+visual_element: "Labels" filter button in the issues toolbar
+trigger: Click on the "Labels" button to open the labels dropdown
 request: GET https://github.com/_graphql
-arguments: 
+arguments:
   "body" (url-encoded): {
-    "query": "b314e1ada402f5a1ad5a80f5d3395c1d",
+    "query": "b480cbd1d6d3f7ba4a98229e88acf3fd",
     "variables": {
-      "nodes": [
-        "MDU6TGFiZWw2MzU5MjE0",
-        "MDU6TGFiZWw2MzU5MjM5",
-        "MDU6TGFiZWwzNjgyNTgyNQ==",
-        "MDU6TGFiZWw2MzU5OTkw",
-        "MDU6TGFiZWw2MzU5OTQ1",
-        "MDU6TGFiZWw2Mzk0ODU5",
-        "MDU6TGFiZWw4MTQ5ODUyMA==",
-        "MDU6TGFiZWwyNDkxOTM0MDg=",
-        "MDU6TGFiZWw1NDYzNzg3NTQ=",
-        "MDU6TGFiZWw2MDI2MzkzNTQ=",
-        "MDU6TGFiZWw2MzU5ODE3",
-        "MDU6TGFiZWw2MzU5ODkz",
-        "MDU6TGFiZWw2MzU5OTI1",
-        "MDU6TGFiZWw2MzU5MzE1",
-        "MDU6TGFiZWw2MzU5MzUy",
-        "MDU6TGFiZWw1MzU0MDI0NjE=",
-        "MDU6TGFiZWwxMDI0Mzk1MTYw",
-        "MDU6TGFiZWwxMDM1MTUyODc5",
-        "MDU6TGFiZWwxMDg2NDkxNjAx",
-        "MDU6TGFiZWwxMTgxMzkwNjcx",
-        "MDU6TGFiZWwxMjMyMjA1NzM0",
-        "MDU6TGFiZWwxMjQ0NTEzNzg0",
-        "MDU6TGFiZWwxNTAxMDU3NTI2",
-        "MDU6TGFiZWwxNTAxMDU1NTI5",
-        "MDU6TGFiZWwxNzE1MDY0NjY1",
-        "MDU6TGFiZWwyMjUwNjA5MjQx",
-        "MDU6TGFiZWwyNTA2MDg1MzM1",
-        "LA_kwDOAA3dP87cvxtl",
-        "LA_kwDOAA3dP88AAAABlbVqug",
-        "LA_kwDOAA3dP88AAAABokdLGg"
-      ]
+      "count": 100,
+      "labelNames": "",
+      "owner": "^owner",
+      "repo": "^repo_name",
+      "shouldQueryByNames": false
     }
   }
-returns: JSON object with keys: data, extensions
-viewport_effect: Displays all available labels with their colors and descriptions
+returns: JSON with available labels, their colors, and descriptions
+effect: Fetches all available labels for the repository
+viewport_effect: Displays a dropdown menu listing all labels with checkboxes
+```
+
+```interactive_element_label_filter
+location_page: ^owner/^repo_name/issues
+type: Checkbox
+visual_element: Checkbox next to a label name in the labels dropdown
+trigger: Click on a label's checkbox to filter issues by that label
+request: GET https://github.com/_graphql
+arguments:
+  "body" (url-encoded): {
+    "query": "29746fd23262d23f528e1f5b9b427437",
+    "variables": {
+      "name": "^repo_name",
+      "owner": "^owner",
+      "query": "is:issue label:\"^label_name\" repo:^owner/^repo_name sort:created-desc"
+    }
+  }
+returns: JSON with issues filtered by the selected label
+effect: Filters the issues list to show only issues with the selected label
+viewport_effect: Updates the issues list to display only issues tagged with the chosen label
+```
+
+```interactive_element_state_toggle
+location_page: ^owner/^repo_name/issues
+type: Tab Button
+visual_element: "Open" and "Closed" tabs above the issues list
+trigger: Click on the "Closed" tab to view closed issues (or "Open" to view open issues)
+request: GET https://github.com/_graphql
+arguments:
+  "body" (url-encoded): {
+    "query": "22d008b451590c967cc8d672452db3f9",
+    "variables": {
+      "includeReactions": false,
+      "name": "^repo_name",
+      "owner": "^owner",
+      "query": "is:issue state:closed label:\"^label_name\" repo:^owner/^repo_name sort:created-desc",
+      "skip": 0
+    }
+  }
+returns: JSON with issues filtered by state (open/closed) and label
+effect: Changes the issues list to show only open or closed issues as selected
+viewport_effect: Updates the issues list to reflect the selected state filter
+```
+
+```interactive_element_label_validate
+location_page: ^owner/^repo_name/issues
+type: Data Fetch (Validation)
+visual_element: (Not directly visible; triggered when filtering by label)
+trigger: Filter issues by label (e.g., after selecting a label checkbox)
+request: GET https://github.com/_filter/labels/validate
+arguments:
+  URL params:
+    repo: "^owner/^repo_name"
+    q: "^label_name"
+    filter_value: "^label_name"
+returns: JSON with label metadata (name, description, color)
+effect: Validates and fetches metadata for the selected label
+viewport_effect: No direct UI change; supports label filtering logic
 ```
 
 ```interactive_element_sort_oldest
@@ -108,13 +143,13 @@ trigger: Click on sort dropdown and select "Oldest"
 request: GET https://github.com/_graphql
 arguments: 
   "body" (url-encoded): {
-    "query": "22d008b451590c967cc8d672452db3f9",
-    "variables": {
-      "includeReactions": false,
-      "name": "^repo_name",
-      "owner": "^owner",
-      "query": "is:issue state:open sort:created-asc repo:^owner/^repo_name",
-      "skip": 0
+    "query":"22d008b451590c967cc8d672452db3f9",
+    "variables":{
+      "includeReactions":false,
+      "name":"^repo_name",
+      "owner":"^owner",
+      "query":"is:issue state:^state label:\"^label_name\" repo:^owner/^repo_name sort:created-asc",
+      "skip":0
     }
   }
 effect: Sorts the issues list by creation date in ascending order (oldest first)
