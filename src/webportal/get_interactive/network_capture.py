@@ -481,6 +481,9 @@ Each element shows the API calls triggered by user interactions.
         response = request.get("response", {})
         response_body = response.get("body", "") if response else ""
         
+        # Extract base URL without query parameters
+        base_url = self._extract_base_url(url)
+        
         # Simple block name from URL path
         block_name = self._generate_simple_block_name(url)
         
@@ -494,7 +497,7 @@ Each element shows the API calls triggered by user interactions.
         markdown = f"```interactive_element_{block_name}\n"
         markdown += f"location_page: {location_page}\n"
         markdown += f"trigger: {tool_call_info.get('arguments', "")}\n"  # Leave empty for LLM to fill
-        markdown += f"request: {method} {url}\n"
+        markdown += f"request: {method} {base_url}\n"
         
         if arguments:
             markdown += f"arguments: {arguments}\n"
@@ -529,7 +532,7 @@ Each element shows the API calls triggered by user interactions.
             if i > 0:
                 markdown += "\n"
             
-            markdown += f"request: {method} {url}\n"
+            markdown += f"request: {method} {self._extract_base_url(url)}\n"
             if arguments:
                 markdown += f"arguments: {arguments}\n"
             markdown += f"effect: {effect}\n"
@@ -562,7 +565,7 @@ Each element shows the API calls triggered by user interactions.
             if i > 0:
                 markdown += "\n"
             
-            markdown += f"request: {method} {url}\n"
+            markdown += f"request: {method} {self._extract_base_url(url)}\n"
             if arguments:
                 markdown += f"arguments: {arguments}\n"
             markdown += f"effect: {effect}\n"
@@ -673,6 +676,15 @@ Each element shows the API calls triggered by user interactions.
             else:
                 return "Text/other format response"
 
+
+    def _extract_base_url(self, url: str) -> str:
+        """Extract base URL without query parameters"""
+        from urllib.parse import urlparse
+        
+        parsed = urlparse(url)
+        # Reconstruct URL without query parameters
+        base_url = f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
+        return base_url
 
     def _generate_simple_block_name(self, url: str) -> str:
         """Generate a simple block name from URL"""
