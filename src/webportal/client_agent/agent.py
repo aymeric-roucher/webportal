@@ -1,5 +1,5 @@
 import json
-
+import time
 import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
@@ -59,6 +59,8 @@ def get_request(url: str, params: dict | None = None) -> dict:
     """
     if params is None:
         params = {}
+        
+    time.sleep(2)
 
     try:
         # JSON-encode any dictionary values in params for proper URL encoding
@@ -117,6 +119,8 @@ def post_request(
         data (dict): JSON data to include in the request body
         params (dict): Query parameters to include in the request
     """
+    time.sleep(2)
+    
     if data is None:
         data = {}
     if params is None:

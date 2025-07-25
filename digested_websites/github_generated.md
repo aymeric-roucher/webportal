@@ -1,44 +1,103 @@
 ```interactive_element_search
-location_page: ^repo_name/search
+location_page: ^owner/^repo_name
 type: Search Bar
-visual_element: Search input field in the GitHub header
-trigger: Type 'numpy' and press 'Enter' in the search bar
+visual_element: Search bar at the top-right corner of the GitHub homepage
+trigger: Type '^query' in the search bar and press enter
 request: GET https://github.com/search
 arguments: 
   URL params: q="^query", type="repositories"
-effect: Initiates a search for repositories matching the query
-returns: HTML page content with search results
-viewport_effect: Displays a list of repositories matching the search query
+returns: HTML page content
+viewport_effect: Displays search results for repositories matching the query
 ```
 
-```interactive_element_repository_navigation
+```interactive_element_repo_navigation
 location_page: ^owner/^repo_name
 type: Link
-visual_element: Repository link in search results
-trigger: Click on the repository link 'numpy/numpy'
+visual_element: Blue hyperlink text for a repository in search results
+trigger: Click on the repository link
 request: GET https://github.com/^owner/^repo_name
-returns: HTML page content of the repository
+returns: HTML page content
 viewport_effect: Navigates to the repository's main page
 ```
 
 ```interactive_element_issues_tab
-location_page: ^owner/^repo_name/issues
+location_page: ^owner/^repo_name
 type: Tab
-visual_element: 'Issues' tab in the repository navigation bar
+visual_element: Gray tab labeled 'Issues' near the top of the repository page
 trigger: Click on the 'Issues' tab
 request: GET https://github.com/^owner/^repo_name/issues
-returns: HTML page content of the issues section
+returns: HTML page content
 viewport_effect: Displays the issues list for the repository
 ```
 
-```interactive_element_labels_button
-location_page: ^owner/^repo_name/labels
+```interactive_element_author_filter
+location_page: ^owner/^repo_name/issues
 type: Button
-visual_element: 'Labels' button in the issues section
+visual_element: Gray button labeled 'Author' near the top of the issues list
+trigger: Click on the 'Author' button
+request: GET https://github.com/_graphql
+arguments: 
+  "body" (url-encoded): {
+    "query": "76143934e91fc5d431ea7b83f63b08b9",
+    "variables": {
+      "capabilities": [],
+      "first": 30,
+      "loginNames": null,
+      "name": "^repo_name",
+      "owner": "^owner",
+      "query": ""
+    }
+  }
+returns: JSON object with keys: data
+viewport_effect: Displays a list of authors who have contributed to the issues
+```
+
+```interactive_element_labels_filter
+location_page: ^owner/^repo_name/issues
+type: Button
+visual_element: Gray button labeled 'Labels' next to the 'Author' button
 trigger: Click on the 'Labels' button
-request: GET https://github.com/^owner/^repo_name/labels
-returns: HTML page content with a list of labels
-viewport_effect: Displays all labels associated with the repository
+request: GET https://github.com/_graphql
+arguments: 
+  "body" (url-encoded): {
+    "query": "b314e1ada402f5a1ad5a80f5d3395c1d",
+    "variables": {
+      "nodes": [
+        "MDU6TGFiZWw2MzU5MjE0",
+        "MDU6TGFiZWw2MzU5MjM5",
+        "MDU6TGFiZWwzNjgyNTgyNQ==",
+        "MDU6TGFiZWw2MzU5OTkw",
+        "MDU6TGFiZWw2MzU5OTQ1",
+        "MDU6TGFiZWw2Mzk0ODU5",
+        "MDU6TGFiZWw4MTQ5ODUyMA==",
+        "MDU6TGFiZWwyNDkxOTM0MDg=",
+        "MDU6TGFiZWw1NDYzNzg3NTQ=",
+        "MDU6TGFiZWw2MDI2MzkzNTQ=",
+        "MDU6TGFiZWw2MzU5ODE3",
+        "MDU6TGFiZWw2MzU5ODkz",
+        "MDU6TGFiZWw2MzU5OTI1",
+        "MDU6TGFiZWw2MzU5MzE1",
+        "MDU6TGFiZWw2MzU5MzUy",
+        "MDU6TGFiZWw1MzU0MDI0NjE=",
+        "MDU6TGFiZWwxMDI0Mzk1MTYw",
+        "MDU6TGFiZWwxMDM1MTUyODc5",
+        "MDU6TGFiZWwxMDg2NDkxNjAx",
+        "MDU6TGFiZWwxMTgxMzkwNjcx",
+        "MDU6TGFiZWwxMjMyMjA1NzM0",
+        "MDU6TGFiZWwxMjQ0NTEzNzg0",
+        "MDU6TGFiZWwxNTAxMDU3NTI2",
+        "MDU6TGFiZWwxNTAxMDU1NTI5",
+        "MDU6TGFiZWwxNzE1MDY0NjY1",
+        "MDU6TGFiZWwyMjUwNjA5MjQx",
+        "MDU6TGFiZWwyNTA2MDg1MzM1",
+        "LA_kwDOAA3dP87cvxtl",
+        "LA_kwDOAA3dP88AAAABlbVqug",
+        "LA_kwDOAA3dP88AAAABokdLGg"
+      ]
+    }
+  }
+returns: JSON object with keys: data, extensions
+viewport_effect: Displays all available labels with their colors and descriptions
 ```
 
 ```interactive_element_sort_oldest
@@ -49,46 +108,16 @@ trigger: Click on sort dropdown and select "Oldest"
 request: GET https://github.com/_graphql
 arguments: 
   "body" (url-encoded): {
-    "query":"22d008b451590c967cc8d672452db3f9",
-    "variables":{"includeReactions":false,"name":"^repo_name","owner":"^owner","query":"is:issue state:open sort:created-asc repo:^owner/^repo_name","skip":0}
+    "query": "22d008b451590c967cc8d672452db3f9",
+    "variables": {
+      "includeReactions": false,
+      "name": "^repo_name",
+      "owner": "^owner",
+      "query": "is:issue state:open sort:created-asc repo:^owner/^repo_name",
+      "skip": 0
+    }
   }
 effect: Sorts the issues list by creation date in ascending order (oldest first)
 returns: JSON with paginated issues data sorted by oldest creation date first
 viewport_effect: Updates the issues list display to show issues sorted chronologically from oldest to newest
-```
-
-```interactive_element_graphql_issues
-location_page: ^owner/^repo_name/issues
-type: GraphQL Query
-visual_element: Issues list in the repository
-trigger: Load issues list
-request: GET https://github.com/_graphql
-arguments: 
-  "body" (url-encoded): {
-    "query": "29746fd23262d23f528e1f5b9b427437",
-    "variables": {
-      "name": "^repo_name",
-      "owner": "^owner",
-      "query": "is:issue archived:false repo:^owner/^repo_name sort:created-desc"
-    }
-  }
-returns: JSON object with issues data
-viewport_effect: Displays the issues list sorted by the specified criteria
-```
-
-```interactive_element_graphql_labels
-location_page: ^owner/^repo_name/labels
-type: GraphQL Query
-visual_element: Labels list in the repository
-trigger: Load labels list
-request: GET https://github.com/_graphql
-arguments: 
-  "body" (url-encoded): {
-    "query": "b314e1ada402f5a1ad5a80f5d3395c1d",
-    "variables": {
-      "nodes": ["^label_id_1", "^label_id_2", "^label_id_3", ...]
-    }
-  }
-returns: JSON object with labels data
-viewport_effect: Displays the list of labels associated with the repository
 ```

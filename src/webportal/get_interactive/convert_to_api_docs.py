@@ -121,22 +121,3 @@ def convert_interactive_elements_to_api_docs(
     # Save the result
     output_path.write_text(api_docs)
     print(f"✅ Converted API documentation saved to: {output_path}")
-
-
-def main():
-    """Main function to run the conversion"""
-    from webportal.common import WEBPORTAL_REPO_PATH
-    
-    # Set up paths
-    input_file = WEBPORTAL_REPO_PATH / Path("data/interactive_elements.md")
-    output_file = WEBPORTAL_REPO_PATH / Path("digested_websites/github_generated.md")
-    
-    # Run conversion
-    convert_interactive_elements_to_api_docs(
-        input_file=input_file,
-        output_file=output_file, 
-    )
-
-
-if __name__ == "__main__":
-    main()
