@@ -493,17 +493,13 @@ Each element shows the API calls triggered by user interactions.
         # Build the markdown block with minimal inference
         markdown = f"```interactive_element_{block_name}\n"
         markdown += f"location_page: {location_page}\n"
-        markdown += f"type: \n"  # Leave empty for LLM to fill
-        markdown += f"visual_element: \n"  # Leave empty for LLM to fill
-        markdown += f"trigger: \n"  # Leave empty for LLM to fill
+        markdown += f"trigger: {tool_call_info.get('arguments', "")}\n"  # Leave empty for LLM to fill
         markdown += f"request: {method} {url}\n"
         
         if arguments:
             markdown += f"arguments: {arguments}\n"
         
-        markdown += f"effect: \n"  # Leave empty for LLM to fill
         markdown += f"returns: {returns}\n"
-        markdown += f"viewport_effect: \n"  # Leave empty for LLM to fill
         markdown += "```"
         
         return markdown

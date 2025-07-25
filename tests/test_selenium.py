@@ -37,7 +37,7 @@ Then I want you to go back, and to sort the issues by oldest order
                             
               """)
     
-# test_run_selenium_network_capture_agent()
+test_run_selenium_network_capture_agent()
 
 def test_return_requests():
     model = InferenceClientModel(
@@ -67,4 +67,4 @@ def test_analysing_requests():
     )
     (TEST_PATH / "markdown.md").write_text(markdown)    
     
-test_analysing_requests()
+# test_analysing_requests()
