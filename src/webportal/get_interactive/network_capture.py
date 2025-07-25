@@ -11,7 +11,7 @@ from smolagents.memory import ActionStep
 from webportal.get_interactive.selenium_agent import SeleniumVisionAgent
 
 class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, markdown_file_path: Path | None = None, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         # Initialize network request tracking
@@ -19,7 +19,7 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
         self.step_requests = {}  # step_number -> list of requests for that step
         
         # Initialize centralized markdown file
-        self.markdown_file_path = Path(self.data_dir) / "interactive_elements.md"
+        self.markdown_file_path = markdown_file_path or Path(self.data_dir) / "interactive_elements.md"
         self._initialize_markdown_file()
         
         self._setup_network_monitoring()

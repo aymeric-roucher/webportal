@@ -7,6 +7,8 @@ from smolagents.models import InferenceClientModel
 
 def main():
     """Main function to run the conversion"""
+    
+    input_file = WEBPORTAL_REPO_PATH / Path("digested_websites/interactive_elements.md")
     model = InferenceClientModel(
         model_id="Qwen/Qwen2.5-VL-72B-Instruct",
         provider="nebius",
@@ -27,7 +29,6 @@ Make sure to interact with each element completely to capture all the network re
 
 
     # Set up paths
-    input_file = WEBPORTAL_REPO_PATH / Path("data/interactive_elements.md")
     output_file = WEBPORTAL_REPO_PATH / Path("digested_websites/github_generated.md")
     
     # Run conversion

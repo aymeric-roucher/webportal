@@ -5,7 +5,7 @@ from webportal.get_interactive.selenium_agent import (
     InferenceClientModel,
 )
 from webportal.get_interactive.network_capture import SeleniumNetworkCaptureAgent
-from webportal.common import MOCK_REQUESTS_PATH, TEST_PATH
+from webportal.common import MOCK_REQUESTS_PATH, TEST_PATH, DATA_PATH
 
 
 @pytest.mark.expensive
@@ -37,14 +37,13 @@ Then I want you to go back, and to sort the issues by oldest order
                             
               """)
     
-test_run_selenium_network_capture_agent()
 
 def test_return_requests():
     model = InferenceClientModel(
         model_id="Qwen/Qwen2.5-VL-72B-Instruct",
         provider="nebius",
     )
-    selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data")
+    selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data", markdown_file_path=DATA_PATH / "empty_markdown.md")
     selenium_vision_agent.tools["open_url"]("https://github.com")
     input("Press Enter to continue...")
     selenium_vision_agent.capture_requests_callback()
