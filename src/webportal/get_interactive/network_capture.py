@@ -419,7 +419,7 @@ Each element shows the API calls triggered by user interactions.
         tool_call_info = self._get_tool_call_info(memory_step)
         
         # Get agent's step context (observations and reasoning)
-        model_output = memory_step.model_output
+        model_output = memory_step.model_output if memory_step else ""
 
         # Generate markdown for this step (including agent context even if no requests)
         markdown_summary = self._generate_step_markdown(
