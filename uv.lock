@@ -4662,6 +4662,7 @@ dependencies = [
     { name = "ruff" },
     { name = "selenium" },
     { name = "smolagents", extra = ["litellm", "openai", "toolkit"] },
+    { name = "tqdm" },
 ]
 
 [package.dev-dependencies]
@@ -4683,6 +4684,7 @@ requires-dist = [
     { name = "ruff", specifier = ">=0.12.4" },
     { name = "selenium", specifier = ">=4.15.0" },
     { name = "smolagents", extras = ["litellm", "openai", "toolkit"], specifier = ">=1.20.0" },
+    { name = "tqdm", specifier = ">=4.66.0" },
 ]
 provides-extras = ["dev"]
 
