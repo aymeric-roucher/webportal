@@ -429,7 +429,7 @@ Each element shows the API calls triggered by user interactions.
         )
 
         # Always save step markdown (even if no requests) to include agent context
-        self._save_step_markdown(step_number=step_number, markdown_summary=markdown_summary, output_model=model_output)
+        self._save_step_markdown(step_number=step_number, markdown=markdown_summary, output_model=model_output)
 
     def _get_tool_call_info(
         self, memory_step: ActionStep | None = None
