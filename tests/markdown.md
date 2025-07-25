@@ -1,5 +1,5 @@
 ```interactive_element_search
-location_page: ^,
+location_page: data:,
 type: 
 visual_element: 
 trigger: 
@@ -11,7 +11,7 @@ viewport_effect:
 ```
 
 ```interactive_element_batch_deferred_sponsor_buttons
-location_page: ^,
+location_page: data:,
 type: 
 visual_element: 
 trigger: 
@@ -23,7 +23,7 @@ viewport_effect:
 ```
 
 ```interactive_element_main
-location_page: ^,
+location_page: data:,
 type: 
 visual_element: 
 trigger: 
@@ -34,7 +34,7 @@ viewport_effect:
 ```
 
 ```interactive_element_refs
-location_page: ^,
+location_page: data:,
 type: 
 visual_element: 
 trigger: 
@@ -46,7 +46,7 @@ viewport_effect:
 ```
 
 ```interactive_element_main
-location_page: ^,
+location_page: data:,
 type: 
 visual_element: 
 trigger: 
@@ -57,7 +57,7 @@ viewport_effect:
 ```
 
 ```interactive_element_main
-location_page: ^,
+location_page: data:,
 type: 
 visual_element: 
 trigger: 
@@ -68,7 +68,7 @@ viewport_effect:
 ```
 
 ```interactive_element_branch-and-tag-count
-location_page: ^,
+location_page: data:,
 type: 
 visual_element: 
 trigger: 
@@ -79,7 +79,7 @@ viewport_effect:
 ```
 
 ```interactive_element__graphql
-location_page: ^,
+location_page: data:,
 type: 
 visual_element: 
 trigger: 
@@ -99,7 +99,7 @@ viewport_effect:
 ```
 
 ```interactive_element__graphql
-location_page: ^,
+location_page: data:,
 type: 
 visual_element: 
 trigger: 
@@ -144,7 +144,7 @@ viewport_effect:
 ```
 
 ```interactive_element__graphql
-location_page: ^,
+location_page: data:,
 type: 
 visual_element: 
 trigger: 
@@ -193,7 +193,7 @@ viewport_effect:
 ```
 
 ```interactive_element_search
-location_page: ^,
+location_page: data:,
 type: 
 visual_element: 
 trigger: 
@@ -205,7 +205,7 @@ viewport_effect:
 ```
 
 ```interactive_element_numpy
-location_page: ^,
+location_page: data:,
 type: 
 visual_element: 
 trigger: 
@@ -216,7 +216,7 @@ viewport_effect:
 ```
 
 ```interactive_element_issues
-location_page: ^,
+location_page: data:,
 type: 
 visual_element: 
 trigger: 
@@ -227,7 +227,7 @@ viewport_effect:
 ```
 
 ```interactive_element_labels
-location_page: ^,
+location_page: data:,
 type: 
 visual_element: 
 trigger: 

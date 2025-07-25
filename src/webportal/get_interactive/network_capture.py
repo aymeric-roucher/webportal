@@ -453,8 +453,7 @@ Each element shows the API calls triggered by user interactions.
             return ""
 
         # Get current page location
-        current_url = self.driver.current_url if hasattr(self, "driver") else "unknown"
-        location_page = self._extract_location_page(current_url)
+        location_page = self.driver.current_url
         
         # Combine all requests for processing
         all_requests = json_requests + html_requests
@@ -677,27 +676,6 @@ Each element shows the API calls triggered by user interactions.
                 return "HTML page content"
             else:
                 return "Text/other format response"
-
-
-    def _extract_location_page(self, url: str) -> str:
-        """Extract a simplified page location from URL"""
-        from urllib.parse import urlparse
-        
-        if not url or url == "unknown":
-            return "unknown"
-        
-        parsed = urlparse(url)
-        path = parsed.path.strip("/")
-        
-        if not path:
-            return "home"
-        
-        # Simplify common GitHub patterns
-        path_parts = path.split("/")
-        if len(path_parts) >= 2:
-            return f"^{path_parts[0]}/{path_parts[1]}" + ("/" + "/".join(path_parts[2:]) if len(path_parts) > 2 else "")
-        else:
-            return f"^{path}"
 
 
     def _generate_simple_block_name(self, url: str) -> str:
