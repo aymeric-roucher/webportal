@@ -1,5 +1,5 @@
 import json
-
+import time
 import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
@@ -9,15 +9,16 @@ from smolagents import (
     OpenAIModel,
     tool,
 )
-
+from webportal.common import WEBPORTAL_REPO_PATH
 load_dotenv()
 
 model = OpenAIModel(
-    model_id="gpt-4o-mini"  # for 200k token per minute
-)  # "gpt-4o" for performance, "gpt-3.5-turbo" for testing
+    model_id="gpt-4.1"  # for 200k token per minute
+)
 
 
-with open("digested_websites/www.target.com_api_calls_short.md", "r") as f:
+with open(WEBPORTAL_REPO_PATH / "digested_websites/github_generated.md", "r") as f:
+# with open(WEBPORTAL_REPO_PATH / "data/interactive_elements.md", "r") as f:
     interaction_description = f.read()
 
 instructions = f"""
@@ -28,7 +29,7 @@ You are an advanced web automation agent specialized in performing complex tasks
 Below is a description of the API calls that you can make to the desired domain.
 You cannot use them directly, you need to use the tools provided to you.
 
-Here is the description of the API calls:
+We used a crawler to extract the following API calls:
 {interaction_description}
 
 """
@@ -59,6 +60,8 @@ def get_request(url: str, params: dict | None = None) -> dict:
     """
     if params is None:
         params = {}
+        
+    time.sleep(2)
 
     try:
         # JSON-encode any dictionary values in params for proper URL encoding
@@ -117,6 +120,8 @@ def post_request(
         data (dict): JSON data to include in the request body
         params (dict): Query parameters to include in the request
     """
+    time.sleep(2)
+    
     if data is None:
         data = {}
     if params is None:
@@ -160,6 +165,6 @@ if __name__ == "__main__":
         verbosity_level=2,
     )
 
-    task = "What are the top 5 cheapest lamp tables on target.com?"
+    task = "According to github, when was Regression added to the oldest closed numpy.polynomial issue that has the Regression label in MM/DD/YY?"
 
     agent.run(task)
