@@ -78,7 +78,7 @@ returns: JSON object with keys: branches, tags
 viewport_effect: 
 ```
 
-```interactive_element_graphql_request
+```interactive_element__graphql
 location_page: ^,
 type: 
 visual_element: 
@@ -98,7 +98,7 @@ returns: JSON with data object containing structured information
 viewport_effect: 
 ```
 
-```interactive_element_graphql_request
+```interactive_element__graphql
 location_page: ^,
 type: 
 visual_element: 
@@ -143,7 +143,7 @@ returns: JSON with data object containing structured information
 viewport_effect: 
 ```
 
-```interactive_element_graphql_request
+```interactive_element__graphql
 location_page: ^,
 type: 
 visual_element: 

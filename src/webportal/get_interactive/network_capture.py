@@ -1,7 +1,7 @@
-import os
 import json
 import time
 import requests
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
@@ -17,6 +17,11 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
         # Initialize network request tracking
         self.network_requests = []
         self.step_requests = {}  # step_number -> list of requests for that step
+        
+        # Initialize centralized markdown file
+        self.markdown_file_path = Path(self.data_dir) / "interactive_elements.md"
+        self._initialize_markdown_file()
+        
         self._setup_network_monitoring()
 
     def setup_step_callbacks(self) -> None:
@@ -38,6 +43,18 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
         # Set up event listener callback (note: this is a simplified approach)
         # In practice, you'd need to use CDP event streaming for real-time capture
         print("Network monitoring enabled")
+        
+    def _initialize_markdown_file(self):
+        """Initialize the centralized markdown file at the beginning of the agent session"""
+        header = """# Interactive Elements Analysis
+
+This file contains the analysis of interactive elements discovered during website exploration.
+Each element shows the API calls triggered by user interactions.
+
+"""
+        
+        self.markdown_file_path.write_text(header)
+        print(f"📝 Initialized markdown file: {self.markdown_file_path}")
 
     def capture_step_network_activity(self, step_number: int) -> list[dict[str, Any]]:
         """Capture network activity that happened during a specific step"""
@@ -398,13 +415,11 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
         )
 
         # Get the action that was performed in this step
-        action_description = self._get_step_action_description(memory_step)
         tool_call_info = self._get_tool_call_info(memory_step)
 
         # Generate markdown for this step
         markdown_summary = self._generate_step_markdown(
             step_number,
-            action_description,
             tool_call_info,
             json_requests,
             html_requests,
@@ -412,31 +427,6 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
 
         if markdown_summary:
             self._save_step_markdown(step_number, markdown_summary)
-
-    def _get_step_action_description(
-        self, memory_step: ActionStep | None = None
-    ) -> str:
-        """Extract a description of what action was performed in this step"""
-        if memory_step and memory_step.tool_calls:
-            tool_call = memory_step.tool_calls[0]
-            tool_name = tool_call.name
-            args = getattr(tool_call, "arguments", {})
-
-            if tool_name == "click":
-                return f"clicked at coordinates ({args.get('x', '?')}, {args.get('y', '?')})"
-            elif tool_name == "type_text":
-                return f"typed text: '{args.get('text', '?')}'"
-            elif tool_name == "open_url":
-                return f"opened URL: {args.get('url', '?')}"
-            elif tool_name == "scroll":
-                direction = args.get("direction", "down")
-                return f"scrolled {direction}"
-            elif tool_name == "press_key":
-                return f"pressed key: {args.get('key', '?')}"
-            else:
-                return f"performed {tool_name} action"
-
-        return "performed unknown action"
 
     def _get_tool_call_info(
         self, memory_step: ActionStep | None = None
@@ -453,7 +443,6 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
     def _generate_step_markdown(
         self,
         step_number: int,
-        action_description: str,
         tool_call_info: dict[str, Any],
         json_requests: list[dict[str, Any]],
         html_requests: list[dict[str, Any]],
@@ -473,7 +462,7 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
         
         for request in all_requests:
             block = self._generate_individual_request_block(
-                request, action_description, tool_call_info, location_page, step_number
+                request=request, tool_call_info=tool_call_info, location_page=location_page
             )
             if block:
                 markdown_blocks.append(block)
@@ -483,10 +472,8 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
     def _generate_individual_request_block(
         self,
         request: dict[str, Any],
-        action_description: str,
         tool_call_info: dict[str, Any],
         location_page: str,
-        step_number: int,
     ) -> str:
         """Generate an individual markdown block for a single request"""
         
@@ -589,14 +576,15 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
         return markdown
 
     def _save_step_markdown(self, step_number: int, markdown: str):
-        """Save the markdown summary for a step"""
-        filename = f"step_{step_number:03d}_interactive_element.md"
-        filepath = os.path.join(self.data_dir, filename)
-
-        with open(filepath, "w") as f:
+        """Append the markdown summary for a step to the centralized file"""
+        step_header = f"\n## Step {step_number}\n\n"
+        
+        with self.markdown_file_path.open("a") as f:
+            f.write(step_header)
             f.write(markdown)
+            f.write("\n\n")
 
-        print(f"💾 Saved interactive element summary to: {filepath}")
+        print(f"💾 Appended step {step_number} to markdown file: {self.markdown_file_path}")
 
     def _extract_request_arguments(self, request: dict[str, Any]) -> str:
         """Extract arguments from request (POST data or URL parameters)"""

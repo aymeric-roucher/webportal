@@ -36,6 +36,8 @@ I want you to go to github.com, to look for the numpy package and click the butt
 Then I want you to go back, and to sort the issues by oldest order
                             
               """)
+    
+# test_run_selenium_network_capture_agent()
 
 def test_return_requests():
     model = InferenceClientModel(
@@ -59,7 +61,6 @@ def test_analysing_requests():
 
     markdown = selenium_vision_agent._generate_step_markdown(
         step_number=1,
-        action_description="",
         tool_call_info={"tool_name": "open_url", "arguments": {"url": "https://github.com"}},
         json_requests=json_requests,
         html_requests=html_requests,
