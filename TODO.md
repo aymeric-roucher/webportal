@@ -1,7 +1,7 @@
-- vérifier que le markdown est généré correctement lorsque l'agent fait plusieurs étapes
-- rajouter les champs manquants dans le markdown
-- rajouter un test pour parser le markdown et vérifier de manière déterministe que les requêtes fonctionnent
-- essayer de mettre le maximum d'informations dans le markdown, puis rajouter une étape où un LLM s'occupera de refaire le markdown en fonction des requêtes. Dans cette étape, le llm doit output un markdown qui passera par le parseur dans lequel on vérifie la syntaxe et les requêtes fonctionnent.
-- pour faire ce markdown, inclure un nouvel argument dans les tools de description et inclure dans le markdown la réflexion du vlm.
+- [ ] vérifier que le markdown est généré correctement lorsque l'agent fait plusieurs étapes
+- [ ] rajouter les champs manquants dans le markdown
+- [ ] rajouter un test pour parser le markdown et vérifier de manière déterministe que les requêtes fonctionnent
+- [ ] essayer de mettre le maximum d'informations dans le markdown, puis rajouter une étape où un LLM s'occupera de refaire le markdown en fonction des requêtes. Dans cette étape, le llm doit output un markdown qui passera par le parseur dans lequel on vérifie la syntaxe et les requêtes fonctionnent.
+- [ ] pour faire ce markdown, inclure un nouvel argument dans les tools de description et inclure dans le markdown la réflexion du vlm.
 - vérifier le prompt du vlm, parfois il bluff
-- improve output informations (the schema is not always described correctly)
+- [x]improve output informations (the schema is not always described correctly)
