@@ -146,8 +146,9 @@ Each element shows the API calls triggered by user interactions.
             self.logger.log(
                 f"Captured {len(step_requests)} network requests for step {current_step}"
             )
-            # Analyze the requests for this step
-            self._analyze_step_requests(current_step, step_requests, memory_step)
+        
+        # Always analyze the step (even if no requests) to capture agent context
+        self._analyze_step_requests(current_step, step_requests, memory_step)
 
     def _filter_relevant_requests(
         self, requests_list: list[dict[str, Any]]
@@ -406,27 +407,29 @@ Each element shows the API calls triggered by user interactions.
         # Filter requests to get JSON and HTML responses separately
         json_requests, html_requests = self._filter_relevant_requests(requests)
 
-        if not json_requests and not html_requests:
-            return
-
         print(f"\n=== STEP {step_number} REQUEST ANALYSIS ===")
-        print(
-            f"Found {len(json_requests)} JSON requests and {len(html_requests)} HTML requests"
-        )
+        if json_requests or html_requests:
+            print(
+                f"Found {len(json_requests)} JSON requests and {len(html_requests)} HTML requests"
+            )
+        else:
+            print("No relevant network requests found for this step")
 
         # Get the action that was performed in this step
         tool_call_info = self._get_tool_call_info(memory_step)
+        
+        # Get agent's step context (observations and reasoning)
+        model_output = memory_step.model_output
 
-        # Generate markdown for this step
+        # Generate markdown for this step (including agent context even if no requests)
         markdown_summary = self._generate_step_markdown(
-            step_number,
-            tool_call_info,
-            json_requests,
-            html_requests,
+            tool_call_info=tool_call_info,
+            json_requests=json_requests,
+            html_requests=html_requests,
         )
 
-        if markdown_summary:
-            self._save_step_markdown(step_number, markdown_summary)
+        # Always save step markdown (even if no requests) to include agent context
+        self._save_step_markdown(step_number=step_number, markdown_summary=markdown_summary, output_model=model_output)
 
     def _get_tool_call_info(
         self, memory_step: ActionStep | None = None
@@ -442,15 +445,11 @@ Each element shows the API calls triggered by user interactions.
 
     def _generate_step_markdown(
         self,
-        step_number: int,
         tool_call_info: dict[str, Any],
         json_requests: list[dict[str, Any]],
         html_requests: list[dict[str, Any]],
     ) -> str:
         """Generate markdown summary for a step with individual blocks per request"""
-
-        if not json_requests and not html_requests:
-            return ""
 
         # Get current page location
         location_page = self.driver.current_url
@@ -459,14 +458,16 @@ Each element shows the API calls triggered by user interactions.
         all_requests = json_requests + html_requests
         markdown_blocks = []
         
-        for request in all_requests:
-            block = self._generate_individual_request_block(
-                request=request, tool_call_info=tool_call_info, location_page=location_page
-            )
-            if block:
-                markdown_blocks.append(block)
+        # Only add request blocks if there are actual requests
+        if all_requests:
+            for request in all_requests:
+                block = self._generate_individual_request_block(
+                    request=request, tool_call_info=tool_call_info, location_page=location_page
+                )
+                if block:
+                    markdown_blocks.append(block)
         
-        return "\n\n".join(markdown_blocks)
+        return "\n\n".join(markdown_blocks) if markdown_blocks else ""
 
     def _generate_individual_request_block(
         self,
@@ -507,80 +508,28 @@ Each element shows the API calls triggered by user interactions.
         
         return markdown
 
-    def _generate_json_requests_section(
-        self, json_requests: list[dict[str, Any]], action_description: str
-    ) -> str:
-        """Generate markdown section for JSON API requests"""
-        if not json_requests:
-            return ""
-        
-        markdown = ""
-        for i, request in enumerate(json_requests):
-            url = request.get("url", "")
-            method = request.get("method", "GET")
-            post_data = request.get("post_data", "")
-            response = request.get("response", {})
-            response_body = response.get("body", "") if response else ""
-            
-            # Extract arguments from POST data or URL parameters
-            arguments = self._extract_request_arguments(request)
-            
-            # Determine effect and returns
-            effect = self._infer_request_effect(action_description, url, response_body)
-            returns = self._describe_response_format(response_body)
-            
-            if i > 0:
-                markdown += "\n"
-            
-            markdown += f"request: {method} {self._extract_base_url(url)}\n"
-            if arguments:
-                markdown += f"arguments: {arguments}\n"
-            markdown += f"effect: {effect}\n"
-            markdown += f"returns: {returns}\n"
-        
-        return markdown
-
-
-    def _generate_html_requests_section(
-        self, html_requests: list[dict[str, Any]], action_description: str
-    ) -> str:
-        """Generate markdown section for HTML page requests"""
-        if not html_requests:
-            return ""
-        
-        markdown = ""
-        for i, request in enumerate(html_requests):
-            url = request.get("url", "")
-            method = request.get("method", "GET")
-            response = request.get("response", {})
-            response_body = response.get("body", "") if response else ""
-            
-            # Extract arguments from URL parameters
-            arguments = self._extract_request_arguments(request)
-            
-            # Determine effect and returns for HTML requests
-            effect = self._infer_request_effect(action_description, url, response_body)
-            returns = "HTML page content"
-            
-            if i > 0:
-                markdown += "\n"
-            
-            markdown += f"request: {method} {self._extract_base_url(url)}\n"
-            if arguments:
-                markdown += f"arguments: {arguments}\n"
-            markdown += f"effect: {effect}\n"
-            markdown += f"returns: {returns}\n"
-        
-        return markdown
-
-    def _save_step_markdown(self, step_number: int, markdown: str):
+    def _save_step_markdown(self, step_number: int, markdown: str, output_model: str):
         """Append the markdown summary for a step to the centralized file"""
         step_header = f"\n## Step {step_number}\n\n"
         
+        # Add agent context section
+        agent_section = ""
+        if output_model:
+            agent_section += f"**Agent output:**\n```\n{output_model}\n```\n\n"
+            
+        markdown_section = ""
+        if markdown:
+            markdown_section = f"**Routes:**\n\n{markdown}\n\n"
+
         with self.markdown_file_path.open("a") as f:
             f.write(step_header)
-            f.write(markdown)
-            f.write("\n\n")
+            if agent_section:
+                f.write(agent_section)
+            if markdown_section:
+                f.write(markdown_section)
+                f.write("\n\n")
+            elif not agent_section:
+                f.write("No significant activity in this step.\n\n")
 
         print(f"💾 Appended step {step_number} to markdown file: {self.markdown_file_path}")
 

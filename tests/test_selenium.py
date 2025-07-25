@@ -60,11 +60,9 @@ def test_analysing_requests():
     selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data")
 
     markdown = selenium_vision_agent._generate_step_markdown(
-        step_number=1,
         tool_call_info={"tool_name": "open_url", "arguments": {"url": "https://github.com"}},
         json_requests=json_requests,
         html_requests=html_requests,
     )
     (TEST_PATH / "markdown.md").write_text(markdown)    
     
-# test_analysing_requests()
