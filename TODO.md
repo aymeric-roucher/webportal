@@ -5,3 +5,4 @@
 - [ ] pour faire ce markdown, inclure un nouvel argument dans les tools de description et inclure dans le markdown la réflexion du vlm.
 - vérifier le prompt du vlm, parfois il bluff
 - [x]improve output informations (the schema is not always described correctly)
+- faire l'outil pour que l'IA créé un bon output

@@ -5,7 +5,7 @@ def create_conversion_prompt(content: str) -> str:
     """Create a detailed prompt for the LLM to convert the content"""
     
     example_format = '''```interactive_element_sort_oldest
-location_page: ^repo_name/issues
+location_page: numpy/numpy/issues
 type: Button/Dropdown  
 visual_element: Sort dropdown button with "Oldest" option in the issues list header
 trigger: Click on sort dropdown and select "Oldest"
@@ -13,7 +13,7 @@ request: GET https://github.com/_graphql
 arguments: 
   "body" (url-encoded): {
     "query":"22d008b451590c967cc8d672452db3f9",
-    "variables":{"includeReactions":false,"name":"^repo_name","owner":"^owner","query":"is:issue state:open sort:created-asc repo:^owner/^repo_name","skip":0}
+    "variables":{"includeReactions":false,"name":"numpy","owner":"numpy","query":"is:issue state:open sort:created-asc repo:numpy/numpy","skip":0}
   }
 effect: Sorts the issues list by creation date in ascending order (oldest first)
 returns: JSON with paginated issues data sorted by oldest creation date first
@@ -38,12 +38,10 @@ CRITICAL INSTRUCTIONS:
    - One-time setup requests
    - Requests that don't provide meaningful functionality
 
-2. **IDENTIFY PATTERNS AND GENERALIZE**:
-   - Replace specific values with variables using ^variable_name syntax
-   - Example: "numpy/numpy" becomes "^owner/^repo_name"
-   - Example: specific issue IDs become "^issue_id"
-   - Example: user names become "^username"
-   - Look for URL patterns and parameter patterns
+2. **DO NOT GENERALIZE**:
+   - Keep all specific values as they are.
+   - Example: "numpy/numpy" should remain "numpy/numpy".
+   - Do not replace values with variables like `^owner` or `^repo_name`.
 
 3. **INFER MISSING INFORMATION**:
    - Add logical `type` (Button, Dropdown, Link, etc.)
@@ -63,15 +61,10 @@ CRITICAL INSTRUCTIONS:
    - Don't modify GraphQL query hashes
    - Keep response format descriptions accurate
 
-6. **VARIABLE NAMING CONVENTION**:
-   - Use ^variable_name for all dynamic values
-   - Common variables: ^owner, ^repo_name, ^issue_id, ^username, ^query, ^page_number
-   - Be consistent across all elements
-
 INPUT TO CONVERT:
 {content}
 
-Generate clean, structured API documentation following the format above. Focus on creating reusable, generalized interactive elements that would be useful for an LLM to understand GitHub's API patterns."""
+Generate clean, structured API documentation following the format above. Focus on creating reusable, specific interactive elements that would be useful for an LLM to understand GitHub's API patterns."""
 
 
 def call_llm(prompt: str) -> str:
@@ -83,7 +76,7 @@ def call_llm(prompt: str) -> str:
     
     try:
         response = client.chat.completions.create(
-            model="gpt-4.1",
+            model="gpt-4o",
             messages=[
                 {
                     "role": "user", 

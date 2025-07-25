@@ -21,6 +21,7 @@ I want you to go to github.com, navigate to the numpy package, and perform the f
 - Click on a label to see the issues that have this label.
 - Click on the "Closed" button to toggle and view closed issues
 - Use the sort dropdown to sort issues by "Oldest" order (creation date ascending)
+- click on an issue to see the details
 Make sure to interact with each element completely to capture all the network requests and API calls that these interactive elements generate.
               """)
 
