@@ -1,6 +1,6 @@
 # Webportal
 
-A project to turn a website into an agent-friendly one.
+Make your website agent-accessible.
 
 ## Workflow
 
