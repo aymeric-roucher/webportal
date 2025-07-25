@@ -60,6 +60,19 @@ Whenever you click, MAKE SURE to click in the middle of the button, text, link o
 For web elements it is always better to click in the middle of the text rather than edges. Calculate extremely well the coordinates. A mistake here can make the full task fail.
 Sometimes you may have missed a click, so never assume that you're on the right page, always make sure that your previous action worked.
 In the screenshot you will see a green crosshair displayed over the position of your last click: this way can inspect if the mouse pointer is off of the targeted element, pay special attention to it.
+
+IMPORTANT: For ALL interaction tools (click, double_click, right_click, type_text, etc.), you MUST provide detailed visual descriptions that include:
+- Element type (button, link, input field, dropdown, etc.)
+- Visible text content (if any)
+- Approximate size (width x height in pixels)
+- Visual appearance (color, shape, style)
+- Position relative to other elements (e.g., "top-right corner", "below the search bar", "center of the page")
+- Any distinguishing visual features
+
+Example good descriptions:
+- "rectangular blue button with white text 'Login', approximately 100x35 pixels, located in the top-right corner of the navigation bar"
+- "white input field with placeholder text 'Search...', approximately 300x40 pixels, centered at the top of the page with a magnifying glass icon on the right"
+- "circular red close button with white 'X', approximately 20x20 pixels, positioned in the top-right corner of the modal dialog"
 </click_guidelines>
 
 <task_resolution_example>
@@ -79,7 +92,7 @@ What I see: I can see the Google homepage with the search box in the center of t
 Reflection: I can see the Google search box. I need to click on it first and then type my search query.
 Action:
 ```python
-click(640, 360, "white rectangular search box in center of page")
+click(640, 360, "white rectangular input field with rounded corners, approximately 480x44 pixels, centered on the page with Google logo above it, contains faint gray text 'Search Google or type a URL'")
 ```<end_code>
 
 Step 3:
@@ -88,7 +101,7 @@ What I see: The search box is now active with a cursor visible.
 Reflection: The search box is ready for input. I'll type 'Hello World' now.
 Action:
 ```python
-type_text("Hello World")
+type_text("Hello World", "Google search input field with blinking cursor")
 ```<end_code>
 
 Step 4:
@@ -97,7 +110,7 @@ What I see: I can see 'Hello World' typed in the search box and there's a search
 Reflection: I can either click the search button or press Enter to submit the search. I'll press Enter.
 Action:
 ```python
-press_key("enter")
+press_key("enter", "to submit the search query in the Google search box")
 ```<end_code>
 
 Step 5:
@@ -282,13 +295,13 @@ class SeleniumVisionAgent(CodeAgent):
         """Register all desktop tools"""
 
         @tool
-        def click(x: int, y: int, description: str = "") -> str:
+        def click(x: int, y: int, description: str) -> str:
             """
             Performs a left-click at the specified coordinates
             Args:
                 x: The x coordinate (horizontal position)
                 y: The y coordinate (vertical position)
-                description: Visual description of what you see at these coordinates (e.g., "blue button with text 'Submit'")
+                description: visual description including: element type, text content, size (approximate width/height), color, position relative to other elements (e.g., "blue rectangular button with white text 'Submit', approximately 120x40 pixels, located in the bottom right corner of the form")
             """
             action = ActionChains(self.driver)
             action.move_by_offset(x, y).click().perform()
@@ -301,13 +314,13 @@ class SeleniumVisionAgent(CodeAgent):
             return log_msg
 
         @tool
-        def right_click(x: int, y: int, description: str = "") -> str:
+        def right_click(x: int, y: int, description: str) -> str:
             """
             Performs a right-click at the specified coordinates
             Args:
                 x: The x coordinate (horizontal position)
                 y: The y coordinate (vertical position)
-                description: Visual description of what you see at these coordinates
+                description: visual description including: element type, text content, size (approximate width/height), color, position relative to other elements
             """
             action = ActionChains(self.driver)
             action.move_by_offset(x, y).context_click().perform()
@@ -320,13 +333,13 @@ class SeleniumVisionAgent(CodeAgent):
             return log_msg
 
         @tool
-        def double_click(x: int, y: int, description: str = "") -> str:
+        def double_click(x: int, y: int, description: str) -> str:
             """
             Performs a double-click at the specified coordinates
             Args:
                 x: The x coordinate (horizontal position)
                 y: The y coordinate (vertical position)
-                description: Visual description of what you see at these coordinates
+                description: visual description including: element type, text content, size (approximate width/height), color, position relative to other elements
             """
             action = ActionChains(self.driver)
             action.move_by_offset(x, y).double_click().perform()
@@ -339,18 +352,22 @@ class SeleniumVisionAgent(CodeAgent):
             return log_msg
 
         @tool
-        def move_mouse(x: int, y: int) -> str:
+        def move_mouse(x: int, y: int, description: str = "") -> str:
             """
             Moves the mouse cursor to the specified coordinates
             Args:
                 x: The x coordinate (horizontal position)
                 y: The y coordinate (vertical position)
+                description: Optional visual description of what you're hovering over
             """
             action = ActionChains(self.driver)
             action.move_by_offset(x, y).perform()
             action.reset_actions()
-            self.logger.log(f"Moved mouse to coordinates ({x}, {y})")
-            return f"Moved mouse to coordinates ({x}, {y})"
+            log_msg = f"Moved mouse to coordinates ({x}, {y})"
+            if description:
+                log_msg += f" over: {description}"
+            self.logger.log(log_msg)
+            return log_msg
 
         def normalize_text(text):
             return "".join(
@@ -360,25 +377,30 @@ class SeleniumVisionAgent(CodeAgent):
             )
 
         @tool
-        def type_text(text: str) -> str:
+        def type_text(text: str, target_description: str = "") -> str:
             """
             Types the specified text at the current cursor position.
             Args:
                 text: The text to type
+                target_description: Optional description of the input field or element where text is being typed (e.g., "search box in the header", "username field in login form")
             """
             clean_text = normalize_text(text)
             action = ActionChains(self.driver)
             action.send_keys(clean_text).perform()
             action.reset_actions()
-            self.logger.log(f"Typed text: '{clean_text}'")
-            return f"Typed text: '{clean_text}'"
+            log_msg = f"Typed text: '{clean_text}'"
+            if target_description:
+                log_msg += f" in: {target_description}"
+            self.logger.log(log_msg)
+            return log_msg
 
         @tool
-        def press_key(key: str) -> str:
+        def press_key(key: str, context_description: str = "") -> str:
             """
             Presses a keyboard key
             Args:
                 key: The key to press (e.g. "enter", "space", "backspace", etc.).
+                context_description: Optional description of the context or purpose (e.g., "to submit the search form", "to close the modal dialog")
             """
             # Map common key names to Selenium Keys
             key_mapping = {
@@ -397,8 +419,11 @@ class SeleniumVisionAgent(CodeAgent):
             action = ActionChains(self.driver)
             action.send_keys(selenium_key).perform()
             action.reset_actions()
-            self.logger.log(f"Pressed key: {key}")
-            return f"Pressed key: {key}"
+            log_msg = f"Pressed key: {key}"
+            if context_description:
+                log_msg += f" {context_description}"
+            self.logger.log(log_msg)
+            return log_msg
 
         @tool
         def go_back() -> str:
@@ -411,7 +436,7 @@ class SeleniumVisionAgent(CodeAgent):
             return "Went back one page"
 
         @tool
-        def drag_and_drop(x1: int, y1: int, x2: int, y2: int) -> str:
+        def drag_and_drop(x1: int, y1: int, x2: int, y2: int, source_description: str = "", target_description: str = "") -> str:
             """
             Clicks [x1, y1], drags mouse to [x2, y2], then release click.
             Args:
@@ -419,6 +444,8 @@ class SeleniumVisionAgent(CodeAgent):
                 y1: origin y coordinate
                 x2: end x coordinate
                 y2: end y coordinate
+                source_description: Optional description of what you're dragging from
+                target_description: Optional description of where you're dropping it
             """
             action = ActionChains(self.driver)
             action.move_by_offset(x1, y1).click_and_hold().move_by_offset(
@@ -426,11 +453,15 @@ class SeleniumVisionAgent(CodeAgent):
             ).release().perform()
             action.reset_actions()
             message = f"Dragged and dropped from [{x1}, {y1}] to [{x2}, {y2}]"
+            if source_description and target_description:
+                message += f" - moved {source_description} to {target_description}"
+            elif source_description:
+                message += f" - dragged {source_description}"
             self.logger.log(message)
             return message
 
         @tool
-        def scroll(x: int, y: int, direction: str = "down", amount: int = 2) -> str:
+        def scroll(x: int, y: int, direction: str = "down", amount: int = 2, area_description: str = "") -> str:
             """
             Moves the mouse to selected coordinates, then scrolls the page.
             Args:
@@ -438,6 +469,7 @@ class SeleniumVisionAgent(CodeAgent):
                 y: The y coordinate (vertical position) of the element to scroll
                 direction: The direction to scroll ("up" or "down"), defaults to "down".
                 amount: The amount to scroll. A good amount is 1 or 2.
+                area_description: Optional description of the area being scrolled (e.g., "main content area", "sidebar list")
             """
             action = ActionChains(self.driver)
             action.move_by_offset(x, y)
@@ -449,6 +481,10 @@ class SeleniumVisionAgent(CodeAgent):
             action.perform()
             action.reset_actions()
             message = f"Scrolled {direction} by {amount}"
+            if area_description:
+                message += f" in: {area_description}"
+            else:
+                message += f" at coordinates ({x}, {y})"
             self.logger.log(message)
             return message
 
