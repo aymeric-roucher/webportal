@@ -9,7 +9,7 @@ from smolagents import (
     OpenAIModel,
     tool,
 )
-
+from webportal.common import WEBPORTAL_REPO_PATH
 load_dotenv()
 
 model = OpenAIModel(
@@ -17,7 +17,7 @@ model = OpenAIModel(
 )  # "gpt-4o" for performance, "gpt-3.5-turbo" for testing
 
 
-with open("digested_websites/www.target.com_api_calls_short.md", "r") as f:
+with open(WEBPORTAL_REPO_PATH / "digested_websites/github_generated.md", "r") as f:
     interaction_description = f.read()
 
 instructions = f"""
@@ -160,6 +160,6 @@ if __name__ == "__main__":
         verbosity_level=2,
     )
 
-    task = "What are the top 5 cheapest lamp tables on target.com?"
+    task = "According to github, when was Regression added to the oldest closed numpy.polynomial issue that has the Regression label in MM/DD/YY?"
 
     agent.run(task)
