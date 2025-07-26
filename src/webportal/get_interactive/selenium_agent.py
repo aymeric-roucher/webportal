@@ -1,29 +1,17 @@
 import os
 import time
 import unicodedata
-import json
-import requests
 from datetime import datetime
 from io import BytesIO
-from typing import Any
-from urllib.parse import urljoin, urlparse
 
-# Selenium imports
+from PIL import Image, ImageDraw
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
-from PIL import Image, ImageDraw
-
-# SmolaAgents imports
-from smolagents import CodeAgent, tool
+from smolagents import CodeAgent, InferenceClientModel, tool
 from smolagents.agent_types import AgentImage
 from smolagents.memory import ActionStep, TaskStep
 from smolagents.monitoring import LogLevel
-from smolagents import InferenceClientModel
 
 SELENIUM_SYSTEM_PROMPT_TEMPLATE = """You are a web automation assistant that can control a local browser using Selenium. The current date is <<current_date>>.
 
@@ -436,7 +424,14 @@ class SeleniumVisionAgent(CodeAgent):
             return "Went back one page"
 
         @tool
-        def drag_and_drop(x1: int, y1: int, x2: int, y2: int, source_description: str = "", target_description: str = "") -> str:
+        def drag_and_drop(
+            x1: int,
+            y1: int,
+            x2: int,
+            y2: int,
+            source_description: str = "",
+            target_description: str = "",
+        ) -> str:
             """
             Clicks [x1, y1], drags mouse to [x2, y2], then release click.
             Args:
@@ -461,7 +456,13 @@ class SeleniumVisionAgent(CodeAgent):
             return message
 
         @tool
-        def scroll(x: int, y: int, direction: str = "down", amount: int = 2, area_description: str = "") -> str:
+        def scroll(
+            x: int,
+            y: int,
+            direction: str = "down",
+            amount: int = 2,
+            area_description: str = "",
+        ) -> str:
             """
             Moves the mouse to selected coordinates, then scrolls the page.
             Args:

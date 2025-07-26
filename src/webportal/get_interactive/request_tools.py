@@ -1,11 +1,12 @@
 import json
 import time
+
 import requests
 from bs4 import BeautifulSoup
 from markdownify import markdownify
 from smolagents import tool
-from webportal.get_static.crawl4ai_tools import get_markdown_using_crawl4ai
 
+from webportal.get_static.crawl4ai_tools import get_markdown_using_crawl4ai
 
 base_headers = {
     "sec-fetch-site": "same-origin",
@@ -25,7 +26,7 @@ def _process_params(params: dict | None) -> dict:
     """Process request parameters by JSON-encoding dictionary values."""
     if params is None:
         return {}
-    
+
     processed_params = {}
     for key, value in params.items():
         if isinstance(value, dict):
@@ -66,7 +67,6 @@ def get_request(url: str, params: dict | None = None) -> dict:
         return {"error": error_msg}
 
 
-
 @tool
 def post_request(
     url: str, data: dict | None = None, params: dict | None = None
@@ -79,7 +79,7 @@ def post_request(
         data (dict): JSON data to include in the request body
         params (dict): Query parameters to include in the request
     """
-    
+
     if data is None:
         data = {}
     if params is None:
@@ -116,10 +116,12 @@ def post_request(
 
 
 @tool
-def get_request_crawl4ai(url: str, params: dict | None = None, expect_html: bool = False) -> dict:
+def get_request_crawl4ai(
+    url: str, params: dict | None = None, expect_html: bool = False
+) -> dict:
     """
     Launch a GET request to the given URL with query parameters using crawl4ai for HTML processing.
-    
+
     This function provides better content extraction for web pages compared to BeautifulSoup,
     especially for complex JavaScript-heavy pages.
 
@@ -144,7 +146,7 @@ def get_request_crawl4ai(url: str, params: dict | None = None, expect_html: bool
             url, headers=base_headers | {"referer": url}, params=processed_params
         )
         response.raise_for_status()
-        
+
         # Try to parse as JSON first
         try:
             result = response.json()
@@ -161,7 +163,9 @@ def get_request_crawl4ai(url: str, params: dict | None = None, expect_html: bool
         return {"error": error_msg}
 
 
-def _fallback_html_processing(html_content: str, include_script_data: bool = True) -> dict:
+def _fallback_html_processing(
+    html_content: str, include_script_data: bool = True
+) -> dict:
     """Fallback HTML processing using BeautifulSoup (original method)"""
     # Parse HTML
     soup = BeautifulSoup(html_content, "html.parser")
@@ -174,7 +178,7 @@ def _fallback_html_processing(html_content: str, include_script_data: bool = Tru
         for script in soup.find_all("script"):
             if "data-target=" in str(script):
                 script_data += "\n" + str(script)
-    
+
     result = {"content": markdownify(html_content)}
     if include_script_data:
         result["extracted_data"] = script_data
