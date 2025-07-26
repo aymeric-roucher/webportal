@@ -13,6 +13,7 @@ from smolagents import InferenceClientModel, ToolCallingAgent, tool
 from smolagents.agent_types import AgentImage
 from smolagents.memory import ActionStep, TaskStep
 from smolagents.monitoring import LogLevel
+from typing import Callable
 
 SELENIUM_SYSTEM_PROMPT_TEMPLATE = """You are a web automation assistant that can control a local browser using Selenium. The current date is <<current_date>>.
 
