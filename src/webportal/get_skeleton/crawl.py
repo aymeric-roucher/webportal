@@ -42,7 +42,9 @@ class FastJSCrawler:
         use_sitemap: bool = True,
     ):
         self.start_url = start_url
-        self.domain = urlparse(start_url).netloc
+        if not self.start_url.startswith(("http://", "https://")):
+            self.start_url = "https://" + self.start_url
+        self.domain = urlparse(self.start_url).netloc
         self.max_pages = max_pages
         self.max_depth = max_depth
         self.concurrency = concurrency
@@ -63,6 +65,7 @@ class FastJSCrawler:
 
     def load_sitemap(self) -> list[str]:
         """Load URLs from sitemap.xml if available"""
+        print(self.start_url)
 
         parsed_start = urlparse(self.start_url)
         sitemap_url = f"{parsed_start.scheme}://{parsed_start.netloc}/sitemap.xml"
@@ -71,62 +74,47 @@ class FastJSCrawler:
         from lxml import etree
 
         print(f"Attempting to load sitemap from: {sitemap_url}")
-        
+
         r = requests.get(sitemap_url)
         if r.status_code != 200:
-            print(f"Could not load sitemap.xml from {sitemap_url}: HTTP {r.status_code}")
+            print(
+                f"Could not load sitemap.xml from {sitemap_url}: HTTP {r.status_code}"
+            )
             return []
-            
+
         # Check if response content looks like XML
-        content_type = r.headers.get('content-type', '').lower()
-        if not content_type.startswith('application/xml') and not content_type.startswith('text/xml'):
-            print(f"Response from {sitemap_url} doesn't appear to be XML (content-type: {content_type})")
+
+        content_type = r.headers.get("content-type", "").lower()
+        if not content_type.startswith(
+            "application/xml"
+        ) and not content_type.startswith("text/xml"):
+            print(
+                f"Response from {sitemap_url} doesn't appear to be XML (content-type: {content_type})"
+            )
             return []
-            
-        return self._parse_sitemap(sitemap_url, max_urls=self.max_pages * 3)
-    
-    def _parse_sitemap(self, sitemap_url: str, max_urls: int = None) -> list[str]:
-        """Recursively parse sitemap, handling both sitemap indices and regular sitemaps"""
-        import requests
-        from lxml import etree
-        
-        print(f"Parsing sitemap: {sitemap_url}")
-        
-        r = requests.get(sitemap_url)
-        if r.status_code != 200:
-            return []
-            
+
         root = etree.fromstring(r.content)
         urls = []
-        
+
+        # Handle sitemap index files
         for elem in root:
-            if max_urls and len(urls) >= max_urls:
-                break
-                
-            if elem.tag.endswith('sitemap'):
-                # Sitemap index - recursively parse child sitemaps
+            if elem.tag.endswith("sitemap"):
+                # This is a sitemap index, get the location
                 for child in elem:
-                    if child.tag.endswith('loc'):
-                        child_urls = self._parse_sitemap(child.text, max_urls - len(urls) if max_urls else None)
-                        urls.extend(child_urls)
-                        break
-            elif elem.tag.endswith('url'):
-                # Regular sitemap with URLs
-                for child in elem:
-                    if child.tag.endswith('loc'):
+                    if child.tag.endswith("loc"):
                         urls.append(child.text)
-                        break
-        
-        print(f"Found {len(urls)} URLs from {sitemap_url}")
+            elif elem.tag.endswith("url"):
+                # This is a URL entry
+                for child in elem:
+                    if child.tag.endswith("loc"):
+                        urls.append(child.text)
+
+        print(f"Found {len(urls)} URLs in sitemap")
         return urls
 
     def filter_sitemap_urls(self, urls: list[str]) -> list[str]:
         """Filter sitemap URLs based on max_pages, max_depth, and domain"""
         filtered_urls = []
-        
-        if urls and len(urls) > 0:
-            print(f"Sample URL from sitemap: {urls[0]}")
-            print(f"Target domain: {self.domain}")
 
         for url in urls:
             # Skip if we've hit max pages
@@ -804,6 +792,18 @@ def test_crawler_logs_variable_template():
     ), replaced_url
 
 
+async def crawl(url: str, max_pages: int, max_depth: int, concurrency: int):
+    print(f"Running crawler for {url}")
+    crawler = FastJSCrawler(
+        url,
+        max_pages=max_pages,
+        max_depth=max_depth,
+        concurrency=concurrency,
+    )
+    await crawler.crawl()
+    return crawler
+
+
 async def main():
     test_crawler_logs_variable_template()
     parser = argparse.ArgumentParser(
@@ -837,25 +837,8 @@ async def main():
 
     args = parser.parse_args()
 
-    # Ensure URL has scheme
-    if not args.url.startswith(("http://", "https://")):
-        args.url = "https://" + args.url
-
     start_time = time.time()
-
-    # Create and run crawler
-    crawler = FastJSCrawler(
-        args.url,
-        max_pages=args.max_pages,
-        max_depth=args.max_depth,
-        concurrency=args.concurrency,
-    )
-
-    try:
-        await crawler.crawl()
-    except KeyboardInterrupt:
-        print("\n\nCrawl interrupted by user")
-
+    crawler = await crawl(args.url, args.max_pages, args.max_depth, args.concurrency)
     elapsed = time.time() - start_time
 
     # Print statistics
@@ -869,7 +852,6 @@ async def main():
     for depth, count in sorted(stats["depth_distribution"].items()):
         print(f"  Level {depth}: {count} pages")
 
-    # Export results
     output = crawler.export_structure(args.format)
 
     if args.output:

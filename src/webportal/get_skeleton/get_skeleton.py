@@ -137,7 +137,7 @@ class SiteStructure(BaseModel):
     urls: list[str]
 
 
-if __name__ == "__main__":
+def get_clean_urls_list(raw_tree: str) -> list[str]:
     reponse = completion(
         model="gpt-4.1",
         messages=[
@@ -152,5 +152,19 @@ if __name__ == "__main__":
     )
 
     content = ast.literal_eval(reponse.choices[0].message.content)["urls"]
+    return content
 
+
+if __name__ == "__main__":
+    from .crawl import FastJSCrawler
+
+    crawler = FastJSCrawler(
+        start_url="semrush.com",
+        max_pages=100,
+        max_depth=5,
+    )
+    await crawler.crawl()
+
+    output = crawler.export_structure("tree")
+    content = get_clean_urls_list(output)
     print(content)
