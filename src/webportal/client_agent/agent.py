@@ -1,16 +1,11 @@
-import json
-import time
-import requests
-from bs4 import BeautifulSoup
 from dotenv import load_dotenv
-from markdownify import markdownify
 from smolagents import (
     CodeAgent,
     OpenAIModel,
-    tool,
 )
-from webportal.get_interactive.request_tools import get_request, post_request
+
 from webportal.common import WEBPORTAL_REPO_PATH
+from webportal.get_interactive.request_tools import get_request, post_request
 
 load_dotenv()
 

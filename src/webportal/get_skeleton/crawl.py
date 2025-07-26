@@ -33,12 +33,22 @@ class Template(BaseModel):
 
 
 class FastJSCrawler:
-    def __init__(self, start_url, max_pages=100, max_depth=5, concurrency=10):
+    def __init__(
+        self,
+        start_url,
+        max_pages=100,
+        max_depth=5,
+        concurrency=10,
+        use_sitemap: bool = True,
+    ):
         self.start_url = start_url
-        self.domain = urlparse(start_url).netloc
+        if not self.start_url.startswith(("http://", "https://")):
+            self.start_url = "https://" + self.start_url
+        self.domain = urlparse(self.start_url).netloc
         self.max_pages = max_pages
         self.max_depth = max_depth
         self.concurrency = concurrency
+        self.use_sitemap = use_sitemap
 
         self.visited = set()
         self.to_visit = asyncio.Queue()
@@ -52,6 +62,87 @@ class FastJSCrawler:
             set
         )  # Track path lengths for each position's segments
         self.semaphore = asyncio.Semaphore(concurrency)
+
+    def load_sitemap(self) -> list[str]:
+        """Load URLs from sitemap.xml if available"""
+        print(self.start_url)
+
+        parsed_start = urlparse(self.start_url)
+        sitemap_url = f"{parsed_start.scheme}://{parsed_start.netloc}/sitemap.xml"
+
+        import requests
+        from lxml import etree
+
+        print(f"Attempting to load sitemap from: {sitemap_url}")
+
+        r = requests.get(sitemap_url)
+        if r.status_code != 200:
+            print(
+                f"Could not load sitemap.xml from {sitemap_url}: HTTP {r.status_code}"
+            )
+            return []
+
+        # Check if response content looks like XML
+
+        content_type = r.headers.get("content-type", "").lower()
+        if not content_type.startswith(
+            "application/xml"
+        ) and not content_type.startswith("text/xml"):
+            print(
+                f"Response from {sitemap_url} doesn't appear to be XML (content-type: {content_type})"
+            )
+            return []
+
+        root = etree.fromstring(r.content)
+        urls = []
+
+        # Handle sitemap index files
+        for elem in root:
+            if elem.tag.endswith("sitemap"):
+                # This is a sitemap index, get the location
+                for child in elem:
+                    if child.tag.endswith("loc"):
+                        urls.append(child.text)
+            elif elem.tag.endswith("url"):
+                # This is a URL entry
+                for child in elem:
+                    if child.tag.endswith("loc"):
+                        urls.append(child.text)
+
+        print(f"Found {len(urls)} URLs in sitemap")
+        return urls
+
+    def filter_sitemap_urls(self, urls: list[str]) -> list[str]:
+        """Filter sitemap URLs based on max_pages, max_depth, and domain"""
+        filtered_urls = []
+
+        for url in urls:
+            # Skip if we've hit max pages
+            if len(filtered_urls) >= self.max_pages:
+                break
+
+            # Skip static assets
+            if self.is_static_asset(url):
+                continue
+
+            # Check domain
+            parsed = urlparse(url)
+            if not self.is_same_domain_or_subdomain(parsed.netloc):
+                continue
+
+            # Check depth
+            path_depth = len([p for p in parsed.path.split("/") if p])
+            start_path_depth = len(
+                [p for p in urlparse(self.start_url).path.split("/") if p]
+            )
+            relative_depth = path_depth - start_path_depth
+
+            if relative_depth > self.max_depth:
+                continue
+
+            filtered_urls.append(url)
+
+        return filtered_urls
 
     def is_static_asset(self, url: str) -> bool:
         """Check if URL points to a static asset that shouldn't be crawled"""
@@ -396,8 +487,6 @@ class FastJSCrawler:
                                 "Remaining links to visit: ",
                                 self.to_visit.qsize(),
                             )
-                            if self.to_visit.qsize() > 25:
-                                print(self.pattern_templates)
             return new_links
 
         except Exception as e:
@@ -448,12 +537,12 @@ class FastJSCrawler:
         """Worker that processes URLs from the queue"""
         while True:
             try:
-                url, depth = await asyncio.wait_for(self.to_visit.get(), timeout=2.0)
+                url, depth = await self.to_visit.get()
                 await self.crawl_page(browser, url, depth)
-            except asyncio.TimeoutError:
-                # No more URLs to process
-                if self.to_visit.empty():
-                    break
+                self.to_visit.task_done()
+            except Exception as e:
+                print(f"Worker error: {str(e)[:50]}")
+                break
 
     async def crawl(self):
         """Main crawling function"""
@@ -461,7 +550,36 @@ class FastJSCrawler:
         print(
             f"Max pages: {self.max_pages}, Max depth: {self.max_depth}, Concurrency: {self.concurrency}"
         )
+        if self.use_sitemap:
+            print("Using sitemap.xml for URL discovery")
         print("-" * 70)
+
+        # If using sitemap, load URLs from sitemap.xml and build tree directly
+        if self.use_sitemap:
+            sitemap_urls = self.load_sitemap()
+            if sitemap_urls:
+                filtered_urls = self.filter_sitemap_urls(sitemap_urls)
+                print(f"Processing {len(filtered_urls)} URLs from sitemap")
+
+                # Process each URL to build templates
+                for url in filtered_urls:
+                    normalized_url = self.normalize_url(url)
+                    normalized_url = self._replace_with_generic_pattern_if_necessary(
+                        normalized_url
+                    )
+
+                    matching_template_index = self.matches_existing_template(
+                        normalized_url
+                    )
+                    if matching_template_index == -1:
+                        self.log_new_fixed_template(normalized_url)
+
+                    self.visited.add(url)
+
+                print(f"Built {len(self.pattern_templates)} URL patterns from sitemap")
+                return
+            else:
+                print("No URLs found in sitemap, falling back to regular crawling")
 
         async with async_playwright() as p:
             # Launch browser in headless mode
@@ -478,8 +596,15 @@ class FastJSCrawler:
                 for _ in range(self.concurrency)
             ]
 
-            # Wait for all workers to finish
-            await asyncio.gather(*workers)
+            # Wait for all tasks to be processed
+            await self.to_visit.join()
+
+            # Cancel all workers since all tasks are done
+            for worker in workers:
+                worker.cancel()
+
+            # Wait for workers to finish cancellation
+            await asyncio.gather(*workers, return_exceptions=True)
 
             await browser.close()
 
@@ -520,58 +645,85 @@ class FastJSCrawler:
             return self._export_sitemap()
 
     def _export_tree(self):
-        """Export as a tree structure"""
+        """Export as a tree structure with proper hierarchical display"""
         result = []
         result.append(f"Site Structure for {self.domain}")
         result.append("=" * 50)
         result.append("")
 
-        # Group URLs by path structure for tree display, avoiding duplicates
-        path_to_title = {}
+        # Build a hierarchical tree structure
+        tree = {}
 
         # Add structural pattern templates with examples first (higher priority)
-        template_paths_added = set()
         for template in self.pattern_templates:
-            template_path = ""
+            path_parts = []
             for segment in template.segments:
                 if isinstance(segment, FixedTemplateSegment):
-                    if segment.example != "https:":
-                        template_path += segment.example + "/"
+                    if segment.example not in ["https:", "http:"]:
+                        path_parts.append(segment.example)
                 else:
-                    template_path += (
+                    variable_part = (
                         "["
                         + (
                             "|".join(list(segment.examples)[:3])
                             + ("|..." if len(segment.examples) > 3 else "")
                         )
                         + "]"
-                        + "/"
                     )
-            if template_path and template_path not in path_to_title:
-                path_to_title[template_path] = "Template Pattern"
-                template_paths_added.add(template_path.rstrip("/"))
+                    path_parts.append(variable_part)
 
-        # Add discovered generic URL patterns only if they don't overlap with templates
+            if path_parts:
+                self._add_to_tree(tree, path_parts, None)
+
+        # Add discovered generic URL patterns
         for pattern in sorted(self.generic_url_patterns):
             parsed = urlparse(pattern)
-            path = parsed.path.rstrip("/")
-            # Only add if path doesn't conflict with existing templates or paths
-            if path and path not in path_to_title and path not in template_paths_added:
-                # Check if this generic pattern semantically overlaps with any template
-                path_to_title[path] = "URL Pattern"
+            if parsed.path and parsed.path != "/":
+                path_parts = [part for part in parsed.path.split("/") if part]
+                self._add_to_tree(tree, path_parts, None)
 
-        # Convert to list and sort paths
-        paths = list(path_to_title.items())
-        paths.sort(key=lambda x: (x[0].count("/"), x[0]))
-
-        # Display tree with proper tree characters
-        for i, (path, title) in enumerate(paths):
-            is_last = i == len(paths) - 1
-            tree_char = "└──" if is_last else "├──"
-
-            result.append(f"{tree_char} {path} - {title}")
+        # Generate tree display
+        self._render_tree(tree, result, "", True)
 
         return "\n".join(result)
+
+    def _add_to_tree(self, tree, path_parts, label):
+        """Add a path to the tree structure"""
+        current = tree
+        for part in path_parts:
+            if part not in current:
+                current[part] = {"children": {}, "label": None}
+            current = current[part]["children"]
+
+        # Set label on the final part
+        if path_parts:
+            parent = tree
+            for part in path_parts[:-1]:
+                parent = parent[part]["children"]
+            parent[path_parts[-1]]["label"] = label
+
+    def _render_tree(self, tree, result, prefix, is_root):
+        """Recursively render the tree structure"""
+        items = list(tree.items())
+        for i, (name, node) in enumerate(items):
+            is_last = i == len(items) - 1
+
+            if is_root:
+                current_prefix = ""
+                tree_char = "├──" if not is_last else "└──"
+            else:
+                tree_char = "├──" if not is_last else "└──"
+                current_prefix = prefix
+
+            # Build the line
+            line = f"{current_prefix}{tree_char} {name}/"
+
+            result.append(line)
+
+            # Render children
+            if node["children"]:
+                child_prefix = current_prefix + ("│   " if not is_last else "    ")
+                self._render_tree(node["children"], result, child_prefix, False)
 
     def _export_json(self):
         """Export as JSON"""
@@ -640,6 +792,18 @@ def test_crawler_logs_variable_template():
     ), replaced_url
 
 
+async def crawl(url: str, max_pages: int, max_depth: int, concurrency: int):
+    print(f"Running crawler for {url}")
+    crawler = FastJSCrawler(
+        url,
+        max_pages=max_pages,
+        max_depth=max_depth,
+        concurrency=concurrency,
+    )
+    await crawler.crawl()
+    return crawler
+
+
 async def main():
     test_crawler_logs_variable_template()
     parser = argparse.ArgumentParser(
@@ -673,25 +837,8 @@ async def main():
 
     args = parser.parse_args()
 
-    # Ensure URL has scheme
-    if not args.url.startswith(("http://", "https://")):
-        args.url = "https://" + args.url
-
     start_time = time.time()
-
-    # Create and run crawler
-    crawler = FastJSCrawler(
-        args.url,
-        max_pages=args.max_pages,
-        max_depth=args.max_depth,
-        concurrency=args.concurrency,
-    )
-
-    try:
-        await crawler.crawl()
-    except KeyboardInterrupt:
-        print("\n\nCrawl interrupted by user")
-
+    crawler = await crawl(args.url, args.max_pages, args.max_depth, args.concurrency)
     elapsed = time.time() - start_time
 
     # Print statistics
@@ -705,7 +852,6 @@ async def main():
     for depth, count in sorted(stats["depth_distribution"].items()):
         print(f"  Level {depth}: {count} pages")
 
-    # Export results
     output = crawler.export_structure(args.format)
 
     if args.output:
@@ -725,4 +871,4 @@ if __name__ == "__main__":
             print("Please install Playwright browsers first:")
             print("  playwright install chromium")
         else:
-            raise
+            raise e

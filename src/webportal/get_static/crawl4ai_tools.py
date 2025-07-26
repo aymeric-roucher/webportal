@@ -1,5 +1,6 @@
 import asyncio
-from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig
+
+from crawl4ai import AsyncWebCrawler
 
 
 async def parse_web_page_using_crawl4ai(url: str):

@@ -1,29 +1,17 @@
 import os
 import time
 import unicodedata
-import json
-import requests
 from datetime import datetime
 from io import BytesIO
-from typing import Any, Callable
-from urllib.parse import urljoin, urlparse
 
-# Selenium imports
+from PIL import Image, ImageDraw
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
-from PIL import Image, ImageDraw
-
-# SmolaAgents imports
-from smolagents import CodeAgent, tool
+from smolagents import CodeAgent, InferenceClientModel, tool
 from smolagents.agent_types import AgentImage
 from smolagents.memory import ActionStep, TaskStep
 from smolagents.monitoring import LogLevel
-from smolagents import InferenceClientModel
 
 SELENIUM_SYSTEM_PROMPT_TEMPLATE = """You are a web automation assistant that can control a local browser using Selenium. The current date is <<current_date>>.
 

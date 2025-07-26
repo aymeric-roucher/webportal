@@ -91,6 +91,7 @@ Generate clean, structured API documentation following the format above. Focus o
 def call_llm(prompt: str) -> str:
     """Call GPT-4o via OpenAI API"""
     import os
+
     from openai import OpenAI
 
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -100,7 +101,7 @@ def call_llm(prompt: str) -> str:
             model="gpt-4o",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.1,  # Low temperature for consistent output
-            max_tokens=8000,  # Generous token limit for full conversion
+            max_tokens=8096,  # Generous token limit for full conversion
         )
 
         return response.choices[0].message.content

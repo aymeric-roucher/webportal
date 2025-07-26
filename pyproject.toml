@@ -19,6 +19,7 @@ dependencies = [
     "tqdm>=4.66.0",
     "ruff>=0.12.4",
     "crawl4ai>=0.7.2",
+    "litellm>=1.74.8",
 ]
 
 [project.optional-dependencies]
@@ -31,4 +32,7 @@ build-backend = "hatchling.build"
 [dependency-groups]
 test = [
     "browser-use>=0.5.5",
+]
+dev = [
+    "pytest-asyncio>=1.1.0",
 ]

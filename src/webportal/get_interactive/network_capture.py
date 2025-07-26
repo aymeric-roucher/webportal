@@ -1,10 +1,10 @@
 import json
 import time
-import requests
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+import requests
 from smolagents import CodeAgent
 from smolagents.memory import ActionStep
 
