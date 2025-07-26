@@ -18,6 +18,8 @@ def main(rerun_web_agent: bool = False):
         selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data", markdown_file_path=input_file)
         selenium_vision_agent.run("""
 According to github, when was Regression added to the oldest closed numpy.polynomial issue that has the Regression label in MM/DD/YY?
+                              
+Start by going to the numpy package page and then click on the Issues tab.
 """)
 
 
@@ -32,4 +34,4 @@ According to github, when was Regression added to the oldest closed numpy.polyno
 
 
 if __name__ == "__main__":
-    main(rerun_web_agent=True)
+    main_crawl_website_and_get_markdown()

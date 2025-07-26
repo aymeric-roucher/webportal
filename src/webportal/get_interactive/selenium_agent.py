@@ -170,18 +170,40 @@ class SeleniumVisionAgent(CodeAgent):
         max_steps: int = 200,
         verbosity_level: LogLevel = 2,
         planning_interval: int = None,
-        use_v1_prompt: bool = False,
+        browser_headless: bool = True,
         **kwargs,
     ):
         self.data_dir = data_dir
         self.planning_interval = planning_interval
 
         self.chrome_options = webdriver.ChromeOptions()
-        self.width, self.height = 1080, 1920
+        self.width, self.height = 1920, 1080
+        
+        if browser_headless:
+            # Docker/serverless-friendly Chrome options
+            self.chrome_options.add_argument("--headless=new")  # New headless mode
+            self.chrome_options.add_argument("--no-sandbox")
+            self.chrome_options.add_argument("--disable-dev-shm-usage")
+            self.chrome_options.add_argument("--disable-gpu")
+            self.chrome_options.add_argument("--disable-web-security")
+            self.chrome_options.add_argument("--disable-features=VizDisplayCompositor")
+            self.chrome_options.add_argument("--remote-debugging-port=9222")
+            
+        # Window and display settings
         self.chrome_options.add_argument("--force-device-scale-factor=1")
-        self.chrome_options.add_argument("--window-size=1920,1080")
+
+        self.chrome_options.add_argument(f"--window-size={self.height},{self.width}")
         self.chrome_options.add_argument("--disable-pdf-viewer")
         self.chrome_options.add_argument("--window-position=0,0")
+        
+        if browser_headless:
+            # Memory and performance optimizations for serverless
+            self.chrome_options.add_argument("--memory-pressure-off")
+            self.chrome_options.add_argument("--max_old_space_size=4096")
+            self.chrome_options.add_argument("--disable-background-timer-throttling")
+            self.chrome_options.add_argument("--disable-backgrounding-occluded-windows")
+            self.chrome_options.add_argument("--disable-renderer-backgrounding")
+            
         # Enable Chrome DevTools Protocol for network monitoring
         self.chrome_options.add_experimental_option("useAutomationExtension", False)
         self.chrome_options.add_experimental_option(
@@ -202,7 +224,6 @@ class SeleniumVisionAgent(CodeAgent):
         os.makedirs(self.data_dir, exist_ok=True)
         print(f"Screenshots and steps will be saved to: {self.data_dir}")
 
-        self.use_v1_prompt = use_v1_prompt
         # Initialize base agent
         super().__init__(
             tools=tools or [],

@@ -22,7 +22,6 @@ Then I want you to go back, and to sort the issues by oldest order
                             
               """)
 
-
 @pytest.mark.expensive
 def test_run_selenium_network_capture_agent():
     model = InferenceClientModel(
