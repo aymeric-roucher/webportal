@@ -5,7 +5,7 @@ from webportal.get_interactive.network_capture import SeleniumNetworkCaptureAgen
 from smolagents.models import InferenceClientModel
 
 
-def main_crawl_website_and_get_markdown(prompt: str, data_dir: Path) -> Path:
+def main_crawl_website_and_get_markdown(prompt: str, data_dir: Path, headless: bool = True) -> Path:
     """Main function to run the conversion"""
     data_dir.mkdir(parents=True, exist_ok=True)
     input_file = data_dir / Path("raw_markdown.md")
@@ -14,7 +14,7 @@ def main_crawl_website_and_get_markdown(prompt: str, data_dir: Path) -> Path:
         model_id="Qwen/Qwen2.5-VL-72B-Instruct",
         provider="nebius",
     )
-    selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir=str(data_dir), markdown_file_path=input_file)
+    selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir=str(data_dir), markdown_file_path=input_file, browser_headless=headless)
     selenium_vision_agent.run(prompt)
 
     # Set up paths
