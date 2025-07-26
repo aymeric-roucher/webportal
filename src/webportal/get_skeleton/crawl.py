@@ -446,12 +446,12 @@ class FastJSCrawler:
         """Worker that processes URLs from the queue"""
         while True:
             try:
-                url, depth = await asyncio.wait_for(self.to_visit.get(), timeout=2.0)
+                url, depth = await self.to_visit.get()
                 await self.crawl_page(browser, url, depth)
-            except asyncio.TimeoutError:
-                # No more URLs to process
-                if self.to_visit.empty():
-                    break
+                self.to_visit.task_done()
+            except Exception as e:
+                print(f"Worker error: {str(e)[:50]}")
+                break
 
     async def crawl(self):
         """Main crawling function"""
@@ -476,8 +476,15 @@ class FastJSCrawler:
                 for _ in range(self.concurrency)
             ]
 
-            # Wait for all workers to finish
-            await asyncio.gather(*workers)
+            # Wait for all tasks to be processed
+            await self.to_visit.join()
+            
+            # Cancel all workers since all tasks are done
+            for worker in workers:
+                worker.cancel()
+            
+            # Wait for workers to finish cancellation
+            await asyncio.gather(*workers, return_exceptions=True)
 
             await browser.close()
 
