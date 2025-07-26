@@ -5,17 +5,19 @@ from webportal.get_interactive.network_capture import SeleniumNetworkCaptureAgen
 from smolagents.models import InferenceClientModel
 
 
-def main():
+def main(rerun_web_agent: bool = False):
     """Main function to run the conversion"""
     
     input_file = WEBPORTAL_REPO_PATH / Path("digested_websites/interactive_elements.md")
-    model = InferenceClientModel(
-        model_id="Qwen/Qwen2.5-VL-72B-Instruct",
-        provider="nebius",
-    )
-    selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data")
-    selenium_vision_agent.capture_requests_callback()
-    selenium_vision_agent.run("""
+
+    if rerun_web_agent:
+        model = InferenceClientModel(
+            model_id="Qwen/Qwen2.5-VL-72B-Instruct",
+            provider="nebius",
+        )
+        selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data")
+        selenium_vision_agent.capture_requests_callback()
+        selenium_vision_agent.run("""
 I want you to go to github.com, navigate to the numpy package, and perform the following actions to extract all interactive elements:
 
 - Go to the issues page (numpy/numpy/issues)
@@ -25,7 +27,7 @@ I want you to go to github.com, navigate to the numpy package, and perform the f
 - Use the sort dropdown to sort issues by "Oldest" order (creation date ascending)
 - click on an issue to see the details
 Make sure to interact with each element completely to capture all the network requests and API calls that these interactive elements generate.
-              """)
+""")
 
 
     # Set up paths
@@ -39,4 +41,4 @@ Make sure to interact with each element completely to capture all the network re
 
 
 if __name__ == "__main__":
-    main()
+    main(rerun_web_agent=False)
