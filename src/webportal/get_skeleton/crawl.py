@@ -396,8 +396,6 @@ class FastJSCrawler:
                                 "Remaining links to visit: ",
                                 self.to_visit.qsize(),
                             )
-                            if self.to_visit.qsize() > 25:
-                                print(self.pattern_templates)
             return new_links
 
         except Exception as e:
@@ -520,58 +518,81 @@ class FastJSCrawler:
             return self._export_sitemap()
 
     def _export_tree(self):
-        """Export as a tree structure"""
+        """Export as a tree structure with proper hierarchical display"""
         result = []
         result.append(f"Site Structure for {self.domain}")
         result.append("=" * 50)
         result.append("")
 
-        # Group URLs by path structure for tree display, avoiding duplicates
-        path_to_title = {}
-
+        # Build a hierarchical tree structure
+        tree = {}
+        
         # Add structural pattern templates with examples first (higher priority)
-        template_paths_added = set()
         for template in self.pattern_templates:
-            template_path = ""
+            path_parts = []
             for segment in template.segments:
                 if isinstance(segment, FixedTemplateSegment):
-                    if segment.example != "https:":
-                        template_path += segment.example + "/"
+                    if segment.example not in ["https:", "http:"]:
+                        path_parts.append(segment.example)
                 else:
-                    template_path += (
-                        "["
-                        + (
-                            "|".join(list(segment.examples)[:3])
-                            + ("|..." if len(segment.examples) > 3 else "")
-                        )
-                        + "]"
-                        + "/"
-                    )
-            if template_path and template_path not in path_to_title:
-                path_to_title[template_path] = "Template Pattern"
-                template_paths_added.add(template_path.rstrip("/"))
+                    variable_part = "[" + (
+                        "|".join(list(segment.examples)[:3])
+                        + ("|..." if len(segment.examples) > 3 else "")
+                    ) + "]"
+                    path_parts.append(variable_part)
+            
+            if path_parts:
+                self._add_to_tree(tree, path_parts, None)
 
-        # Add discovered generic URL patterns only if they don't overlap with templates
+        # Add discovered generic URL patterns
         for pattern in sorted(self.generic_url_patterns):
             parsed = urlparse(pattern)
-            path = parsed.path.rstrip("/")
-            # Only add if path doesn't conflict with existing templates or paths
-            if path and path not in path_to_title and path not in template_paths_added:
-                # Check if this generic pattern semantically overlaps with any template
-                path_to_title[path] = "URL Pattern"
+            if parsed.path and parsed.path != "/":
+                path_parts = [part for part in parsed.path.split("/") if part]
+                self._add_to_tree(tree, path_parts, None)
 
-        # Convert to list and sort paths
-        paths = list(path_to_title.items())
-        paths.sort(key=lambda x: (x[0].count("/"), x[0]))
-
-        # Display tree with proper tree characters
-        for i, (path, title) in enumerate(paths):
-            is_last = i == len(paths) - 1
-            tree_char = "└──" if is_last else "├──"
-
-            result.append(f"{tree_char} {path} - {title}")
-
+        # Generate tree display
+        self._render_tree(tree, result, "", True)
+        
         return "\n".join(result)
+    
+    def _add_to_tree(self, tree, path_parts, label):
+        """Add a path to the tree structure"""
+        current = tree
+        for part in path_parts:
+            if part not in current:
+                current[part] = {"children": {}, "label": None}
+            current = current[part]["children"]
+        
+        # Set label on the final part
+        if path_parts:
+            parent = tree
+            for part in path_parts[:-1]:
+                parent = parent[part]["children"]
+            parent[path_parts[-1]]["label"] = label
+    
+    def _render_tree(self, tree, result, prefix, is_root):
+        """Recursively render the tree structure"""
+        items = list(tree.items())
+        for i, (name, node) in enumerate(items):
+            is_last = i == len(items) - 1
+            
+            if is_root:
+                current_prefix = ""
+                tree_char = "├──" if not is_last else "└──"
+            else:
+                tree_char = "├──" if not is_last else "└──"
+                current_prefix = prefix
+            
+            # Build the line
+            line = f"{current_prefix}{tree_char} {name}/"
+            
+            result.append(line)
+            
+            # Render children
+            if node["children"]:
+                child_prefix = current_prefix + ("│   " if not is_last else "    ")
+                self._render_tree(node["children"], result, child_prefix, False)
 
     def _export_json(self):
         """Export as JSON"""
@@ -725,4 +746,4 @@ if __name__ == "__main__":
             print("Please install Playwright browsers first:")
             print("  playwright install chromium")
         else:
-            raise
+            raise e
