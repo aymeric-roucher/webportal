@@ -595,7 +595,7 @@ Each element shows the API calls triggered by user interactions.
 
         # Handle URL parameters - specifically for GraphQL queries in GET requests
         if "?" in url:
-            from urllib.parse import urlparse, parse_qs, unquote
+            from urllib.parse import parse_qs, unquote, urlparse
 
             parsed = urlparse(url)
             params = parse_qs(parsed.query)

@@ -1,11 +1,13 @@
-import pytest
 import json
-from webportal.get_interactive.selenium_agent import (
-    SeleniumVisionAgent,
-    InferenceClientModel,
-)
+
+import pytest
+
+from webportal.common import DATA_PATH, MOCK_REQUESTS_PATH, TEST_PATH
 from webportal.get_interactive.network_capture import SeleniumNetworkCaptureAgent
-from webportal.common import MOCK_REQUESTS_PATH, TEST_PATH, DATA_PATH
+from webportal.get_interactive.selenium_agent import (
+    InferenceClientModel,
+    SeleniumVisionAgent,
+)
 
 
 @pytest.mark.expensive

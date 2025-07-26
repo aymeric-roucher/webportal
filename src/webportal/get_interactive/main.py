@@ -1,10 +1,13 @@
 from pathlib import Path
+
+from smolagents.models import InferenceClientModel
+
 from webportal.common import DATA_PATH
 from webportal.get_interactive.convert_to_api_docs import (
     convert_interactive_elements_to_api_docs,
 )
 from webportal.get_interactive.network_capture import SeleniumNetworkCaptureAgent
-from smolagents.models import InferenceClientModel
+
 
 def main_crawl_website_and_get_markdown(
     prompt: str, data_dir: Path, headless: bool = True
