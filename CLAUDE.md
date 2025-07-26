@@ -64,7 +64,7 @@ python -m pytest               # Alternative test runner
 - **requests**: HTTP client for API interactions
 
 ### Coding Style
-- DO NOT USE TRY/EXCEPT blocks except if it is absolutely necessary (meaning that this is the only way to handle the error). And in that case, you should except a specific error.
-- This is python3.13 code so DO NOT use "List" or "Dict" for typing, use "list" or "dict" instead. 
+- Do not use try/except blocks except if it is absolutely necessary (meaning that this is the only way to handle the error). And in that case, you should except a specific error.
+- This is python3.13 code so do not import List or Dict for typing. 
 - Typing is important
-- Always choose the simplest solutions that will do the job.
+- Always choose the simpler solution over the more complex one. 

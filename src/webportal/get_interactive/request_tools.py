@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from markdownify import markdownify
 from smolagents import tool
 
-from webportal.get_static_page.crawl4ai_tools import get_markdown_using_crawl4ai
+from webportal.get_static.crawl4ai_tools import get_markdown_using_crawl4ai
 
 base_headers = {
     "sec-fetch-site": "same-origin",

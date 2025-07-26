@@ -13,8 +13,8 @@ from webportal.get_interactive.selenium_agent import (
 @pytest.mark.expensive
 def test_run_selenium_agent():
     model = InferenceClientModel(
-        model_id="Qwen/Qwen2.5-VL-32B-Instruct",
-        provider="auto",
+        model_id="Qwen/Qwen2.5-VL-72B-Instruct",
+        provider="nebius",
     )
     selenium_vision_agent = SeleniumVisionAgent(model=model, data_dir="data")
     selenium_vision_agent.run("""
@@ -26,8 +26,8 @@ I want you to crawl the website github.com and click on the main features of the
 @pytest.mark.expensive
 def test_run_selenium_network_capture_agent():
     model = InferenceClientModel(
-        model_id="Qwen/Qwen2.5-VL-32B-Instruct",
-        provider="auto",
+        model_id="Qwen/Qwen2.5-VL-72B-Instruct",
+        provider="nebius",
     )
     selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data")
     selenium_vision_agent.run("""
@@ -38,33 +38,17 @@ Then I want you to go back, and to sort the issues by oldest order
               """)
 
 
-from time import time
-
-
-def test_return_requests(url: str = "arxiv.org"):
+def test_return_requests():
     model = InferenceClientModel(
-        model_id="Qwen/Qwen2.5-VL-32B-Instruct",
-        provider="auto",
+        model_id="Qwen/Qwen2.5-VL-72B-Instruct",
+        provider="nebius",
     )
     selenium_vision_agent = SeleniumNetworkCaptureAgent(
-        model=model,
-        data_dir="data",
-        markdown_file_path=DATA_PATH / "empty_markdown.md",
-        browser_headless=False,
+        model=model, data_dir="data", markdown_file_path=DATA_PATH / "empty_markdown.md"
     )
-    selenium_vision_agent.tools["open_url"](url)
+    selenium_vision_agent.tools["open_url"]("https://github.com")
     input("Press Enter to continue...")
-    from smolagents import ActionStep, Timing, ToolCall
-
-    memory_step = ActionStep(
-        0,
-        Timing(start_time=time()),
-        tool_calls=[ToolCall(name="open_url", arguments={"url": url}, id="1")],
-    )
-    selenium_vision_agent.capture_requests_callback(memory_step, selenium_vision_agent)
-
-
-test_return_requests("https://arxiv.org/abs/2507.18628")
+    selenium_vision_agent.capture_requests_callback()
 
 
 def test_analysing_requests():
@@ -72,8 +56,8 @@ def test_analysing_requests():
     json_requests = json.loads((MOCK_REQUESTS_PATH / "github_json.json").read_text())
 
     model = InferenceClientModel(
-        model_id="Qwen/Qwen2.5-VL-32B-Instruct",
-        provider="auto",
+        model_id="Qwen/Qwen2.5-VL-72B-Instruct",
+        provider="nebius",
     )
     selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data")
 
