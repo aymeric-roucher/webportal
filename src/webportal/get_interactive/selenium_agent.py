@@ -5,7 +5,7 @@ import json
 import requests
 from datetime import datetime
 from io import BytesIO
-from typing import Any
+from typing import Any, Callable
 from urllib.parse import urljoin, urlparse
 
 # Selenium imports
@@ -171,10 +171,12 @@ class SeleniumVisionAgent(CodeAgent):
         verbosity_level: LogLevel = 2,
         planning_interval: int = None,
         browser_headless: bool = True,
+        callback_tools: list[Callable] | None= None,
         **kwargs,
     ):
         self.data_dir = data_dir
         self.planning_interval = planning_interval
+        self.callback_tools = callback_tools or []
 
         self.chrome_options = webdriver.ChromeOptions()
         self.width, self.height = 1920, 1080
@@ -248,7 +250,7 @@ class SeleniumVisionAgent(CodeAgent):
         pass
 
     def setup_step_callbacks(self) -> None:
-        self._setup_step_callbacks([self.take_screenshot_callback])
+        self._setup_step_callbacks([self.take_screenshot_callback] + self.callback_tools)
 
     def take_screenshot_callback(
         self, memory_step: ActionStep, agent: CodeAgent | None = None

@@ -7,8 +7,8 @@ from smolagents.models import InferenceClientModel
 
 def main_crawl_website_and_get_markdown(prompt: str, data_dir: Path) -> Path:
     """Main function to run the conversion"""
-    
-    input_file = WEBPORTAL_REPO_PATH / Path("digested_websites/interactive_elements.md")
+    data_dir.mkdir(parents=True, exist_ok=True)
+    input_file = data_dir / Path("raw_markdown.md")
 
     model = InferenceClientModel(
         model_id="Qwen/Qwen2.5-VL-72B-Instruct",
@@ -18,7 +18,7 @@ def main_crawl_website_and_get_markdown(prompt: str, data_dir: Path) -> Path:
     selenium_vision_agent.run(prompt)
 
     # Set up paths
-    output_file = WEBPORTAL_REPO_PATH / Path("digested_websites/github_generated.md")
+    output_file = input_file.with_name("digested_markdown")
     
     # Run conversion
     convert_interactive_elements_to_api_docs(
@@ -28,6 +28,9 @@ def main_crawl_website_and_get_markdown(prompt: str, data_dir: Path) -> Path:
     
     return output_file
 
+def click_on_every_button_on_the_page(website_url: str, data_dir: Path) -> Path:
+    main_crawl_website_and_get_markdown(f"I want you to click on every button on the page {website_url}, if you changed page, you should go back to the previous page", data_dir)
+
 
 if __name__ == "__main__":
     prompt = """
@@ -35,5 +38,5 @@ According to github, when was Regression added to the oldest closed numpy.polyno
                               
 Start by going to the numpy package page and then click on the Issues tab.
 """
-    data_dir = DATA_PATH
+    data_dir = DATA_PATH / "github"
     main_crawl_website_and_get_markdown(prompt, data_dir)
