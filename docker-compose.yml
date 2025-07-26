@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  webportal:
+    build: .
+    container_name: webportal-app
+    restart: unless-stopped
+    environment:
+      - PYTHONPATH=/app/src
+      - CHROME_BIN=/usr/bin/google-chrome
+      - DISPLAY=:99
+    volumes:
+      # Mount data directory for persistent storage
+      - ./data:/app/data
+      - ./digested_websites:/app/digested_websites
+      - ./har_data:/app/har_data
+      # Mount logs directory
+      - ./logs:/app/logs
+    ports:
+      - "8000:8000"
+    # Add security options
+    security_opt:
+      - seccomp:unconfined
+    # Increase shared memory for Chrome
+    shm_size: 2gb
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

@@ -13,6 +13,7 @@ from smolagents import InferenceClientModel, ToolCallingAgent, tool
 from smolagents.agent_types import AgentImage
 from smolagents.memory import ActionStep, TaskStep
 from smolagents.monitoring import LogLevel
+from typing import Callable
 
 SELENIUM_SYSTEM_PROMPT_TEMPLATE = """You are a web automation assistant that can control a local browser using Selenium. The current date is <<current_date>>.
 
@@ -177,7 +178,7 @@ class SeleniumVisionAgent(ToolCallingAgent):
         # Window and display settings
         self.chrome_options.add_argument("--force-device-scale-factor=1")
 
-        self.chrome_options.add_argument(f"--window-size={self.height},{self.width}")
+        self.chrome_options.add_argument(f"--window-size={self.width},{self.height}")
         self.chrome_options.add_argument("--disable-pdf-viewer")
         self.chrome_options.add_argument("--window-position=0,0")
 
