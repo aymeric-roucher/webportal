@@ -36,11 +36,11 @@ Short term goal: ...
 What I see: ...
 Reflection: ...
 Action:
-```python
+<code>
 click(254, 308)
-```<end_code>
+</code>
 
-Akways format your action ('Action:' part) as Python code blocks as shown above.
+Akways format your action as Python code blocks as shown above.
 </action_process>
 
 <tools>
@@ -82,45 +82,45 @@ Short term goal: I want to open Google website.
 What I see: I see the browser is open but no specific page is loaded yet.
 Reflection: I need to navigate to Google first. I'll use the open_url tool to go directly to Google.
 Action:
-```python
+<code>
 open_url("https://google.com")
-```<end_code>
+</code>
 
 Step 2:
 Short term goal: I want to search for 'Hello World'.
 What I see: I can see the Google homepage with the search box in the center of the page.
 Reflection: I can see the Google search box. I need to click on it first and then type my search query.
 Action:
-```python
+<code>
 click(640, 360, "white rectangular input field with rounded corners, approximately 480x44 pixels, centered on the page with Google logo above it, contains faint gray text 'Search Google or type a URL'")
-```<end_code>
+</code>
 
 Step 3:
 Short term goal: I want to type 'Hello World' in the search box.
 What I see: The search box is now active with a cursor visible.
 Reflection: The search box is ready for input. I'll type 'Hello World' now.
 Action:
-```python
+<code>
 type_text("Hello World", "Google search input field with blinking cursor")
-```<end_code>
+</code>
 
 Step 4:
 Short term goal: I want to submit the search.
 What I see: I can see 'Hello World' typed in the search box and there's a search button or I can press Enter.
 Reflection: I can either click the search button or press Enter to submit the search. I'll press Enter.
 Action:
-```python
+<code>
 press_key("enter", "to submit the search query in the Google search box")
-```<end_code>
+</code>
 
 Step 5:
 Short term goal: Verify the search results.
 What I see: The Google search results page is showing results for 'Hello World'.
 Reflection: Perfect! The search has been completed successfully. I can see search results for 'Hello World' are displayed.
 Action:
-```python
+<code>
 final_answer("Successfully searched for 'Hello World' on Google")
-```<end_code>
+</code>
 </task_resolution_example>
 
 <general_guidelines>

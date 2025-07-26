@@ -16,17 +16,9 @@ def main(rerun_web_agent: bool = False):
             provider="nebius",
         )
         selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data", markdown_file_path=input_file)
-        selenium_vision_agent.capture_requests_callback()
         selenium_vision_agent.run("""
-I want you to go to github.com, navigate to the numpy package, and perform the following actions to extract all interactive elements:
+"According to github, when was Regression added to the oldest closed numpy.polynomial issue that has the Regression label in MM/DD/YY?",
 
-- Go to the issues page (numpy/numpy/issues)
-- Click on the "Labels" filter button (between the "Author" and the "Labels" button) to see all available labels with their colors and descriptions.
-- Click on a label to see the issues that have this label.
-- Click on the "Closed" button to toggle and view closed issues
-- Use the sort dropdown to sort issues by "Oldest" order (creation date ascending)
-- click on an issue to see the details
-Make sure to interact with each element completely to capture all the network requests and API calls that these interactive elements generate.
 """)
 
 
