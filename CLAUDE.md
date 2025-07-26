@@ -44,23 +44,23 @@ python -m pytest               # Alternative test runner
 - Supports both JSON and HTML responses with BeautifulSoup parsing
 - GraphQL error handling built-in
 
-**Interactive/Browser-based** (`src/webportal/get_interactive/selenium_agent.py`):
-- `SeleniumVisionAgent` extends CodeAgent with browser automation
+**Interactive/Browser-based** (`src/webportal/get_interactive/playwright_agent.py`):
+- `PlaywrightVisionAgent` extends CodeAgent with browser automation
 - Provides comprehensive desktop interaction tools (click, type, scroll, etc.)
-- Network monitoring via Chrome DevTools Protocol
+- Network monitoring via Playwright's built-in capabilities
 - Screenshot capture with click markers for debugging
 - Window resolution: 1920x1080 with proper scaling
 
 ### Project Structure
 - `digested_websites/` - Website-specific processed content
-- `data/` - Screenshot storage for Selenium agent
+- `data/` - Screenshot storage for Playwright agent
 - `src/webportal/` - Main package code
-- `src/webportal/get_interactive/` - Selenium agent code that will crawl a website to extract the relevant API calls. 
-- `tests/` - Test files with Selenium integration tests
+- `src/webportal/get_interactive/` - Playwright agent code that will crawl a website to extract the relevant API calls. 
+- `tests/` - Test files with Playwright integration tests
 
 ### Main Dependencies
 - **smolagents**: Agent framework with Qwen model integration
-- **selenium**: Browser automation with Chrome driver
+- **playwright**: Browser automation with Chrome/Firefox/Safari support
 - **requests**: HTTP client for API interactions
 
 ### Coding Style

@@ -3,17 +3,16 @@ import time
 import unicodedata
 from datetime import datetime
 from io import BytesIO
+from typing import Callable
 
 from PIL import Image, ImageDraw
-from selenium import webdriver
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
+from playwright.sync_api import sync_playwright, Browser, Page
 from smolagents import CodeAgent, InferenceClientModel, tool
 from smolagents.agent_types import AgentImage
 from smolagents.memory import ActionStep, TaskStep
 from smolagents.monitoring import LogLevel
 
-SELENIUM_SYSTEM_PROMPT_TEMPLATE = """You are a web automation assistant that can control a local browser using Selenium. The current date is <<current_date>>.
+PLAYWRIGHT_SYSTEM_PROMPT_TEMPLATE = """You are a web automation assistant that can control a local browser using Playwright. The current date is <<current_date>>.
 
 <action process>
 You will be given a task to solve in several steps. At each step you will perform an action.
@@ -147,8 +146,8 @@ def draw_marker_on_image(image_copy, click_coordinates):
     return image_copy
 
 
-class SeleniumVisionAgent(CodeAgent):
-    """Agent for local browser automation with Selenium and Qwen2.5VL vision capabilities"""
+class PlaywrightVisionAgent(CodeAgent):
+    """Agent for local browser automation with Playwright and Qwen2.5VL vision capabilities"""
 
     def __init__(
         self,
@@ -165,41 +164,48 @@ class SeleniumVisionAgent(CodeAgent):
         self.data_dir = data_dir
         self.planning_interval = planning_interval
         self.callback_tools = callback_tools or []
+        
+        self.width, self.height = 1280, 720
 
-        self.chrome_options = webdriver.ChromeOptions()
-        self.width, self.height = 1920, 1080
-
+        
+        self.browser_headless = browser_headless
+        
+        # Initialize Playwright
+        self.playwright = sync_playwright().start()
+        
+        # Launch browser with appropriate options
+        browser_args = [
+            "--force-device-scale-factor=1",
+            "--disable-pdf-viewer",
+        ]
+        
         if browser_headless:
             # Docker/serverless-friendly Chrome options
-            self.chrome_options.add_argument("--headless=new")  # New headless mode
-            self.chrome_options.add_argument("--no-sandbox")
-            self.chrome_options.add_argument("--disable-dev-shm-usage")
-            self.chrome_options.add_argument("--disable-gpu")
-            self.chrome_options.add_argument("--disable-web-security")
-            self.chrome_options.add_argument("--disable-features=VizDisplayCompositor")
-            self.chrome_options.add_argument("--remote-debugging-port=9222")
-
-        # Window and display settings
-        self.chrome_options.add_argument("--force-device-scale-factor=1")
-
-        self.chrome_options.add_argument(f"--window-size={self.height},{self.width}")
-        self.chrome_options.add_argument("--disable-pdf-viewer")
-        self.chrome_options.add_argument("--window-position=0,0")
-
-        if browser_headless:
-            # Memory and performance optimizations for serverless
-            self.chrome_options.add_argument("--memory-pressure-off")
-            self.chrome_options.add_argument("--max_old_space_size=4096")
-            self.chrome_options.add_argument("--disable-background-timer-throttling")
-            self.chrome_options.add_argument("--disable-backgrounding-occluded-windows")
-            self.chrome_options.add_argument("--disable-renderer-backgrounding")
-
-        self._additional_chrome_options()
-
-        self.driver = webdriver.Chrome(options=self.chrome_options)
-
-        # Set browser window size
-        self.driver.set_window_size(self.width, self.height)
+            browser_args.extend([
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu",
+                "--disable-web-security",
+                "--disable-features=VizDisplayCompositor",
+                "--memory-pressure-off",
+                "--max_old_space_size=4096",
+                "--disable-background-timer-throttling",
+                "--disable-backgrounding-occluded-windows",
+                "--disable-renderer-backgrounding",
+            ])
+        
+        self.browser = self.playwright.chromium.launch(
+            headless=browser_headless,
+            args=browser_args
+        )
+        
+        # Create context and page
+        self.context = self.browser.new_context(
+            viewport={"width": self.width, "height": self.height},
+            device_scale_factor=1
+        )
+        self.page = self.context.new_page()
+        
         print(f"Browser window size: {self.width}x{self.height}")
 
         # Set up temp directory
@@ -217,7 +223,7 @@ class SeleniumVisionAgent(CodeAgent):
             **kwargs,
         )
         self.prompt_templates["system_prompt"] = (
-            SELENIUM_SYSTEM_PROMPT_TEMPLATE.replace(
+            PLAYWRIGHT_SYSTEM_PROMPT_TEMPLATE.replace(
                 "<<resolution_x>>", str(self.width)
             ).replace("<<resolution_y>>", str(self.height))
         )
@@ -231,9 +237,6 @@ class SeleniumVisionAgent(CodeAgent):
         self._setup_desktop_tools()
         self.setup_step_callbacks()
 
-    def _additional_chrome_options(self):
-        """Additional Chrome options"""
-        pass
 
     def setup_step_callbacks(self) -> None:
         self._setup_step_callbacks(
@@ -250,7 +253,7 @@ class SeleniumVisionAgent(CodeAgent):
 
         time.sleep(2.5)  # Let things happen in the browser
 
-        screenshot_bytes = self.driver.get_screenshot_as_png()
+        screenshot_bytes = self.page.screenshot()
         image = Image.open(BytesIO(screenshot_bytes))
 
         # Create a filename with step number
@@ -312,9 +315,7 @@ class SeleniumVisionAgent(CodeAgent):
                 y: The y coordinate (vertical position)
                 description: visual description including: element type, text content, size (approximate width/height), color, position relative to other elements (e.g., "blue rectangular button with white text 'Submit', approximately 120x40 pixels, located in the bottom right corner of the form")
             """
-            action = ActionChains(self.driver)
-            action.move_by_offset(x, y).click().perform()
-            action.reset_actions()
+            self.page.mouse.click(x, y)
             self.click_coordinates = [x, y]
             log_msg = f"Clicked at coordinates ({x}, {y})"
             if description:
@@ -331,9 +332,7 @@ class SeleniumVisionAgent(CodeAgent):
                 y: The y coordinate (vertical position)
                 description: visual description including: element type, text content, size (approximate width/height), color, position relative to other elements
             """
-            action = ActionChains(self.driver)
-            action.move_by_offset(x, y).context_click().perform()
-            action.reset_actions()
+            self.page.mouse.click(x, y, button='right')
             self.click_coordinates = [x, y]
             log_msg = f"Right-clicked at coordinates ({x}, {y})"
             if description:
@@ -350,9 +349,7 @@ class SeleniumVisionAgent(CodeAgent):
                 y: The y coordinate (vertical position)
                 description: visual description including: element type, text content, size (approximate width/height), color, position relative to other elements
             """
-            action = ActionChains(self.driver)
-            action.move_by_offset(x, y).double_click().perform()
-            action.reset_actions()
+            self.page.mouse.dblclick(x, y)
             self.click_coordinates = [x, y]
             log_msg = f"Double-clicked at coordinates ({x}, {y})"
             if description:
@@ -369,9 +366,7 @@ class SeleniumVisionAgent(CodeAgent):
                 y: The y coordinate (vertical position)
                 description: Optional visual description of what you're hovering over
             """
-            action = ActionChains(self.driver)
-            action.move_by_offset(x, y).perform()
-            action.reset_actions()
+            self.page.mouse.move(x, y)
             log_msg = f"Moved mouse to coordinates ({x}, {y})"
             if description:
                 log_msg += f" over: {description}"
@@ -394,9 +389,7 @@ class SeleniumVisionAgent(CodeAgent):
                 target_description: Optional description of the input field or element where text is being typed (e.g., "search box in the header", "username field in login form")
             """
             clean_text = normalize_text(text)
-            action = ActionChains(self.driver)
-            action.send_keys(clean_text).perform()
-            action.reset_actions()
+            self.page.keyboard.type(clean_text)
             log_msg = f"Typed text: '{clean_text}'"
             if target_description:
                 log_msg += f" in: {target_description}"
@@ -411,23 +404,21 @@ class SeleniumVisionAgent(CodeAgent):
                 key: The key to press (e.g. "enter", "space", "backspace", etc.).
                 context_description: Optional description of the context or purpose (e.g., "to submit the search form", "to close the modal dialog")
             """
-            # Map common key names to Selenium Keys
+            # Map common key names to Playwright key format
             key_mapping = {
-                "enter": Keys.ENTER,
-                "space": Keys.SPACE,
-                "backspace": Keys.BACKSPACE,
-                "tab": Keys.TAB,
-                "escape": Keys.ESCAPE,
-                "esc": Keys.ESCAPE,
-                "delete": Keys.DELETE,
-                "shift": Keys.SHIFT,
-                "ctrl": Keys.CONTROL,
-                "alt": Keys.ALT,
+                "enter": "Enter",
+                "space": "Space",
+                "backspace": "Backspace",
+                "tab": "Tab",
+                "escape": "Escape",
+                "esc": "Escape",
+                "delete": "Delete",
+                "shift": "Shift",
+                "ctrl": "Control",
+                "alt": "Alt",
             }
-            selenium_key = key_mapping.get(key.lower(), key)
-            action = ActionChains(self.driver)
-            action.send_keys(selenium_key).perform()
-            action.reset_actions()
+            playwright_key = key_mapping.get(key.lower(), key)
+            self.page.keyboard.press(playwright_key)
             log_msg = f"Pressed key: {key}"
             if context_description:
                 log_msg += f" {context_description}"
@@ -440,7 +431,7 @@ class SeleniumVisionAgent(CodeAgent):
             Goes back to the previous page in the browser. If using this tool doesn't work, just click the button directly.
             Args:
             """
-            self.driver.back()
+            self.page.go_back()
             self.logger.log("Went back one page")
             return "Went back one page"
 
@@ -463,11 +454,10 @@ class SeleniumVisionAgent(CodeAgent):
                 source_description: Optional description of what you're dragging from
                 target_description: Optional description of where you're dropping it
             """
-            action = ActionChains(self.driver)
-            action.move_by_offset(x1, y1).click_and_hold().move_by_offset(
-                x2 - x1, y2 - y1
-            ).release().perform()
-            action.reset_actions()
+            self.page.mouse.move(x1, y1)
+            self.page.mouse.down()
+            self.page.mouse.move(x2, y2)
+            self.page.mouse.up()
             message = f"Dragged and dropped from [{x1}, {y1}] to [{x2}, {y2}]"
             if source_description and target_description:
                 message += f" - moved {source_description} to {target_description}"
@@ -493,15 +483,12 @@ class SeleniumVisionAgent(CodeAgent):
                 amount: The amount to scroll. A good amount is 1 or 2.
                 area_description: Optional description of the area being scrolled (e.g., "main content area", "sidebar list")
             """
-            action = ActionChains(self.driver)
-            action.move_by_offset(x, y)
+            self.page.mouse.move(x, y)
             for _ in range(amount):
                 if direction.lower() == "up":
-                    action.scroll_by_amount(0, -100)
+                    self.page.mouse.wheel(0, -100)
                 else:
-                    action.scroll_by_amount(0, 100)
-            action.perform()
-            action.reset_actions()
+                    self.page.mouse.wheel(0, 100)
             message = f"Scrolled {direction} by {amount}"
             if area_description:
                 message += f" in: {area_description}"
@@ -534,7 +521,7 @@ class SeleniumVisionAgent(CodeAgent):
             if not url.startswith(("http://", "https://")):
                 url = "https://" + url
 
-            self.driver.get(url)
+            self.page.goto(url)
             # Give it time to load
             time.sleep(2)
             self.logger.log(f"Opening URL: {url}")
@@ -547,16 +534,14 @@ class SeleniumVisionAgent(CodeAgent):
             Args:
                 search_string: The string to search for on the page.
             """
-            action = ActionChains(self.driver)
-            action.key_down(Keys.CONTROL).send_keys("f").key_up(Keys.CONTROL).perform()
+            self.page.keyboard.press("Control+f")
             time.sleep(0.3)
             clean_text = normalize_text(search_string)
-            action.send_keys(clean_text).perform()
+            self.page.keyboard.type(clean_text)
             time.sleep(0.3)
-            action.send_keys(Keys.ENTER).perform()
+            self.page.keyboard.press("Enter")
             time.sleep(0.3)
-            action.send_keys(Keys.ESCAPE).perform()
-            action.reset_actions()
+            self.page.keyboard.press("Escape")
             output_message = f"Scrolled to the first occurrence of '{clean_text}'"
             self.logger.log(output_message)
             return output_message
@@ -577,7 +562,9 @@ class SeleniumVisionAgent(CodeAgent):
 
     def close(self):
         """Clean up resources"""
-        if self.driver:
+        if hasattr(self, 'browser') and self.browser:
             print("Closing browser...")
-            self.driver.quit()
+            self.browser.close()
             print("Browser closed")
+        if hasattr(self, 'playwright') and self.playwright:
+            self.playwright.stop()

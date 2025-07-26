@@ -8,10 +8,10 @@ import requests
 from smolagents import CodeAgent
 from smolagents.memory import ActionStep
 
-from webportal.get_interactive.selenium_agent import SeleniumVisionAgent
+from webportal.get_interactive.playwright_agent import PlaywrightVisionAgent
 
 
-class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
+class PlaywrightNetworkCaptureAgent(PlaywrightVisionAgent):
     def __init__(self, markdown_file_path: Path | None = None, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -27,17 +27,6 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
 
         self._setup_network_monitoring()
 
-    def _additional_chrome_options(self):
-        """Additional Chrome options"""
-        # Enable Chrome DevTools Protocol for network monitoring
-        self.chrome_options.add_experimental_option("useAutomationExtension", False)
-        self.chrome_options.add_experimental_option(
-            "excludeSwitches", ["enable-automation"]
-        )
-        self.chrome_options.add_argument("--enable-network-service-logging")
-        self.chrome_options.add_argument("--log-level=0")
-        # Enable performance logs to capture network requests
-        self.chrome_options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
 
     def setup_step_callbacks(self) -> None:
         self._setup_step_callbacks(
@@ -45,19 +34,47 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
         )
 
     def _setup_network_monitoring(self):
-        """Setup Chrome DevTools Protocol for network monitoring"""
-        # Enable network domain
-        self.driver.execute_cdp_cmd("Network.enable", {})
-
-        # Clear any existing network requests
+        """Setup Playwright network monitoring"""
+        # Initialize network request tracking
         self.network_requests = []
-
-        # Add event listeners for network requests
-        self.driver.execute_cdp_cmd("Network.clearBrowserCache", {})
-
-        # Set up event listener callback (note: this is a simplified approach)
-        # In practice, you'd need to use CDP event streaming for real-time capture
+        
+        # Set up request and response listeners
+        self.page.on("request", self._on_request)
+        self.page.on("response", self._on_response)
+        
         print("Network monitoring enabled")
+        
+    def _on_request(self, request):
+        """Handle incoming requests"""
+        request_data = {
+            "url": request.url,
+            "method": request.method,
+            "headers": request.headers,
+            "post_data": request.post_data if request.method in ["POST", "PUT", "PATCH"] else None,
+            "timestamp": time.time(),
+            "resource_type": request.resource_type,
+        }
+        self.network_requests.append(request_data)
+        
+    def _on_response(self, response):
+        """Handle responses"""
+        # Find the corresponding request and add response data
+        for request in reversed(self.network_requests):
+            if request.get("url") == response.url and "response" not in request:
+                request["response"] = {
+                    "status_code": response.status,
+                    "status_text": response.status_text,
+                    "headers": response.headers,
+                    "url": response.url,
+                    "response_timestamp": time.time(),
+                }
+                # Try to get response body
+                try:
+                    request["response"]["body"] = response.text()
+                except Exception as e:
+                    request["response"]["body"] = None
+                    request["response"]["body_error"] = str(e)
+                break
 
     def _initialize_markdown_file(self):
         """Initialize the centralized markdown file at the beginning of the agent session"""
@@ -73,79 +90,22 @@ Each element shows the API calls triggered by user interactions.
 
     def capture_step_network_activity(self, step_number: int) -> list[dict[str, Any]]:
         """Capture network activity that happened during a specific step"""
-        # Get all current logs
         time.sleep(1)  # making sure the response is received
-        logs = self.driver.get_log("performance")
-
-        if not logs:
-            return []
-
-        # Temporary storage for this step's requests and responses
-        requests_map = {}
-        responses_map = {}
-
-        # Process new logs only
-        for log in logs:
-            message = json.loads(log["message"])
-            method = message.get("message", {}).get("method")
-            params = message.get("message", {}).get("params", {})
-
-            if method == "Network.requestWillBeSent":
-                request_id = params.get("requestId", "")
-                if request_id:
-                    requests_map[request_id] = {
-                        "timestamp": log["timestamp"] / 1000,
-                        "url": params.get("request", {}).get("url", ""),
-                        "method": params.get("request", {}).get("method", "GET"),
-                        "headers": params.get("request", {}).get("headers", {}),
-                        "post_data": params.get("request", {}).get("postData", ""),
-                        "request_id": request_id,
-                        "step_number": step_number,
-                        "type": params.get("type", ""),
-                    }
-
-            elif method == "Network.responseReceived":
-                request_id = params.get("requestId", "")
-                if (
-                    request_id and request_id in requests_map
-                ):  # Only for requests we captured in this step
-                    response_info = params.get("response", {})
-                    response_data = {
-                        "status_code": response_info.get("status", 0),
-                        "status_text": response_info.get("statusText", ""),
-                        "headers": response_info.get("headers", {}),
-                        "mime_type": response_info.get("mimeType", ""),
-                        "url": response_info.get("url", ""),
-                        "response_timestamp": log["timestamp"] / 1000,
-                    }
-
-                    # Try to get the response body
-                    try:
-                        body_result = self.driver.execute_cdp_cmd(
-                            "Network.getResponseBody", {"requestId": request_id}
-                        )
-                        response_data["body"] = body_result.get("body")
-                        response_data["base64Encoded"] = body_result.get(
-                            "base64Encoded", False
-                        )
-                    except Exception as e:
-                        response_data["body"] = None
-                        response_data["body_error"] = str(e)
-
-                    responses_map[request_id] = response_data
-
-        # Combine requests with responses for this step
-        step_requests = []
-        for request_id, request_info in requests_map.items():
-            if request_id in responses_map:
-                request_info["response"] = responses_map[request_id]
-            else:
-                request_info["response"] = None
-            step_requests.append(request_info)
-
+        
+        # Get requests that were captured during this step
+        # For simplicity, we'll return all recent requests
+        # In a more sophisticated implementation, we'd track timing
+        step_requests = [req for req in self.network_requests if req.get("step_number") == step_number or "step_number" not in req]
+        
+        # Add step number to new requests
+        for req in step_requests:
+            if "step_number" not in req:
+                req["step_number"] = step_number
+                req["type"] = req.get("resource_type", "")
+        
         # Store step requests for later analysis
         self.step_requests[step_number] = step_requests
-
+        
         return step_requests
 
     def capture_requests_callback(
@@ -284,7 +244,7 @@ Each element shows the API calls triggered by user interactions.
             )
 
         # Get current cookies from the browser to maintain session
-        browser_cookies = self.driver.get_cookies()
+        browser_cookies = self.context.cookies()
         cookies_dict = {cookie["name"]: cookie["value"] for cookie in browser_cookies}
 
         # Base headers similar to agent.py
@@ -298,7 +258,7 @@ Each element shows the API calls triggered by user interactions.
             "sec-fetch-mode": "cors",
             "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
             "x-requested-with": "XMLHttpRequest",
-            "referer": self.driver.current_url,
+            "referer": self.page.url,
         }
 
         # Merge with original request headers
@@ -471,7 +431,7 @@ Each element shows the API calls triggered by user interactions.
         """Generate markdown summary for a step with individual blocks per request"""
 
         # Get current page location
-        location_page = self.driver.current_url
+        location_page = self.page.url
 
         # Combine all requests for processing
         all_requests = json_requests + html_requests
