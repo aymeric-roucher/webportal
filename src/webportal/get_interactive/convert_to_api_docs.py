@@ -34,9 +34,12 @@ INPUT FORMAT: The input contains step-by-step agent actions with captured networ
 - Route sections showing captured API calls with basic information
 
 OUTPUT FORMAT: Convert this into structured interactive elements with the following format:
+<example_format>
 {example_format}
+</example_format>
 
 CRITICAL INSTRUCTIONS:
+<guidelines>
 
 There are 2 types of requests:
 - GET requests
@@ -75,9 +78,12 @@ get_request or post_request.
    - Preserve JSON structure in arguments
    - Don't modify GraphQL query hashes
    - Keep response format descriptions accurate
+</guidelines>
 
 INPUT TO CONVERT:
+<input>
 {content}
+</input>
 
 Generate clean, structured API documentation following the format above. Focus on creating reusable, specific interactive elements that would be useful for an LLM to understand GitHub's API patterns."""
 

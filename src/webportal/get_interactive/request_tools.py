@@ -161,7 +161,7 @@ def get_request_crawl4ai(url: str, params: dict | None = None, expect_html: bool
         return {"error": error_msg}
 
 
-def _fallback_html_processing(html_content: str, include_script_data: bool = False) -> dict:
+def _fallback_html_processing(html_content: str, include_script_data: bool = True) -> dict:
     """Fallback HTML processing using BeautifulSoup (original method)"""
     # Parse HTML
     soup = BeautifulSoup(html_content, "html.parser")

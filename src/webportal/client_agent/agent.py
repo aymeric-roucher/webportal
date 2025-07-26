@@ -9,7 +9,7 @@ from smolagents import (
     OpenAIModel,
     tool,
 )
-from webportal.get_interactive.request_tools import get_request_crawl4ai, post_request
+from webportal.get_interactive.request_tools import get_request, post_request
 from webportal.common import WEBPORTAL_REPO_PATH
 load_dotenv()
 
@@ -37,7 +37,7 @@ We used a crawler to extract the following API calls:
 if __name__ == "__main__":
     agent = CodeAgent(
         model=model,
-        tools=[get_request_crawl4ai, post_request],
+        tools=[get_request, post_request],
         instructions=instructions,
         additional_authorized_imports=["urllib.*"],
         verbosity_level=2,

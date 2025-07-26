@@ -17,8 +17,7 @@ def main(rerun_web_agent: bool = False):
         )
         selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data", markdown_file_path=input_file)
         selenium_vision_agent.run("""
-"According to github, when was Regression added to the oldest closed numpy.polynomial issue that has the Regression label in MM/DD/YY?",
-
+According to github, when was Regression added to the oldest closed numpy.polynomial issue that has the Regression label in MM/DD/YY?
 """)
 
 
