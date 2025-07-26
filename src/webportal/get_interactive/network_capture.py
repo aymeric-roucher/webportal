@@ -18,6 +18,7 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
 
         self.network_requests: list[dict[str, Any]] = []
         self.step_requests: dict[int, list[dict[str, Any]]] = {}
+        self.previous_url: str | None = None
 
         self.markdown_file_path = (
             markdown_file_path or Path(self.data_dir) / "interactive_elements.md"
@@ -160,6 +161,9 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
             memory_step.observations += f"\n{capture_message}"
         else:
             memory_step.observations = capture_message
+
+        if "with arguments: " in memory_step.model_output:
+            memory_step.model_output = memory_step.model_output.split("\nTool call ")[0]
 
         # Always analyze the step (even if no requests) to capture agent context
         self._analyze_step_requests(current_step, step_requests, memory_step)
@@ -437,6 +441,7 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
             tool_call_info=tool_call_info,
             json_requests=json_requests,
             html_requests=html_requests,
+            previous_url=self.previous_url,
         )
 
         # Always save step markdown (even if no requests) to include agent context
@@ -445,26 +450,29 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
             markdown=markdown_summary,
             output_model=model_output,
         )
+        self.previous_url = self.driver.current_url
 
     def _get_tool_call_info(self, memory_step: ActionStep) -> dict[str, Any]:
         """Extract tool call information for markdown generation"""
-        tool_call = memory_step.tool_calls[0]
-        return {
-            "name": tool_call.name,
-            "arguments": tool_call.arguments,
-        }
+        if memory_step.tool_calls:
+            tool_call = memory_step.tool_calls[0]
+            return {
+                "name": tool_call.name,
+                "arguments": tool_call.arguments,
+            }
+        else:
+            return {"name": "unknown", "arguments": {}}
 
     def _generate_step_interaction_summary_markdown(
         self,
         tool_call_info: dict[str, Any],
         json_requests: list[dict[str, Any]],
         html_requests: list[dict[str, Any]],
+        previous_url: str | None = None,
     ) -> str:
         """Generate markdown summary for a step with individual blocks per request"""
 
         # Get current page location
-        # TODO: this should not be the current url but the url at the previous step!
-        location_page = self.driver.current_url
 
         # Combine all requests for processing
         all_requests = json_requests + html_requests
@@ -476,7 +484,7 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
                 block = self._generate_individual_request_block(
                     request=request,
                     tool_call_info=tool_call_info,
-                    location_page=location_page,
+                    previous_url=previous_url,
                 )
                 if block:
                     markdown_blocks.append(block)
@@ -487,14 +495,14 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
         self,
         request: dict[str, Any],
         tool_call_info: dict[str, Any],
-        location_page: str,
+        previous_url: str | None = None,
     ) -> str:
         """Generate an individual markdown block for a single request"""
 
-        url = request.get("url", "")
-        method = request.get("method", "GET")
-        response = request.get("response", {})
-        response_body = response.get("body", "") if response else ""
+        url = request["url"]
+        method = request["method"]
+        response = request["response"]
+        response_body = response["body"] if response else ""
 
         # Extract base URL without query parameters
         base_url = self._extract_base_url(url)
@@ -510,8 +518,13 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
 
         # Build the markdown block with minimal inference
         markdown = f"```interactive_element_{block_name}\n"
-        markdown += f"location_page: {location_page}\n"
-        markdown += f"trigger: {tool_call_info['name']} {tool_call_info['arguments']}\n"
+        markdown += f"location_page: {previous_url}\n"
+        trigger_description = tool_call_info["name"]
+        if "element_description" in tool_call_info["arguments"]:
+            trigger_description += (
+                f" on {tool_call_info['arguments']['element_description']}"
+            )
+        markdown += f"trigger: {trigger_description}\n"
         markdown += f"request: {method} {base_url}\n"
 
         if arguments:
