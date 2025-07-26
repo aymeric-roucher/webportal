@@ -11,6 +11,7 @@ from smolagents import (
 )
 from webportal.get_interactive.request_tools import get_request, post_request
 from webportal.common import WEBPORTAL_REPO_PATH
+
 load_dotenv()
 
 model = OpenAIModel(

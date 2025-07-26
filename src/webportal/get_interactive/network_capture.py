@@ -10,6 +10,7 @@ from smolagents.memory import ActionStep
 
 from webportal.get_interactive.selenium_agent import SeleniumVisionAgent
 
+
 class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
     def __init__(self, markdown_file_path: Path | None = None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -17,13 +18,15 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
         # Initialize network request tracking
         self.network_requests = []
         self.step_requests = {}  # step_number -> list of requests for that step
-        
+
         # Initialize centralized markdown file
-        self.markdown_file_path = markdown_file_path or Path(self.data_dir) / "interactive_elements.md"
+        self.markdown_file_path = (
+            markdown_file_path or Path(self.data_dir) / "interactive_elements.md"
+        )
         self._initialize_markdown_file()
-        
+
         self._setup_network_monitoring()
-        
+
     def _additional_chrome_options(self):
         """Additional Chrome options"""
         # Enable Chrome DevTools Protocol for network monitoring
@@ -55,7 +58,7 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
         # Set up event listener callback (note: this is a simplified approach)
         # In practice, you'd need to use CDP event streaming for real-time capture
         print("Network monitoring enabled")
-        
+
     def _initialize_markdown_file(self):
         """Initialize the centralized markdown file at the beginning of the agent session"""
         header = """# Interactive Elements Analysis
@@ -64,14 +67,14 @@ This file contains the analysis of interactive elements discovered during websit
 Each element shows the API calls triggered by user interactions.
 
 """
-        
+
         self.markdown_file_path.write_text(header)
         print(f"📝 Initialized markdown file: {self.markdown_file_path}")
 
     def capture_step_network_activity(self, step_number: int) -> list[dict[str, Any]]:
         """Capture network activity that happened during a specific step"""
         # Get all current logs
-        time.sleep(1) # making sure the response is received
+        time.sleep(1)  # making sure the response is received
         logs = self.driver.get_log("performance")
 
         if not logs:
@@ -158,7 +161,7 @@ Each element shows the API calls triggered by user interactions.
             self.logger.log(
                 f"Captured {len(step_requests)} network requests for step {current_step}"
             )
-        
+
         # Always analyze the step (even if no requests) to capture agent context
         self._analyze_step_requests(current_step, step_requests, memory_step)
 
@@ -429,7 +432,7 @@ Each element shows the API calls triggered by user interactions.
 
         # Get the action that was performed in this step
         tool_call_info = self._get_tool_call_info(memory_step)
-        
+
         # Get agent's step context (observations and reasoning)
         model_output = memory_step.model_output if memory_step else ""
 
@@ -441,7 +444,11 @@ Each element shows the API calls triggered by user interactions.
         )
 
         # Always save step markdown (even if no requests) to include agent context
-        self._save_step_markdown(step_number=step_number, markdown=markdown_summary, output_model=model_output)
+        self._save_step_markdown(
+            step_number=step_number,
+            markdown=markdown_summary,
+            output_model=model_output,
+        )
 
     def _get_tool_call_info(
         self, memory_step: ActionStep | None = None
@@ -465,20 +472,22 @@ Each element shows the API calls triggered by user interactions.
 
         # Get current page location
         location_page = self.driver.current_url
-        
+
         # Combine all requests for processing
         all_requests = json_requests + html_requests
         markdown_blocks = []
-        
+
         # Only add request blocks if there are actual requests
         if all_requests:
             for request in all_requests:
                 block = self._generate_individual_request_block(
-                    request=request, tool_call_info=tool_call_info, location_page=location_page
+                    request=request,
+                    tool_call_info=tool_call_info,
+                    location_page=location_page,
                 )
                 if block:
                     markdown_blocks.append(block)
-        
+
         return "\n\n".join(markdown_blocks) if markdown_blocks else ""
 
     def _generate_individual_request_block(
@@ -488,47 +497,47 @@ Each element shows the API calls triggered by user interactions.
         location_page: str,
     ) -> str:
         """Generate an individual markdown block for a single request"""
-        
+
         url = request.get("url", "")
         method = request.get("method", "GET")
         response = request.get("response", {})
         response_body = response.get("body", "") if response else ""
-        
+
         # Extract base URL without query parameters
         base_url = self._extract_base_url(url)
-        
+
         # Simple block name from URL path
         block_name = self._generate_simple_block_name(url)
-        
+
         # Extract arguments
         arguments = self._extract_request_arguments(request)
-        
+
         # Simple descriptions
         returns = self._describe_response_format(response_body)
-        
+
         # Build the markdown block with minimal inference
         markdown = f"```interactive_element_{block_name}\n"
         markdown += f"location_page: {location_page}\n"
-        markdown += f"trigger: {tool_call_info.get('arguments', "")}\n"  # Leave empty for LLM to fill
+        markdown += f"trigger: {tool_call_info.get('arguments', '')}\n"  # Leave empty for LLM to fill
         markdown += f"request: {method} {base_url}\n"
-        
+
         if arguments:
             markdown += f"arguments: {arguments}\n"
-        
+
         markdown += f"returns: {returns}\n"
         markdown += "```"
-        
+
         return markdown
 
     def _save_step_markdown(self, step_number: int, markdown: str, output_model: str):
         """Append the markdown summary for a step to the centralized file"""
         step_header = f"\n## Step {step_number}\n\n"
-        
+
         # Add agent context section
         agent_section = ""
         if output_model:
             agent_section += f"**Agent output:**\n```\n{output_model}\n```\n\n"
-            
+
         markdown_section = ""
         if markdown:
             markdown_section = f"**Routes:**\n\n{markdown}\n\n"
@@ -543,16 +552,18 @@ Each element shows the API calls triggered by user interactions.
             elif not agent_section:
                 f.write("No significant activity in this step.\n\n")
 
-        print(f"💾 Appended step {step_number} to markdown file: {self.markdown_file_path}")
+        print(
+            f"💾 Appended step {step_number} to markdown file: {self.markdown_file_path}"
+        )
 
     def _extract_request_arguments(self, request: dict[str, Any]) -> str:
         """Extract arguments from request (POST data or URL parameters)"""
         method = request.get("method", "GET")
         url = request.get("url", "")
         post_data = request.get("post_data", "")
-        
+
         arguments = []
-        
+
         # Handle POST data
         if method == "POST" and post_data:
             try:
@@ -567,17 +578,28 @@ Each element shows the API calls triggered by user interactions.
                 # Handle form data or other formats
                 if "multipart/form-data" in str(request.get("headers", {})):
                     arguments.append('"body" (form-data): [multipart form data]')
-                elif "application/x-www-form-urlencoded" in str(request.get("headers", {})):
-                    arguments.append(f'"body" (url-encoded): {post_data[:200]}...' if len(post_data) > 200 else f'"body" (url-encoded): {post_data}')
+                elif "application/x-www-form-urlencoded" in str(
+                    request.get("headers", {})
+                ):
+                    arguments.append(
+                        f'"body" (url-encoded): {post_data[:200]}...'
+                        if len(post_data) > 200
+                        else f'"body" (url-encoded): {post_data}'
+                    )
                 else:
-                    arguments.append(f'"body": {post_data[:200]}...' if len(post_data) > 200 else f'"body": {post_data}')
-        
+                    arguments.append(
+                        f'"body": {post_data[:200]}...'
+                        if len(post_data) > 200
+                        else f'"body": {post_data}'
+                    )
+
         # Handle URL parameters - specifically for GraphQL queries in GET requests
         if "?" in url:
             from urllib.parse import urlparse, parse_qs, unquote
+
             parsed = urlparse(url)
             params = parse_qs(parsed.query)
-            
+
             # Special handling for GraphQL queries passed as URL parameters
             if "body" in params and "_graphql" in url:
                 try:
@@ -593,7 +615,7 @@ Each element shows the API calls triggered by user interactions.
                         if len(values) == 1:
                             param_strs.append(f'{key}="{values[0]}"')
                         else:
-                            param_strs.append(f'{key}={values}')
+                            param_strs.append(f"{key}={values}")
                     arguments.append(f"URL params: {', '.join(param_strs)}")
             else:
                 # Regular URL parameter handling
@@ -602,26 +624,27 @@ Each element shows the API calls triggered by user interactions.
                     if len(values) == 1:
                         param_strs.append(f'{key}="{values[0]}"')
                     else:
-                        param_strs.append(f'{key}={values}')
+                        param_strs.append(f"{key}={values}")
                 arguments.append(f"URL params: {', '.join(param_strs)}")
-        
-        return "\n".join(arguments) if arguments else ""
 
+        return "\n".join(arguments) if arguments else ""
 
     def _describe_response_format(self, response_body: str) -> str:
         """Describe the format and content of the response"""
         if not response_body:
             return "Empty response"
-        
+
         max_keys = 30
-        
+
         try:
             # Try to parse as JSON
             json_data = json.loads(response_body)
             if isinstance(json_data, dict):
                 # Analyze JSON structure
                 keys = list(json_data.keys())
-                return f"JSON object with keys: {', '.join(keys[:max_keys])}" + ("..." if len(keys) > max_keys else "")
+                return f"JSON object with keys: {', '.join(keys[:max_keys])}" + (
+                    "..." if len(keys) > max_keys else ""
+                )
             elif isinstance(json_data, list):
                 return f"JSON array with {len(json_data)} items"
             else:
@@ -632,11 +655,10 @@ Each element shows the API calls triggered by user interactions.
             else:
                 return "Text/other format response"
 
-
     def _extract_base_url(self, url: str) -> str:
         """Extract base URL without query parameters"""
         from urllib.parse import urlparse
-        
+
         parsed = urlparse(url)
         # Reconstruct URL without query parameters
         base_url = f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
@@ -645,10 +667,10 @@ Each element shows the API calls triggered by user interactions.
     def _generate_simple_block_name(self, url: str) -> str:
         """Generate a simple block name from URL"""
         from urllib.parse import urlparse
-        
+
         parsed = urlparse(url)
         path_parts = [p for p in parsed.path.strip("/").split("/") if p]
-        
+
         # Simple patterns
         if "_graphql" in url:
             return "_graphql"

@@ -6,18 +6,18 @@ from webportal.get_interactive.request_tools import get_request
 def test_github_graphql_issue_search_archived():
     """Test GitHub GraphQL query for issue search with archived filter"""
     url = "https://github.com/_graphql"
-    
+
     query_data = {
         "body": {
             "query": "29746fd23262d23f528e1f5b9b427437",
             "variables": {
                 "name": "numpy",
                 "owner": "numpy",
-                "query": "is:issue archived:false repo:numpy/numpy sort:created-desc"
-            }
+                "query": "is:issue archived:false repo:numpy/numpy sort:created-desc",
+            },
         }
     }
-    
+
     result = get_request(url, query_data)
     assert "error" not in result or "API returned errors" in result.get("error", "")
 
@@ -26,7 +26,7 @@ def test_github_graphql_issue_search_archived():
 def test_github_graphql_nodes_query():
     """Test GitHub GraphQL query for specific nodes"""
     url = "https://github.com/_graphql"
-    
+
     query_data = {
         "body": {
             "query": "94d38dded736cdabaf92c2e06e57dc3e",
@@ -37,12 +37,12 @@ def test_github_graphql_nodes_query():
                     "I_kwDOAA3dP87B-PUE",
                     "I_kwDOAA3dP87B9gZ8",
                     "I_kwDOAA3dP87B9Lh1",
-                    "I_kwDOAA3dP87BzbQL"
-                ]
-            }
+                    "I_kwDOAA3dP87BzbQL",
+                ],
+            },
         }
     }
-    
+
     result = get_request(url, query_data)
     assert "error" not in result or "API returned errors" in result.get("error", "")
 
@@ -51,7 +51,7 @@ def test_github_graphql_nodes_query():
 def test_github_graphql_labels_query():
     """Test GitHub GraphQL query for labels without names"""
     url = "https://github.com/_graphql"
-    
+
     query_data = {
         "body": {
             "query": "b480cbd1d6d3f7ba4a98229e88acf3fd",
@@ -60,11 +60,11 @@ def test_github_graphql_labels_query():
                 "labelNames": "",
                 "owner": "numpy",
                 "repo": "numpy",
-                "shouldQueryByNames": False
-            }
+                "shouldQueryByNames": False,
+            },
         }
     }
-    
+
     result = get_request(url, query_data)
     assert "error" not in result or "API returned errors" in result.get("error", "")
 
@@ -73,7 +73,7 @@ def test_github_graphql_labels_query():
 def test_github_graphql_bug_label_search():
     """Test GitHub GraphQL query for bug label search"""
     url = "https://github.com/_graphql"
-    
+
     query_data = {
         "body": {
             "query": "22d008b451590c967cc8d672452db3f9",
@@ -81,12 +81,12 @@ def test_github_graphql_bug_label_search():
                 "includeReactions": False,
                 "name": "numpy",
                 "owner": "numpy",
-                "query": "is:issue state:open label:\"00 - Bug\" repo:numpy/numpy sort:created-desc",
-                "skip": 0
-            }
+                "query": 'is:issue state:open label:"00 - Bug" repo:numpy/numpy sort:created-desc',
+                "skip": 0,
+            },
         }
     }
-    
+
     result = get_request(url, query_data)
     assert "error" not in result or "API returned errors" in result.get("error", "")
 
@@ -95,7 +95,7 @@ def test_github_graphql_bug_label_search():
 def test_github_graphql_bug_label_search_ascending():
     """Test GitHub GraphQL query for bug label search with ascending sort"""
     url = "https://github.com/_graphql"
-    
+
     query_data = {
         "body": {
             "query": "22d008b451590c967cc8d672452db3f9",
@@ -103,12 +103,12 @@ def test_github_graphql_bug_label_search_ascending():
                 "includeReactions": False,
                 "name": "numpy",
                 "owner": "numpy",
-                "query": "is:issue state:open label:\"00 - Bug\" sort:created-asc repo:numpy/numpy",
-                "skip": 0
-            }
+                "query": 'is:issue state:open label:"00 - Bug" sort:created-asc repo:numpy/numpy',
+                "skip": 0,
+            },
         }
     }
-    
+
     result = get_request(url, query_data)
     assert "error" not in result or "API returned errors" in result.get("error", "")
 
@@ -117,20 +117,20 @@ def test_github_graphql_bug_label_search_ascending():
 def test_github_graphql_labels_with_names():
     """Test GitHub GraphQL query for labels with specific names"""
     url = "https://github.com/_graphql"
-    
+
     query_data = {
         "body": {
             "query": "b480cbd1d6d3f7ba4a98229e88acf3fd",
             "variables": {
                 "count": 100,
-                "labelNames": "\"00 - Bug\"",
+                "labelNames": '"00 - Bug"',
                 "owner": "numpy",
                 "repo": "numpy",
-                "shouldQueryByNames": True
-            }
+                "shouldQueryByNames": True,
+            },
         }
     }
-    
+
     result = get_request(url, query_data)
     assert "error" not in result or "API returned errors" in result.get("error", "")
 
@@ -139,7 +139,7 @@ def test_github_graphql_labels_with_names():
 def test_github_graphql_author_capabilities():
     """Test GitHub GraphQL query for author capabilities"""
     url = "https://github.com/_graphql"
-    
+
     query_data = {
         "body": {
             "query": "76143934e91fc5d431ea7b83f63b08b9",
@@ -149,11 +149,11 @@ def test_github_graphql_author_capabilities():
                 "loginNames": None,
                 "name": "numpy",
                 "owner": "numpy",
-                "query": ""
-            }
+                "query": "",
+            },
         }
     }
-    
+
     result = get_request(url, query_data)
     assert "error" not in result or "API returned errors" in result.get("error", "")
 
@@ -162,18 +162,18 @@ def test_github_graphql_author_capabilities():
 def test_github_graphql_issue_search_no_label():
     """Test GitHub GraphQL issue search without label filter"""
     url = "https://github.com/_graphql"
-    
+
     query_data = {
         "body": {
             "query": "29746fd23262d23f528e1f5b9b427437",
             "variables": {
                 "name": "numpy",
                 "owner": "numpy",
-                "query": "is:issue state:open label:\"00 - Bug\" repo:numpy/numpy sort:created-desc"
-            }
+                "query": 'is:issue state:open label:"00 - Bug" repo:numpy/numpy sort:created-desc',
+            },
         }
     }
-    
+
     result = get_request(url, query_data)
     assert "error" not in result or "API returned errors" in result.get("error", "")
 
@@ -182,18 +182,18 @@ def test_github_graphql_issue_search_no_label():
 def test_github_graphql_issue_search_ascending_sort():
     """Test GitHub GraphQL issue search with ascending sort"""
     url = "https://github.com/_graphql"
-    
+
     query_data = {
         "body": {
             "query": "29746fd23262d23f528e1f5b9b427437",
             "variables": {
                 "name": "numpy",
                 "owner": "numpy",
-                "query": "is:issue state:open label:\"00 - Bug\" sort:created-asc repo:numpy/numpy"
-            }
+                "query": 'is:issue state:open label:"00 - Bug" sort:created-asc repo:numpy/numpy',
+            },
         }
     }
-    
+
     result = get_request(url, query_data)
     assert "error" not in result or "API returned errors" in result.get("error", "")
 
@@ -202,7 +202,7 @@ def test_github_graphql_issue_search_ascending_sort():
 def test_github_graphql_nodes_with_legacy_ids():
     """Test GitHub GraphQL query for nodes with legacy IDs"""
     url = "https://github.com/_graphql"
-    
+
     query_data = {
         "body": {
             "query": "94d38dded736cdabaf92c2e06e57dc3e",
@@ -213,12 +213,12 @@ def test_github_graphql_nodes_with_legacy_ids():
                     "MDU6SXNzdWU2MzA4MTIy",
                     "MDU6SXNzdWU3NzE4NjUw",
                     "MDU6SXNzdWU3NzE4Njgw",
-                    "MDU6SXNzdWU3NzIzOTkz"
-                ]
-            }
+                    "MDU6SXNzdWU3NzIzOTkz",
+                ],
+            },
         }
     }
-    
+
     result = get_request(url, query_data)
     assert "error" not in result or "API returned errors" in result.get("error", "")
 
@@ -227,7 +227,7 @@ def test_github_graphql_nodes_with_legacy_ids():
 def test_github_graphql_extended_nodes_query():
     """Test GitHub GraphQL query for extended set of nodes"""
     url = "https://github.com/_graphql"
-    
+
     query_data = {
         "body": {
             "query": "94d38dded736cdabaf92c2e06e57dc3e",
@@ -243,11 +243,11 @@ def test_github_graphql_extended_nodes_query():
                     "I_kwDOAA3dP86_buBy",
                     "I_kwDOAA3dP86_XVnG",
                     "I_kwDOAA3dP86-xDnl",
-                    "I_kwDOAA3dP86-PtAa"
-                ]
-            }
+                    "I_kwDOAA3dP86-PtAa",
+                ],
+            },
         }
     }
-    
+
     result = get_request(url, query_data)
     assert "error" not in result or "API returned errors" in result.get("error", "")

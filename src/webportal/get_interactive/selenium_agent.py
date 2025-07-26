@@ -171,7 +171,7 @@ class SeleniumVisionAgent(CodeAgent):
         verbosity_level: LogLevel = 2,
         planning_interval: int = None,
         browser_headless: bool = True,
-        callback_tools: list[Callable] | None= None,
+        callback_tools: list[Callable] | None = None,
         **kwargs,
     ):
         self.data_dir = data_dir
@@ -180,7 +180,7 @@ class SeleniumVisionAgent(CodeAgent):
 
         self.chrome_options = webdriver.ChromeOptions()
         self.width, self.height = 1920, 1080
-        
+
         if browser_headless:
             # Docker/serverless-friendly Chrome options
             self.chrome_options.add_argument("--headless=new")  # New headless mode
@@ -190,14 +190,14 @@ class SeleniumVisionAgent(CodeAgent):
             self.chrome_options.add_argument("--disable-web-security")
             self.chrome_options.add_argument("--disable-features=VizDisplayCompositor")
             self.chrome_options.add_argument("--remote-debugging-port=9222")
-            
+
         # Window and display settings
         self.chrome_options.add_argument("--force-device-scale-factor=1")
 
         self.chrome_options.add_argument(f"--window-size={self.height},{self.width}")
         self.chrome_options.add_argument("--disable-pdf-viewer")
         self.chrome_options.add_argument("--window-position=0,0")
-        
+
         if browser_headless:
             # Memory and performance optimizations for serverless
             self.chrome_options.add_argument("--memory-pressure-off")
@@ -205,10 +205,8 @@ class SeleniumVisionAgent(CodeAgent):
             self.chrome_options.add_argument("--disable-background-timer-throttling")
             self.chrome_options.add_argument("--disable-backgrounding-occluded-windows")
             self.chrome_options.add_argument("--disable-renderer-backgrounding")
-        
-        self._additional_chrome_options()
-        
 
+        self._additional_chrome_options()
 
         self.driver = webdriver.Chrome(options=self.chrome_options)
 
@@ -244,13 +242,15 @@ class SeleniumVisionAgent(CodeAgent):
         self.logger.log("Setting up agent tools...")
         self._setup_desktop_tools()
         self.setup_step_callbacks()
-        
+
     def _additional_chrome_options(self):
         """Additional Chrome options"""
         pass
 
     def setup_step_callbacks(self) -> None:
-        self._setup_step_callbacks([self.take_screenshot_callback] + self.callback_tools)
+        self._setup_step_callbacks(
+            [self.take_screenshot_callback] + self.callback_tools
+        )
 
     def take_screenshot_callback(
         self, memory_step: ActionStep, agent: CodeAgent | None = None
@@ -457,7 +457,14 @@ class SeleniumVisionAgent(CodeAgent):
             return "Went back one page"
 
         @tool
-        def drag_and_drop(x1: int, y1: int, x2: int, y2: int, source_description: str = "", target_description: str = "") -> str:
+        def drag_and_drop(
+            x1: int,
+            y1: int,
+            x2: int,
+            y2: int,
+            source_description: str = "",
+            target_description: str = "",
+        ) -> str:
             """
             Clicks [x1, y1], drags mouse to [x2, y2], then release click.
             Args:
@@ -482,7 +489,13 @@ class SeleniumVisionAgent(CodeAgent):
             return message
 
         @tool
-        def scroll(x: int, y: int, direction: str = "down", amount: int = 2, area_description: str = "") -> str:
+        def scroll(
+            x: int,
+            y: int,
+            direction: str = "down",
+            amount: int = 2,
+            area_description: str = "",
+        ) -> str:
             """
             Moves the mouse to selected coordinates, then scrolls the page.
             Args:
@@ -513,7 +526,7 @@ class SeleniumVisionAgent(CodeAgent):
         def wait(seconds: float) -> str:
             """
             Waits for the specified number of seconds. Very useful in case the prior order is still executing (for example starting very heavy applications like browsers or office apps)
-            
+
             This tool should be called if you hit a request limit. In that case you should wait for a minute and then try again.
             Args:
                 seconds: Number of seconds to wait, generally 3 is enough.
