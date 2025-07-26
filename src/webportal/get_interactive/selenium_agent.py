@@ -203,16 +203,10 @@ class SeleniumVisionAgent(CodeAgent):
             self.chrome_options.add_argument("--disable-background-timer-throttling")
             self.chrome_options.add_argument("--disable-backgrounding-occluded-windows")
             self.chrome_options.add_argument("--disable-renderer-backgrounding")
-            
-        # Enable Chrome DevTools Protocol for network monitoring
-        self.chrome_options.add_experimental_option("useAutomationExtension", False)
-        self.chrome_options.add_experimental_option(
-            "excludeSwitches", ["enable-automation"]
-        )
-        self.chrome_options.add_argument("--enable-network-service-logging")
-        self.chrome_options.add_argument("--log-level=0")
-        # Enable performance logs to capture network requests
-        self.chrome_options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
+        
+        self._additional_chrome_options()
+        
+
 
         self.driver = webdriver.Chrome(options=self.chrome_options)
 
@@ -248,6 +242,10 @@ class SeleniumVisionAgent(CodeAgent):
         self.logger.log("Setting up agent tools...")
         self._setup_desktop_tools()
         self.setup_step_callbacks()
+        
+    def _additional_chrome_options(self):
+        """Additional Chrome options"""
+        pass
 
     def setup_step_callbacks(self) -> None:
         self._setup_step_callbacks([self.take_screenshot_callback])
