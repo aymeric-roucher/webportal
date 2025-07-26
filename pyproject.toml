@@ -23,7 +23,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = []
+dev = [
+    "browser-use",
+]
 
 [build-system]
 requires = ["hatchling"]
