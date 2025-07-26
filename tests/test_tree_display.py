@@ -6,8 +6,8 @@ Test script for the tree display functionality
 from src.webportal.get_skeleton.crawl import (
     FastJSCrawler,
     FixedTemplateSegment,
-    VariableTemplateSegment,
     Template,
+    VariableTemplateSegment,
 )
 
 
@@ -72,13 +72,13 @@ def test_tree_display():
     print("=" * 50)
 
     # Validate tree structure components (order of set items may vary)
-    lines = tree_output.strip().split('\n')
-    
+    lines = tree_output.strip().split("\n")
+
     # Check header
     assert lines[0] == "Site Structure for github.com"
     assert lines[1] == "=" * 50
     assert lines[2] == ""
-    
+
     # Check that all expected paths are present (except variable segments which may vary in order)
     expected_patterns = [
         "├── docs.github.com/",
@@ -100,18 +100,28 @@ def test_tree_display():
         "                └── main/",
         "                    └── lib/",
         "                        └── linguist/",
-        "                            └── languages.yml/"
+        "                            └── languages.yml/",
     ]
-    
+
     for pattern in expected_patterns:
         assert pattern in tree_output, f"Pattern '{pattern}' not found in tree output"
-    
+
     # Check variable segment with flexible ordering
-    assert any(("[tree|blob]" in line or "[blob|tree]" in line) for line in lines), "Variable segment [tree|blob] or [blob|tree] not found"
-    
+    assert any(("[tree|blob]" in line or "[blob|tree]" in line) for line in lines), (
+        "Variable segment [tree|blob] or [blob|tree] not found"
+    )
+
     # Check that variable segments contain expected values (order may vary)
-    assert any("debug-errors" in line and "document-code" in line and "refactor-code" in line for line in lines)
-    assert any("connect-with-wireguard" in line and "integrate-ai-agents" in line and "refactor-design-patterns" in line for line in lines)
+    assert any(
+        "debug-errors" in line and "document-code" in line and "refactor-code" in line
+        for line in lines
+    )
+    assert any(
+        "connect-with-wireguard" in line
+        and "integrate-ai-agents" in line
+        and "refactor-design-patterns" in line
+        for line in lines
+    )
     assert any("tree|blob" in line or "blob|tree" in line for line in lines)
 
     print("✅ Tree display test passed!")
