@@ -79,7 +79,7 @@ def test_tree_display():
     assert lines[1] == "=" * 50
     assert lines[2] == ""
     
-    # Check that all expected paths are present
+    # Check that all expected paths are present (except variable segments which may vary in order)
     expected_patterns = [
         "├── docs.github.com/",
         "│   └── [id]/",
@@ -97,7 +97,6 @@ def test_tree_display():
         "    │                       └── github-code-search/",
         "    └── github-linguist/",
         "        └── linguist/",
-        "            └── [tree|blob]/",
         "                └── main/",
         "                    └── lib/",
         "                        └── linguist/",
@@ -106,6 +105,9 @@ def test_tree_display():
     
     for pattern in expected_patterns:
         assert pattern in tree_output, f"Pattern '{pattern}' not found in tree output"
+    
+    # Check variable segment with flexible ordering
+    assert any(("[tree|blob]" in line or "[blob|tree]" in line) for line in lines), "Variable segment [tree|blob] or [blob|tree] not found"
     
     # Check that variable segments contain expected values (order may vary)
     assert any("debug-errors" in line and "document-code" in line and "refactor-code" in line for line in lines)

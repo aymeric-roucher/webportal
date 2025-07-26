@@ -33,12 +33,20 @@ class Template(BaseModel):
 
 
 class FastJSCrawler:
-    def __init__(self, start_url, max_pages=100, max_depth=5, concurrency=10):
+    def __init__(
+        self,
+        start_url,
+        max_pages=100,
+        max_depth=5,
+        concurrency=10,
+        use_sitemap: bool = True,
+    ):
         self.start_url = start_url
         self.domain = urlparse(start_url).netloc
         self.max_pages = max_pages
         self.max_depth = max_depth
         self.concurrency = concurrency
+        self.use_sitemap = use_sitemap
 
         self.visited = set()
         self.to_visit = asyncio.Queue()
@@ -52,6 +60,101 @@ class FastJSCrawler:
             set
         )  # Track path lengths for each position's segments
         self.semaphore = asyncio.Semaphore(concurrency)
+
+    def load_sitemap(self) -> list[str]:
+        """Load URLs from sitemap.xml if available"""
+
+        parsed_start = urlparse(self.start_url)
+        sitemap_url = f"{parsed_start.scheme}://{parsed_start.netloc}/sitemap.xml"
+
+        import requests
+        from lxml import etree
+
+        print(f"Attempting to load sitemap from: {sitemap_url}")
+        
+        r = requests.get(sitemap_url)
+        if r.status_code != 200:
+            print(f"Could not load sitemap.xml from {sitemap_url}: HTTP {r.status_code}")
+            return []
+            
+        # Check if response content looks like XML
+        content_type = r.headers.get('content-type', '').lower()
+        if not content_type.startswith('application/xml') and not content_type.startswith('text/xml'):
+            print(f"Response from {sitemap_url} doesn't appear to be XML (content-type: {content_type})")
+            return []
+            
+        return self._parse_sitemap(sitemap_url, max_urls=self.max_pages * 3)
+    
+    def _parse_sitemap(self, sitemap_url: str, max_urls: int = None) -> list[str]:
+        """Recursively parse sitemap, handling both sitemap indices and regular sitemaps"""
+        import requests
+        from lxml import etree
+        
+        print(f"Parsing sitemap: {sitemap_url}")
+        
+        r = requests.get(sitemap_url)
+        if r.status_code != 200:
+            return []
+            
+        root = etree.fromstring(r.content)
+        urls = []
+        
+        for elem in root:
+            if max_urls and len(urls) >= max_urls:
+                break
+                
+            if elem.tag.endswith('sitemap'):
+                # Sitemap index - recursively parse child sitemaps
+                for child in elem:
+                    if child.tag.endswith('loc'):
+                        child_urls = self._parse_sitemap(child.text, max_urls - len(urls) if max_urls else None)
+                        urls.extend(child_urls)
+                        break
+            elif elem.tag.endswith('url'):
+                # Regular sitemap with URLs
+                for child in elem:
+                    if child.tag.endswith('loc'):
+                        urls.append(child.text)
+                        break
+        
+        print(f"Found {len(urls)} URLs from {sitemap_url}")
+        return urls
+
+    def filter_sitemap_urls(self, urls: list[str]) -> list[str]:
+        """Filter sitemap URLs based on max_pages, max_depth, and domain"""
+        filtered_urls = []
+        
+        if urls and len(urls) > 0:
+            print(f"Sample URL from sitemap: {urls[0]}")
+            print(f"Target domain: {self.domain}")
+
+        for url in urls:
+            # Skip if we've hit max pages
+            if len(filtered_urls) >= self.max_pages:
+                break
+
+            # Skip static assets
+            if self.is_static_asset(url):
+                continue
+
+            # Check domain
+            parsed = urlparse(url)
+            if not self.is_same_domain_or_subdomain(parsed.netloc):
+                continue
+
+            # Check depth
+            path_depth = len([p for p in parsed.path.split("/") if p])
+            start_path_depth = len(
+                [p for p in urlparse(self.start_url).path.split("/") if p]
+            )
+            relative_depth = path_depth - start_path_depth
+
+            if relative_depth > self.max_depth:
+                continue
+
+            filtered_urls.append(url)
+
+        return filtered_urls
 
     def is_static_asset(self, url: str) -> bool:
         """Check if URL points to a static asset that shouldn't be crawled"""
@@ -459,7 +562,36 @@ class FastJSCrawler:
         print(
             f"Max pages: {self.max_pages}, Max depth: {self.max_depth}, Concurrency: {self.concurrency}"
         )
+        if self.use_sitemap:
+            print("Using sitemap.xml for URL discovery")
         print("-" * 70)
+
+        # If using sitemap, load URLs from sitemap.xml and build tree directly
+        if self.use_sitemap:
+            sitemap_urls = self.load_sitemap()
+            if sitemap_urls:
+                filtered_urls = self.filter_sitemap_urls(sitemap_urls)
+                print(f"Processing {len(filtered_urls)} URLs from sitemap")
+
+                # Process each URL to build templates
+                for url in filtered_urls:
+                    normalized_url = self.normalize_url(url)
+                    normalized_url = self._replace_with_generic_pattern_if_necessary(
+                        normalized_url
+                    )
+
+                    matching_template_index = self.matches_existing_template(
+                        normalized_url
+                    )
+                    if matching_template_index == -1:
+                        self.log_new_fixed_template(normalized_url)
+
+                    self.visited.add(url)
+
+                print(f"Built {len(self.pattern_templates)} URL patterns from sitemap")
+                return
+            else:
+                print("No URLs found in sitemap, falling back to regular crawling")
 
         async with async_playwright() as p:
             # Launch browser in headless mode
@@ -478,11 +610,11 @@ class FastJSCrawler:
 
             # Wait for all tasks to be processed
             await self.to_visit.join()
-            
+
             # Cancel all workers since all tasks are done
             for worker in workers:
                 worker.cancel()
-            
+
             # Wait for workers to finish cancellation
             await asyncio.gather(*workers, return_exceptions=True)
 
@@ -533,7 +665,7 @@ class FastJSCrawler:
 
         # Build a hierarchical tree structure
         tree = {}
-        
+
         # Add structural pattern templates with examples first (higher priority)
         for template in self.pattern_templates:
             path_parts = []
@@ -542,12 +674,16 @@ class FastJSCrawler:
                     if segment.example not in ["https:", "http:"]:
                         path_parts.append(segment.example)
                 else:
-                    variable_part = "[" + (
-                        "|".join(list(segment.examples)[:3])
-                        + ("|..." if len(segment.examples) > 3 else "")
-                    ) + "]"
+                    variable_part = (
+                        "["
+                        + (
+                            "|".join(list(segment.examples)[:3])
+                            + ("|..." if len(segment.examples) > 3 else "")
+                        )
+                        + "]"
+                    )
                     path_parts.append(variable_part)
-            
+
             if path_parts:
                 self._add_to_tree(tree, path_parts, None)
 
@@ -560,9 +696,9 @@ class FastJSCrawler:
 
         # Generate tree display
         self._render_tree(tree, result, "", True)
-        
+
         return "\n".join(result)
-    
+
     def _add_to_tree(self, tree, path_parts, label):
         """Add a path to the tree structure"""
         current = tree
@@ -570,32 +706,32 @@ class FastJSCrawler:
             if part not in current:
                 current[part] = {"children": {}, "label": None}
             current = current[part]["children"]
-        
+
         # Set label on the final part
         if path_parts:
             parent = tree
             for part in path_parts[:-1]:
                 parent = parent[part]["children"]
             parent[path_parts[-1]]["label"] = label
-    
+
     def _render_tree(self, tree, result, prefix, is_root):
         """Recursively render the tree structure"""
         items = list(tree.items())
         for i, (name, node) in enumerate(items):
             is_last = i == len(items) - 1
-            
+
             if is_root:
                 current_prefix = ""
                 tree_char = "├──" if not is_last else "└──"
             else:
                 tree_char = "├──" if not is_last else "└──"
                 current_prefix = prefix
-            
+
             # Build the line
             line = f"{current_prefix}{tree_char} {name}/"
-            
+
             result.append(line)
-            
+
             # Render children
             if node["children"]:
                 child_prefix = current_prefix + ("│   " if not is_last else "    ")
