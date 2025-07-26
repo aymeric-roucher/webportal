@@ -9,16 +9,14 @@ from webportal.get_interactive.convert_to_api_docs import (
 from webportal.get_interactive.network_capture import SeleniumNetworkCaptureAgent
 
 
-def main_crawl_website_and_get_markdown(
-    prompt: str, data_dir: Path, headless: bool = True
-) -> Path:
+def ingest_from_prompt(prompt: str, data_dir: Path, headless: bool = True) -> str:
     """Main function to run the conversion"""
     data_dir.mkdir(parents=True, exist_ok=True)
     input_file = data_dir / Path("raw_markdown.md")
 
     model = InferenceClientModel(
-        model_id="Qwen/Qwen2.5-VL-72B-Instruct",
-        provider="nebius",
+        model_id="Qwen/Qwen2.5-VL-32B-Instruct",
+        provider="auto",
     )
     selenium_vision_agent = SeleniumNetworkCaptureAgent(
         model=model,
@@ -27,21 +25,13 @@ def main_crawl_website_and_get_markdown(
         browser_headless=headless,
     )
     selenium_vision_agent.run(prompt)
-
-    # Set up paths
-    output_file = input_file.with_name("digested_markdown")
-
-    # Run conversion
-    convert_interactive_elements_to_api_docs(
-        input_file=input_file,
-        output_file=output_file,
-    )
-
-    return output_file
+    content = input_file.read_text()
+    api_docs = convert_interactive_elements_to_api_docs(input_elements=content)
+    return api_docs
 
 
-def click_on_every_button_on_the_page(website_url: str, data_dir: Path) -> Path:
-    main_crawl_website_and_get_markdown(
+def ingest_clickaround(website_url: str, data_dir: Path) -> str:
+    return ingest_from_prompt(
         f"I want you to click on every button on the page {website_url}, if you changed page, you should go back to the previous page",
         data_dir,
     )
@@ -54,4 +44,4 @@ According to github, when was Regression added to the oldest closed numpy.polyno
 Start by going to the numpy package page and then click on the Issues tab.
 """
     data_dir = DATA_PATH / "github"
-    main_crawl_website_and_get_markdown(prompt, data_dir)
+    ingest_from_prompt(prompt, data_dir)

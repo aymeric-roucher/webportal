@@ -4,6 +4,8 @@ import asyncio
 from litellm import completion
 from pydantic import BaseModel
 
+from webportal.map_website.crawl import crawl
+
 raw_tree = """
 Site Structure for nature.com
 ==================================================
@@ -63,9 +65,7 @@ def get_clean_urls_list(raw_tree: str) -> list[str]:
 
 
 if __name__ == "__main__":
-    from webportal.get_skeleton.crawl import crawl
-
     crawler = asyncio.run(crawl("semrush.com", 100, 5, 10))
     tree_output = crawler.export_structure("tree")
-    content = get_clean_urls_list(tree_output)
+    content = get_clean_urls_list(tree_output)[:10]
     print(content)

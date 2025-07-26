@@ -3,12 +3,13 @@ import time
 import unicodedata
 from datetime import datetime
 from io import BytesIO
+from typing import Callable
 
 from PIL import Image, ImageDraw
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
-from smolagents import CodeAgent, InferenceClientModel, tool
+from smolagents import InferenceClientModel, ToolCallingAgent, tool
 from smolagents.agent_types import AgentImage
 from smolagents.memory import ActionStep, TaskStep
 from smolagents.monitoring import LogLevel
@@ -126,7 +127,9 @@ Wait for page elements to load before interacting with them.
 """.replace("<<current_date>>", datetime.now().strftime("%A, %d-%B-%Y"))
 
 
-def draw_marker_on_image(image_copy, click_coordinates):
+def draw_marker_on_image(
+    image_copy: Image.Image, click_coordinates: list[int]
+) -> Image.Image:
     x, y = click_coordinates
     draw = ImageDraw.Draw(image_copy)
     cross_size, linewidth = 10, 3
@@ -147,17 +150,17 @@ def draw_marker_on_image(image_copy, click_coordinates):
     return image_copy
 
 
-class SeleniumVisionAgent(CodeAgent):
+class SeleniumVisionAgent(ToolCallingAgent):
     """Agent for local browser automation with Selenium and Qwen2.5VL vision capabilities"""
 
     def __init__(
         self,
         model: InferenceClientModel,
         data_dir: str,
-        tools: list[tool] = None,
+        tools: list[tool] | None = None,
         max_steps: int = 200,
         verbosity_level: LogLevel = 2,
-        planning_interval: int = None,
+        planning_interval: int | None = None,
         browser_headless: bool = True,
         callback_tools: list[Callable] | None = None,
         **kwargs,
@@ -167,7 +170,7 @@ class SeleniumVisionAgent(CodeAgent):
         self.callback_tools = callback_tools or []
 
         self.chrome_options = webdriver.ChromeOptions()
-        self.width, self.height = 1920, 1080
+        self.width, self.height = 1280, 720
 
         if browser_headless:
             # Docker/serverless-friendly Chrome options
@@ -241,7 +244,7 @@ class SeleniumVisionAgent(CodeAgent):
         )
 
     def take_screenshot_callback(
-        self, memory_step: ActionStep, agent: CodeAgent | None = None
+        self, memory_step: ActionStep, agent: ToolCallingAgent
     ) -> None:
         """Callback that takes a screenshot + memory snapshot after a step completes"""
         self.logger.log("Analyzing screen content...")

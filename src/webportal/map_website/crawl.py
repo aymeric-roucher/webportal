@@ -6,7 +6,6 @@ Extracts ~90% of a website's structure quickly with concurrent browser contexts
 
 import argparse
 import asyncio
-import json
 import re
 import time
 from collections import defaultdict
@@ -50,8 +49,8 @@ class FastJSCrawler:
         self.concurrency = concurrency
         self.use_sitemap = use_sitemap
 
-        self.visited = set()
-        self.to_visit = asyncio.Queue()
+        self.visited: set[str] = set()
+        self.to_visit: asyncio.Queue[tuple[str, int]] = asyncio.Queue()
         self.site_structure = defaultdict(set)
         self.page_titles = {}
         self.generic_url_patterns = set()  # Store discovered URL patterns
@@ -114,7 +113,7 @@ class FastJSCrawler:
 
     def filter_sitemap_urls(self, urls: list[str]) -> list[str]:
         """Filter sitemap URLs based on max_pages, max_depth, and domain"""
-        filtered_urls = []
+        filtered_urls: list[str] = []
 
         for url in urls:
             # Skip if we've hit max pages
@@ -310,7 +309,7 @@ class FastJSCrawler:
     def log_new_fixed_template(self, url: str):
         """Log a new fixed template, applying generic pattern detection to segments"""
         segments = [seg for seg in url.split("/") if seg]
-        template_segments = []
+        template_segments: list[TemplateSegment] = []
 
         for segment in segments:
             template_segments.append(FixedTemplateSegment(example=segment))
@@ -381,7 +380,7 @@ class FastJSCrawler:
                         VariableTemplateSegment,
                     ):
                         # Just append the new segment to the variable segment
-                        template_segments[differing_segment_index].examples.add(segment)
+                        template_segments[differing_segment_index].examples.add(segment)  # type: ignore
                         return template_index
                     elif isinstance(
                         template_segments[differing_segment_index], FixedTemplateSegment
@@ -391,7 +390,7 @@ class FastJSCrawler:
                             VariableTemplateSegment(
                                 examples={
                                     segment,
-                                    template_segments[differing_segment_index].example,
+                                    template_segments[differing_segment_index].example,  # type: ignore
                                 }
                             )
                         )
@@ -483,10 +482,6 @@ class FastJSCrawler:
                         self.log_new_fixed_template(normalized_url)
                         if current_depth < self.max_depth:
                             await self.to_visit.put((normalized_url, current_depth + 1))
-                            print(
-                                "Remaining links to visit: ",
-                                self.to_visit.qsize(),
-                            )
             return new_links
 
         except Exception as e:
@@ -536,6 +531,7 @@ class FastJSCrawler:
     async def worker(self, browser):
         """Worker that processes URLs from the queue"""
         while True:
+            print(f"Remaining links to visit: {self.to_visit.qsize()}")
             try:
                 url, depth = await self.to_visit.get()
                 await self.crawl_page(browser, url, depth)
@@ -637,12 +633,8 @@ class FastJSCrawler:
         """Export the site structure in different formats"""
         if format == "tree":
             return self._export_tree()
-        elif format == "json":
-            return self._export_json()
         elif format == "urls":
             return self._export_urls()
-        elif format == "sitemap":
-            return self._export_sitemap()
 
     def _export_tree(self):
         """Export as a tree structure with proper hierarchical display"""
@@ -725,38 +717,9 @@ class FastJSCrawler:
                 child_prefix = current_prefix + ("│   " if not is_last else "    ")
                 self._render_tree(node["children"], result, child_prefix, False)
 
-    def _export_json(self):
-        """Export as JSON"""
-        return json.dumps(
-            {
-                "domain": self.domain,
-                "start_url": self.start_url,
-                "pages_crawled": len(self.visited),
-                "statistics": self.get_statistics(),
-                "structure": {
-                    url: {"title": self.page_titles.get(url, ""), "links": list(links)}
-                    for url, links in self.site_structure.items()
-                },
-            },
-            indent=2,
-        )
-
     def _export_urls(self):
         """Export as simple URL list"""
         return "\n".join(sorted(self.visited))
-
-    def _export_sitemap(self):
-        """Export as XML sitemap format"""
-        result = ['<?xml version="1.0" encoding="UTF-8"?>']
-        result.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
-
-        for url in sorted(self.visited):
-            result.append("  <url>")
-            result.append(f"    <loc>{url}</loc>")
-            result.append("  </url>")
-
-        result.append("</urlset>")
-        return "\n".join(result)
 
 
 def test_crawler_logs_variable_template():
@@ -829,7 +792,7 @@ async def main():
     )
     parser.add_argument(
         "--format",
-        choices=["tree", "json", "urls", "sitemap"],
+        choices=["tree", "urls"],
         default="tree",
         help="Output format",
     )
@@ -863,12 +826,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    # Install playwright browsers if not already installed
-    try:
-        asyncio.run(main())
-    except Exception as e:
-        if "playwright install" in str(e):
-            print("Please install Playwright browsers first:")
-            print("  playwright install chromium")
-        else:
-            raise e
+    asyncio.run(main())

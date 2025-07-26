@@ -9,17 +9,16 @@ from smolagents import CodeAgent
 from smolagents.memory import ActionStep
 
 from webportal.get_interactive.selenium_agent import SeleniumVisionAgent
+from webportal.utils import describe_response_format
 
 
 class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
     def __init__(self, markdown_file_path: Path | None = None, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Initialize network request tracking
-        self.network_requests = []
-        self.step_requests = {}  # step_number -> list of requests for that step
+        self.network_requests: list[dict[str, Any]] = []
+        self.step_requests: dict[int, list[dict[str, Any]]] = {}
 
-        # Initialize centralized markdown file
         self.markdown_file_path = (
             markdown_file_path or Path(self.data_dir) / "interactive_elements.md"
         )
@@ -61,12 +60,7 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
 
     def _initialize_markdown_file(self):
         """Initialize the centralized markdown file at the beginning of the agent session"""
-        header = """# Interactive Elements Analysis
-
-This file contains the analysis of interactive elements discovered during website exploration.
-Each element shows the API calls triggered by user interactions.
-
-"""
+        header = """# Interactive Elements Analysis"""
 
         self.markdown_file_path.write_text(header)
         print(f"📝 Initialized markdown file: {self.markdown_file_path}")
@@ -149,7 +143,7 @@ Each element shows the API calls triggered by user interactions.
         return step_requests
 
     def capture_requests_callback(
-        self, memory_step: ActionStep | None = None, agent: CodeAgent | None = None
+        self, memory_step: ActionStep, agent: CodeAgent
     ) -> None:
         """Callback that captures the requests for a step"""
         # Capture network requests for this specific step
@@ -158,9 +152,14 @@ Each element shows the API calls triggered by user interactions.
 
         step_requests = self.capture_step_network_activity(current_step)
         if step_requests:
-            self.logger.log(
-                f"Captured {len(step_requests)} network requests for step {current_step}"
-            )
+            capture_message = f"Captured {len(step_requests)} network requests for step {current_step}"
+        else:
+            capture_message = "No network requests captured for this step"
+        self.logger.log(capture_message)
+        if isinstance(memory_step.observations, str):
+            memory_step.observations += f"\n{capture_message}"
+        else:
+            memory_step.observations = capture_message
 
         # Always analyze the step (even if no requests) to capture agent context
         self._analyze_step_requests(current_step, step_requests, memory_step)
@@ -239,7 +238,7 @@ Each element shows the API calls triggered by user interactions.
                 continue
             if request.get("type") in ["XHR", "Fetch", "Document"]:
                 if request.get("response") is not None:
-                    if request.get("response").get("body"):
+                    if request["response"].get("body"):
                         relevant_requests_filtered_by_type_and_body.append(request)
             else:
                 continue
@@ -412,23 +411,20 @@ Each element shows the API calls triggered by user interactions.
             return {"success": False, "error": f"Unexpected error: {str(e)}"}
 
     def _analyze_step_requests(
-        self,
-        step_number: int,
-        requests: list[dict[str, Any]],
-        memory_step: ActionStep | None = None,
+        self, step_number: int, requests: list[dict[str, Any]], memory_step: ActionStep
     ):
         """Analyze requests from a specific step and generate markdown summaries"""
 
         # Filter requests to get JSON and HTML responses separately
         json_requests, html_requests = self._filter_relevant_requests(requests)
 
-        print(f"\n=== STEP {step_number} REQUEST ANALYSIS ===")
+        self.logger.log(f"\n=== STEP {step_number} REQUEST ANALYSIS ===")
         if json_requests or html_requests:
-            print(
+            self.logger.log(
                 f"Found {len(json_requests)} JSON requests and {len(html_requests)} HTML requests"
             )
         else:
-            print("No relevant network requests found for this step")
+            self.logger.log("No relevant network requests found for this step")
 
         # Get the action that was performed in this step
         tool_call_info = self._get_tool_call_info(memory_step)
@@ -437,7 +433,7 @@ Each element shows the API calls triggered by user interactions.
         model_output = memory_step.model_output if memory_step else ""
 
         # Generate markdown for this step (including agent context even if no requests)
-        markdown_summary = self._generate_step_markdown(
+        markdown_summary = self._generate_step_interaction_summary_markdown(
             tool_call_info=tool_call_info,
             json_requests=json_requests,
             html_requests=html_requests,
@@ -450,19 +446,15 @@ Each element shows the API calls triggered by user interactions.
             output_model=model_output,
         )
 
-    def _get_tool_call_info(
-        self, memory_step: ActionStep | None = None
-    ) -> dict[str, Any]:
+    def _get_tool_call_info(self, memory_step: ActionStep) -> dict[str, Any]:
         """Extract tool call information for markdown generation"""
-        if memory_step and memory_step.tool_calls:
-            tool_call = memory_step.tool_calls[0]
-            return {
-                "tool_name": tool_call.name,
-                "arguments": getattr(tool_call, "arguments", {}),
-            }
-        return {"tool_name": "unknown", "arguments": {}}
+        tool_call = memory_step.tool_calls[0]
+        return {
+            "name": tool_call.name,
+            "arguments": tool_call.arguments,
+        }
 
-    def _generate_step_markdown(
+    def _generate_step_interaction_summary_markdown(
         self,
         tool_call_info: dict[str, Any],
         json_requests: list[dict[str, Any]],
@@ -471,6 +463,7 @@ Each element shows the API calls triggered by user interactions.
         """Generate markdown summary for a step with individual blocks per request"""
 
         # Get current page location
+        # TODO: this should not be the current url but the url at the previous step!
         location_page = self.driver.current_url
 
         # Combine all requests for processing
@@ -513,12 +506,12 @@ Each element shows the API calls triggered by user interactions.
         arguments = self._extract_request_arguments(request)
 
         # Simple descriptions
-        returns = self._describe_response_format(response_body)
+        returns = describe_response_format(response_body)
 
         # Build the markdown block with minimal inference
         markdown = f"```interactive_element_{block_name}\n"
         markdown += f"location_page: {location_page}\n"
-        markdown += f"trigger: {tool_call_info.get('arguments', '')}\n"  # Leave empty for LLM to fill
+        markdown += f"trigger: {tool_call_info['name']} {tool_call_info['arguments']}\n"
         markdown += f"request: {method} {base_url}\n"
 
         if arguments:
@@ -628,32 +621,6 @@ Each element shows the API calls triggered by user interactions.
                 arguments.append(f"URL params: {', '.join(param_strs)}")
 
         return "\n".join(arguments) if arguments else ""
-
-    def _describe_response_format(self, response_body: str) -> str:
-        """Describe the format and content of the response"""
-        if not response_body:
-            return "Empty response"
-
-        max_keys = 30
-
-        try:
-            # Try to parse as JSON
-            json_data = json.loads(response_body)
-            if isinstance(json_data, dict):
-                # Analyze JSON structure
-                keys = list(json_data.keys())
-                return f"JSON object with keys: {', '.join(keys[:max_keys])}" + (
-                    "..." if len(keys) > max_keys else ""
-                )
-            elif isinstance(json_data, list):
-                return f"JSON array with {len(json_data)} items"
-            else:
-                return "JSON response"
-        except json.JSONDecodeError:
-            if "DOCTYPE" in response_body:
-                return "HTML page content"
-            else:
-                return "Text/other format response"
 
     def _extract_base_url(self, url: str) -> str:
         """Extract base URL without query parameters"""

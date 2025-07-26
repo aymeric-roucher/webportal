@@ -1,10 +1,6 @@
-from pathlib import Path
+from webportal.inference import call_llm
 
-
-def create_conversion_prompt(content: str) -> str:
-    """Create a detailed prompt for the LLM to convert the content"""
-
-    example_format = """```interactive_element_sort_oldest
+INTERACTIVE_ELEMENT_FORMAT = """```interactive_element_sort_oldest
 location_page: numpy/numpy/issues
 type: Button/Dropdown  
 visual_element: Sort dropdown button with "Oldest" option in the issues list header
@@ -27,6 +23,8 @@ returns: JSON with paginated issues data sorted by oldest creation date first
 viewport_effect: Updates the issues list display to show issues sorted chronologically from oldest to newest
 ```"""
 
+
+def create_api_docs_conversion_prompt(content: str) -> str:
     return f"""You are an expert API documentation generator. Your task is to convert raw interactive elements data from a website crawler into clean, structured API documentation.
 
 INPUT FORMAT: The input contains step-by-step agent actions with captured network requests in this format:
@@ -35,7 +33,7 @@ INPUT FORMAT: The input contains step-by-step agent actions with captured networ
 
 OUTPUT FORMAT: Convert this into structured interactive elements with the following format:
 <example_format>
-{example_format}
+{INTERACTIVE_ELEMENT_FORMAT}
 </example_format>
 
 CRITICAL INSTRUCTIONS:
@@ -88,45 +86,13 @@ INPUT TO CONVERT:
 Generate clean, structured API documentation following the format above. Focus on creating reusable, specific interactive elements that would be useful for an LLM to understand GitHub's API patterns."""
 
 
-def call_llm(prompt: str) -> str:
-    """Call GPT-4o via OpenAI API"""
-    import os
-
-    from openai import OpenAI
-
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.1,  # Low temperature for consistent output
-            max_tokens=8096,  # Generous token limit for full conversion
-        )
-
-        return response.choices[0].message.content
-
-    except Exception as e:
-        raise Exception(f"OpenAI API call failed: {e}")
-
-
 def convert_interactive_elements_to_api_docs(
-    input_file: str | Path, output_file: str | Path
-) -> None:
-    """Convert interactive_elements.md to structured API documentation"""
-
-    input_path = Path(input_file)
-    output_path = Path(output_file)
-
-    # Read the input file
-    content = input_path.read_text()
-
+    input_elements: str,
+) -> str:
+    """Convert interactive_elements to structured API documentation"""
     # Create the prompt for LLM processing
-    prompt = create_conversion_prompt(content)
+    prompt = create_api_docs_conversion_prompt(input_elements)
 
     # Call the LLM
     api_docs = call_llm(prompt)
-
-    # Save the result
-    output_path.write_text(api_docs)
-    print(f"✅ Converted API documentation saved to: {output_path}")
+    return api_docs
