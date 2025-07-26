@@ -34,10 +34,6 @@ COPY src/ ./src/
 # Install Python dependencies
 RUN uv sync --frozen
 
-# Copy remaining files
-COPY tests/ ./tests/
-COPY CLAUDE.md ./
-
 # Set environment variables for headless browser
 ENV DISPLAY=:99
 
