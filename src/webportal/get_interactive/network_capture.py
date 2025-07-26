@@ -27,6 +27,18 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
 
         self._setup_network_monitoring()
 
+    def _additional_chrome_options(self):
+        """Additional Chrome options"""
+        # Enable Chrome DevTools Protocol for network monitoring
+        self.chrome_options.add_experimental_option("useAutomationExtension", False)
+        self.chrome_options.add_experimental_option(
+            "excludeSwitches", ["enable-automation"]
+        )
+        self.chrome_options.add_argument("--enable-network-service-logging")
+        self.chrome_options.add_argument("--log-level=0")
+        # Enable performance logs to capture network requests
+        self.chrome_options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
+
     def setup_step_callbacks(self) -> None:
         self._setup_step_callbacks(
             [self.take_screenshot_callback, self.capture_requests_callback]
@@ -583,7 +595,7 @@ Each element shows the API calls triggered by user interactions.
 
         # Handle URL parameters - specifically for GraphQL queries in GET requests
         if "?" in url:
-            from urllib.parse import parse_qs, unquote, urlparse
+            from urllib.parse import urlparse, parse_qs, unquote
 
             parsed = urlparse(url)
             params = parse_qs(parsed.query)

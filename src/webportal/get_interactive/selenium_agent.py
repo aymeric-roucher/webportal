@@ -158,27 +158,43 @@ class SeleniumVisionAgent(CodeAgent):
         max_steps: int = 200,
         verbosity_level: LogLevel = 2,
         planning_interval: int = None,
-        use_v1_prompt: bool = False,
+        browser_headless: bool = True,
+        callback_tools: list[Callable] | None = None,
         **kwargs,
     ):
         self.data_dir = data_dir
         self.planning_interval = planning_interval
+        self.callback_tools = callback_tools or []
 
         self.chrome_options = webdriver.ChromeOptions()
-        self.width, self.height = 1080, 1920
+        self.width, self.height = 1920, 1080
+
+        if browser_headless:
+            # Docker/serverless-friendly Chrome options
+            self.chrome_options.add_argument("--headless=new")  # New headless mode
+            self.chrome_options.add_argument("--no-sandbox")
+            self.chrome_options.add_argument("--disable-dev-shm-usage")
+            self.chrome_options.add_argument("--disable-gpu")
+            self.chrome_options.add_argument("--disable-web-security")
+            self.chrome_options.add_argument("--disable-features=VizDisplayCompositor")
+            self.chrome_options.add_argument("--remote-debugging-port=9222")
+
+        # Window and display settings
         self.chrome_options.add_argument("--force-device-scale-factor=1")
-        self.chrome_options.add_argument("--window-size=1920,1080")
+
+        self.chrome_options.add_argument(f"--window-size={self.height},{self.width}")
         self.chrome_options.add_argument("--disable-pdf-viewer")
         self.chrome_options.add_argument("--window-position=0,0")
-        # Enable Chrome DevTools Protocol for network monitoring
-        self.chrome_options.add_experimental_option("useAutomationExtension", False)
-        self.chrome_options.add_experimental_option(
-            "excludeSwitches", ["enable-automation"]
-        )
-        self.chrome_options.add_argument("--enable-network-service-logging")
-        self.chrome_options.add_argument("--log-level=0")
-        # Enable performance logs to capture network requests
-        self.chrome_options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
+
+        if browser_headless:
+            # Memory and performance optimizations for serverless
+            self.chrome_options.add_argument("--memory-pressure-off")
+            self.chrome_options.add_argument("--max_old_space_size=4096")
+            self.chrome_options.add_argument("--disable-background-timer-throttling")
+            self.chrome_options.add_argument("--disable-backgrounding-occluded-windows")
+            self.chrome_options.add_argument("--disable-renderer-backgrounding")
+
+        self._additional_chrome_options()
 
         self.driver = webdriver.Chrome(options=self.chrome_options)
 
@@ -190,7 +206,6 @@ class SeleniumVisionAgent(CodeAgent):
         os.makedirs(self.data_dir, exist_ok=True)
         print(f"Screenshots and steps will be saved to: {self.data_dir}")
 
-        self.use_v1_prompt = use_v1_prompt
         # Initialize base agent
         super().__init__(
             tools=tools or [],
@@ -216,8 +231,14 @@ class SeleniumVisionAgent(CodeAgent):
         self._setup_desktop_tools()
         self.setup_step_callbacks()
 
+    def _additional_chrome_options(self):
+        """Additional Chrome options"""
+        pass
+
     def setup_step_callbacks(self) -> None:
-        self._setup_step_callbacks([self.take_screenshot_callback])
+        self._setup_step_callbacks(
+            [self.take_screenshot_callback] + self.callback_tools
+        )
 
     def take_screenshot_callback(
         self, memory_step: ActionStep, agent: CodeAgent | None = None
@@ -493,6 +514,8 @@ class SeleniumVisionAgent(CodeAgent):
         def wait(seconds: float) -> str:
             """
             Waits for the specified number of seconds. Very useful in case the prior order is still executing (for example starting very heavy applications like browsers or office apps)
+
+            This tool should be called if you hit a request limit. In that case you should wait for a minute and then try again.
             Args:
                 seconds: Number of seconds to wait, generally 3 is enough.
             """
