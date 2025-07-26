@@ -513,6 +513,8 @@ class SeleniumVisionAgent(CodeAgent):
         def wait(seconds: float) -> str:
             """
             Waits for the specified number of seconds. Very useful in case the prior order is still executing (for example starting very heavy applications like browsers or office apps)
+            
+            This tool should be called if you hit a request limit. In that case you should wait for a minute and then try again.
             Args:
                 seconds: Number of seconds to wait, generally 3 is enough.
             """
