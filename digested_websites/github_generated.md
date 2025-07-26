@@ -1,127 +1,118 @@
 ```interactive_element_search
 location_page: https://github.com/search?q=numpy&type=repositories
 type: Search
-visual_element: Search bar in the top right corner of the GitHub homepage
-trigger: Press the enter key to submit the search query in the GitHub search bar
-request: GET https://github.com/search
-arguments: 
-  URL params: 
-    q: "numpy"
-    type: "repositories"
-effect: Executes a search for repositories matching the term "numpy"
-returns: HTML page content with search results for repositories
-viewport_effect: Displays a list of repositories matching the search term "numpy"
+visual_element: Search bar at the top of the GitHub homepage
+trigger: press_key("enter", "to execute the search for 'numpy' in the GitHub search bar")
+example:
+result = get_request("https://github.com/search", {
+    "q": "numpy",
+    "type": "repositories"
+})
+effect: Executes a search for repositories related to 'numpy'
+returns: HTML page content with search results
+viewport_effect: Displays a list of repositories matching the search query
 ```
 
-```interactive_element_navigation
+```interactive_element_repository_navigation
 location_page: https://github.com/numpy/numpy
 type: Link
-visual_element: Blue hyperlink text 'numpy/numpy' in the search results
-trigger: Click on the 'numpy/numpy' link in the search results
-request: GET https://github.com/numpy/numpy
+visual_element: Blue hyperlink text 'numpy/numpy' in search results
+trigger: click(408, 160, "blue hyperlink text 'numpy/numpy', approximately 100x20 pixels, located near the top of the search results")
+example:
+result = get_request("https://github.com/numpy/numpy")
+effect: Navigates to the numpy repository page
 returns: HTML page content of the numpy repository
-viewport_effect: Navigates to the numpy repository page
+viewport_effect: Displays the main page of the numpy repository
 ```
 
 ```interactive_element_issues_tab
 location_page: https://github.com/numpy/numpy/issues
 type: Tab
-visual_element: Gray text 'Issues' tab with a badge showing the number of issues
-trigger: Click on the 'Issues' tab
-request: GET https://github.com/numpy/numpy/issues
+visual_element: Gray tab labeled 'Issues' next to the 'Code' tab
+trigger: click(150, 158, "gray tab labeled 'Issues', approximately 50x20 pixels, located next to the 'Code' tab")
+example:
+result = get_request("https://github.com/numpy/numpy/issues")
+effect: Opens the issues page of the numpy repository
 returns: HTML page content of the issues section
-viewport_effect: Displays the issues list for the numpy repository
+viewport_effect: Displays a list of issues related to the numpy repository
 ```
 
-```interactive_element_labels_dropdown
-location_page: https://github.com/numpy/numpy/issues
-type: Dropdown
-visual_element: Gray text 'Labels' button with a small downward arrow
-trigger: Click on the 'Labels' button to view all available labels
-request: GET https://github.com/_graphql
-arguments: 
-  "body" (url-encoded): 
-    {
-      "query": "b480cbd1d6d3f7ba4a98229e88acf3fd",
-      "variables": {
-        "count": 100,
-        "labelNames": "",
-        "owner": "numpy",
-        "repo": "numpy",
-        "shouldQueryByNames": false
-      }
-    }
-effect: Retrieves a list of labels available for filtering issues
-returns: JSON object with label data
-viewport_effect: Opens a dropdown menu displaying available labels
-```
-
-```interactive_element_closed_issues
-location_page: https://github.com/numpy/numpy/issues?q=is%3Aissue%20state%3Aclosed
+```interactive_element_labels_filter
+location_page: https://github.com/numpy/numpy/labels
 type: Button
-visual_element: Gray text 'Closed' button with a badge showing the number of closed issues
-trigger: Click on the 'Closed' button to view closed issues
-request: GET https://github.com/_graphql
-arguments: 
-  "body" (url-encoded): 
-    {
-      "query": "22d008b451590c967cc8d672452db3f9",
-      "variables": {
-        "includeReactions": false,
-        "name": "numpy",
-        "owner": "numpy",
-        "query": "is:issue state:closed label:\"00 - Bug\" repo:numpy/numpy sort:created-desc",
-        "skip": 0
-      }
+visual_element: Gray button labeled 'Labels' in the toolbar above the list of issues
+trigger: click(785, 228, "gray button labeled 'Labels', approximately 80x30 pixels, located in the toolbar above the list of issues")
+example:
+result = get_request("https://github.com/numpy/numpy/labels")
+effect: Opens the labels page showing all available labels for filtering issues
+returns: HTML page content with a list of labels
+viewport_effect: Displays available labels with their colors and descriptions
+```
+
+```interactive_element_label_selection
+location_page: https://github.com/numpy/numpy/issues?q=state%3Aopen%20label%3A%2200%20-%20Bug%22
+type: Label
+visual_element: Label '00 - Bug' in the labels list
+trigger: click(75, 385, "label '00 - Bug', approximately 60x20 pixels, located near the top of the labels list")
+example:
+result = get_request("https://github.com/_graphql", {
+    "body": {
+        "query": "29746fd23262d23f528e1f5b9b427437",
+        "variables": {
+            "name": "numpy",
+            "owner": "numpy",
+            "query": "state:open label:\"00 - Bug\" repo:numpy/numpy sort:created-desc"
+        }
     }
-effect: Filters the issues list to show only closed issues
-returns: JSON object with closed issues data
-viewport_effect: Updates the issues list to display only closed issues
+})
+effect: Filters issues by the '00 - Bug' label
+returns: JSON with issues data filtered by the selected label
+viewport_effect: Displays issues associated with the '00 - Bug' label
 ```
 
 ```interactive_element_sort_oldest
-location_page: numpy/numpy/issues
+location_page: https://github.com/numpy/numpy/issues
 type: Dropdown
 visual_element: Sort dropdown button with "Oldest" option in the issues list header
 trigger: Click on sort dropdown and select "Oldest"
-request: GET https://github.com/_graphql
-arguments: 
-  "body" (url-encoded): 
-    {
-      "query": "22d008b451590c967cc8d672452db3f9",
-      "variables": {
-        "includeReactions": false,
-        "name": "numpy",
-        "owner": "numpy",
-        "query": "is:issue state:closed sort:created-asc repo:numpy/numpy",
-        "skip": 0
-      }
+example:
+result = get_request("https://github.com/_graphql", {
+    "body": {
+        "query": "22d008b451590c967cc8d672452db3f9",
+        "variables": {
+            "includeReactions": false,
+            "name": "numpy",
+            "owner": "numpy",
+            "query": "state:closed label:\"00 - Bug\" author:andyfaff repo:numpy/numpy sort:created-desc",
+            "skip": 0
+        }
     }
+})
 effect: Sorts the issues list by creation date in ascending order (oldest first)
 returns: JSON with paginated issues data sorted by oldest creation date first
 viewport_effect: Updates the issues list display to show issues sorted chronologically from oldest to newest
 ```
 
 ```interactive_element_issue_details
-location_page: https://github.com/numpy/numpy/issues/291
+location_page: https://github.com/numpy/numpy/issues/24966
 type: Link
-visual_element: Issue title 'Changes in PyArray_FromAny between 1.5.x and 1.6.x' in the issues list
-trigger: Click on the issue title to view its details
-request: GET https://github.com/_graphql
-arguments: 
-  "body" (url-encoded): 
-    {
-      "query": "2d7d4b00e17984f22f2bb06bd6eeb12d",
-      "variables": {
-        "allowedOwner": null,
-        "count": 15,
-        "number": 291,
-        "owner": "numpy",
-        "repo": "numpy",
-        "skip": null
-      }
+visual_element: Issue titled 'BUG: scipy and numpy, --use-scipy-openblas vs --with-scipy-openblas' in the issues list
+trigger: click(150, 330, "issue titled 'BUG: scipy and numpy, --use-scipy-openblas vs --with-scipy-openblas', approximately 600x20 pixels, located at the top of the issues list")
+example:
+result = get_request("https://github.com/_graphql", {
+    "body": {
+        "query": "2d7d4b00e17984f22f2bb06bd6eeb12d",
+        "variables": {
+            "allowedOwner": null,
+            "count": 15,
+            "number": 24966,
+            "owner": "numpy",
+            "repo": "numpy",
+            "skip": null
+        }
     }
-effect: Retrieves detailed information about the selected issue
-returns: JSON object with issue details
-viewport_effect: Displays the detailed view of the selected issue
+})
+effect: Opens the details page of the selected issue
+returns: JSON with detailed issue data including comments and metadata
+viewport_effect: Displays the full details of the selected issue including description and comments
 ```

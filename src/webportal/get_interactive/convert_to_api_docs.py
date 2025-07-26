@@ -9,12 +9,19 @@ location_page: numpy/numpy/issues
 type: Button/Dropdown  
 visual_element: Sort dropdown button with "Oldest" option in the issues list header
 trigger: Click on sort dropdown and select "Oldest"
-request: GET https://github.com/_graphql
-arguments: 
-  "body" (url-encoded): {
-    "query":"22d008b451590c967cc8d672452db3f9",
-    "variables":{"includeReactions":false,"name":"numpy","owner":"numpy","query":"is:issue state:open sort:created-asc repo:numpy/numpy","skip":0}
-  }
+example:
+result = get_request(https://github.com/_graphql, {
+    "body": {
+        "query": "22d008b451590c967cc8d672452db3f9",
+        "variables": {
+            "includeReactions": False,
+            "name": "numpy",
+            "owner": "numpy",
+            "query": "is:issue state:open label:\"00 - Bug\" repo:numpy/numpy sort:created-desc",
+            "skip": 0
+        }
+    }
+})
 effect: Sorts the issues list by creation date in ascending order (oldest first)
 returns: JSON with paginated issues data sorted by oldest creation date first
 viewport_effect: Updates the issues list display to show issues sorted chronologically from oldest to newest
@@ -30,6 +37,13 @@ OUTPUT FORMAT: Convert this into structured interactive elements with the follow
 {example_format}
 
 CRITICAL INSTRUCTIONS:
+
+There are 2 types of requests:
+- GET requests
+- POST requests
+
+You will directly give an example using one of the two tools:
+get_request or post_request.
 
 1. **REMOVE USELESS ROUTES**: Filter out routes that are not useful for API documentation:
    - Static asset requests (CSS, JS, images)
@@ -54,6 +68,7 @@ CRITICAL INSTRUCTIONS:
    - Group related functionality together
    - Use clear, descriptive names for interactive elements
    - Ensure each element is self-contained and reusable
+   - You can add any additional information that you think is relevant to the API call
 
 5. **MAINTAIN TECHNICAL ACCURACY**:
    - Keep all actual API endpoints, methods, and parameters intact

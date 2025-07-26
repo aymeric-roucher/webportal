@@ -5,27 +5,21 @@ from webportal.get_interactive.network_capture import SeleniumNetworkCaptureAgen
 from smolagents.models import InferenceClientModel
 
 
-def main():
+def main(rerun_web_agent: bool = False):
     """Main function to run the conversion"""
     
     input_file = WEBPORTAL_REPO_PATH / Path("digested_websites/interactive_elements.md")
-    model = InferenceClientModel(
-        model_id="Qwen/Qwen2.5-VL-72B-Instruct",
-        provider="nebius",
-    )
-    selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data")
-    selenium_vision_agent.capture_requests_callback()
-    selenium_vision_agent.run("""
-I want you to go to github.com, navigate to the numpy package, and perform the following actions to extract all interactive elements:
 
-- Go to the issues page (numpy/numpy/issues)
-- Click on the "Labels" filter button (between the "Author" and the "Labels" button) to see all available labels with their colors and descriptions.
-- Click on a label to see the issues that have this label.
-- Click on the "Closed" button to toggle and view closed issues
-- Use the sort dropdown to sort issues by "Oldest" order (creation date ascending)
-- click on an issue to see the details
-Make sure to interact with each element completely to capture all the network requests and API calls that these interactive elements generate.
-              """)
+    if rerun_web_agent:
+        model = InferenceClientModel(
+            model_id="Qwen/Qwen2.5-VL-72B-Instruct",
+            provider="nebius",
+        )
+        selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data", markdown_file_path=input_file)
+        selenium_vision_agent.run("""
+"According to github, when was Regression added to the oldest closed numpy.polynomial issue that has the Regression label in MM/DD/YY?",
+
+""")
 
 
     # Set up paths
@@ -39,4 +33,4 @@ Make sure to interact with each element completely to capture all the network re
 
 
 if __name__ == "__main__":
-    main()
+    main(rerun_web_agent=True)
