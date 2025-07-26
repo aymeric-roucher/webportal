@@ -186,7 +186,7 @@ class SeleniumVisionAgent(ToolCallingAgent):
         # Window and display settings
         self.chrome_options.add_argument("--force-device-scale-factor=1")
 
-        self.chrome_options.add_argument(f"--window-size={self.height},{self.width}")
+        self.chrome_options.add_argument(f"--window-size={self.width},{self.height}")
         self.chrome_options.add_argument("--disable-pdf-viewer")
         self.chrome_options.add_argument("--window-position=0,0")
 
