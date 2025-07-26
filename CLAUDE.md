@@ -49,7 +49,6 @@ python -m pytest               # Alternative test runner
 - Provides comprehensive desktop interaction tools (click, type, scroll, etc.)
 - Network monitoring via Chrome DevTools Protocol
 - Screenshot capture with click markers for debugging
-- Window resolution: 1920x1080 with proper scaling
 
 ### Project Structure
 - `digested_websites/` - Website-specific processed content
