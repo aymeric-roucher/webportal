@@ -20,7 +20,7 @@ class TemplateSegment(BaseModel):
 
 
 class VariableTemplateSegment(TemplateSegment):
-    examples: set[str] = set()
+    examples: list[str] = []
 
 
 class FixedTemplateSegment(TemplateSegment):
@@ -353,7 +353,7 @@ class FastJSCrawler:
                 else:
                     # Just add the segment value to variable segment examples if not there
                     if segment not in template_segment.examples:
-                        template_segment.examples.add(segment)
+                        template_segment.examples.append(segment)
                     segment_identity[segment_index] = 1
 
             if sum(segment_identity) == len(segments):
@@ -380,7 +380,9 @@ class FastJSCrawler:
                         VariableTemplateSegment,
                     ):
                         # Just append the new segment to the variable segment
-                        template_segments[differing_segment_index].examples.add(segment)  # type: ignore
+                        template_segments[differing_segment_index].examples.append(
+                            segment
+                        )  # type: ignore
                         return template_index
                     elif isinstance(
                         template_segments[differing_segment_index], FixedTemplateSegment
@@ -388,10 +390,10 @@ class FastJSCrawler:
                         # We've discovered a new variable segment!
                         template_segments[differing_segment_index] = (
                             VariableTemplateSegment(
-                                examples={
-                                    segment,
+                                examples=[
                                     template_segments[differing_segment_index].example,  # type: ignore
-                                }
+                                    segment,
+                                ]
                             )
                         )
                         return template_index
@@ -531,13 +533,13 @@ class FastJSCrawler:
     async def worker(self, browser):
         """Worker that processes URLs from the queue"""
         while True:
-            print(f"Remaining links to visit: {self.to_visit.qsize()}")
             try:
                 url, depth = await self.to_visit.get()
                 await self.crawl_page(browser, url, depth)
                 self.to_visit.task_done()
+                print(f"Remaining links to visit: {self.to_visit.qsize()}")
             except Exception as e:
-                print(f"Worker error: {str(e)[:50]}")
+                print(f"Worker error:\n" + str(e))
                 break
 
     async def crawl(self):
@@ -732,9 +734,9 @@ def test_crawler_logs_variable_template():
     crawler.log_new_fixed_template("https://arxiv.org/abs/")
     assert crawler.matches_existing_template("https://arxiv.org/abs/") == 0
     assert crawler.matches_existing_template("https://arxiv.org/pdf/") == 0
-    assert crawler.pattern_templates[0].segments[-1].examples == {"abs", "pdf"}
+    assert crawler.pattern_templates[0].segments[-1].examples == ["abs", "pdf"]
     assert crawler.matches_existing_template("https://arxiv.org/html/") == 0
-    assert crawler.pattern_templates[0].segments[-1].examples == {"abs", "pdf", "html"}
+    assert crawler.pattern_templates[0].segments[-1].examples == ["abs", "pdf", "html"]
 
     crawler = FastJSCrawler(
         "https://arxiv.org/abs/2507.09001",

@@ -13,7 +13,6 @@ from smolagents import InferenceClientModel, ToolCallingAgent, tool
 from smolagents.agent_types import AgentImage
 from smolagents.memory import ActionStep, TaskStep
 from smolagents.monitoring import LogLevel
-from typing import Callable
 
 SELENIUM_SYSTEM_PROMPT_TEMPLATE = """You are a web automation assistant that can control a local browser using Selenium. The current date is <<current_date>>.
 
@@ -23,6 +22,7 @@ Then you will proceed as follows, with these sections: don't skip any!
 
 Short term goal: ...
 What I see: ...
+Outcome of previous action: ...
 Reflection: ...
 Action:
 {"name": "click", "arguments": {"x": 254, "y": 308, "element_description": "button with text 'Submit'"}}
@@ -114,6 +114,7 @@ Use click to interact with web elements and scroll to navigate through web pages
 Always analyze the latest screenshot carefully before performing actions.
 Web pages may have dropdowns, modals, and interactive elements that appear on hover or click.
 Use open_url to navigate to new websites directly.
+When you've done a click in the previous step, it will be shown by a green crosshair on the screenshot. Use it to check that you didn't click sideways.
 In browser, ignore any sign-in popups, cookie banners, or ads while they don't interfere with the elements you want to interact with.
 Wait for page elements to load before interacting with them.
 </general_guidelines>
@@ -210,6 +211,7 @@ class SeleniumVisionAgent(ToolCallingAgent):
             verbosity_level=verbosity_level,
             planning_interval=self.planning_interval,
             stream_outputs=True,
+            instructions="Don't do parallel tool calls: only one per step.",
             **kwargs,
         )
         self.prompt_templates["system_prompt"] = (
@@ -224,8 +226,15 @@ class SeleniumVisionAgent(ToolCallingAgent):
 
         # Add default tools
         self.logger.log("Setting up agent tools...")
+        self.click_coordinates = None
         self._setup_desktop_tools()
         self.setup_step_callbacks()
+
+    def quick_open_url(self, url: str) -> Image.Image:
+        self.tools["open_url"](url)
+        time.sleep(1.0)
+        screenshot_bytes = self.driver.get_screenshot_as_png()
+        return Image.open(BytesIO(screenshot_bytes))
 
     def _additional_chrome_options(self):
         """Additional Chrome options"""
@@ -251,13 +260,12 @@ class SeleniumVisionAgent(ToolCallingAgent):
 
         # Create a filename with step number
         screenshot_path = os.path.join(self.data_dir, f"step_{current_step:03d}.png")
-        image.save(screenshot_path)
 
         image_copy = image.copy()
-
-        if getattr(self, "click_coordinates", None):
-            print("DRAWING MARKER")
+        if self.click_coordinates:
+            print("DRAWING MARKER on coords", self.click_coordinates)
             image_copy = draw_marker_on_image(image_copy, self.click_coordinates)
+        image_copy.save(screenshot_path)
 
         self.last_marked_screenshot = AgentImage(screenshot_path)
         print(f"Saved screenshot for step {current_step} to {screenshot_path}")
@@ -498,7 +506,7 @@ class SeleniumVisionAgent(ToolCallingAgent):
 
             This tool should be called if you hit a request limit. In that case you should wait for a minute and then try again.
             Args:
-                seconds: Number of seconds to wait, generally 3 is enough.
+                seconds: Number of seconds to wait, generally 3.0 is enough. This is a float, not an integer.
             """
             time.sleep(seconds)
             self.logger.log(f"Waited for {seconds} seconds")

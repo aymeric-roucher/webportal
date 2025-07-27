@@ -13,7 +13,13 @@ from webportal.utils import describe_response_format
 
 
 class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
-    def __init__(self, markdown_file_path: Path | None = None, *args, **kwargs):
+    def __init__(
+        self,
+        *args,
+        markdown_file_path: Path | None = None,
+        domain_to_stay_on: str | None = None,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
 
         self.network_requests: list[dict[str, Any]] = []
@@ -23,6 +29,7 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
         self.markdown_file_path = (
             markdown_file_path or Path(self.data_dir) / "interactive_elements.md"
         )
+        self.domain_to_stay_on = domain_to_stay_on
         self._initialize_markdown_file()
 
         self._setup_network_monitoring()
@@ -162,8 +169,25 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
         else:
             memory_step.observations = capture_message
 
+        current_url = self.driver.current_url
+        if self.domain_to_stay_on:
+            from urllib.parse import urlparse
+
+            current_domain = urlparse(current_url).netloc
+            base_domain = self.domain_to_stay_on.replace("www.", "").replace(".", "-")
+            if base_domain not in current_domain.replace(
+                ".", "-"
+            ):  # We allow domain like arxiv-org.atlassian.net for base domain arxiv.org
+                raise Exception(
+                    f"Visited {current_url}, out of domain {self.domain_to_stay_on}: interrupting agent"
+                )
+
+        memory_step.observations += (
+            f"\nBrowser is currently at this url: {self.driver.current_url}\n"
+        )
+
         if "with arguments: " in memory_step.model_output:
-            memory_step.model_output = memory_step.model_output.split("\nTool call ")[0]
+            memory_step.model_output = memory_step.model_output.split("Tool call ")[0]
 
         # Always analyze the step (even if no requests) to capture agent context
         self._analyze_step_requests(current_step, step_requests, memory_step)
@@ -546,7 +570,11 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
 
         markdown_section = ""
         if markdown:
-            markdown_section = f"**Routes:**\n\n{markdown}\n\n"
+            markdown_section = f"**Network requests:**\n\n{markdown}\n\n"
+        else:
+            markdown_section = (
+                "**Network requests:**\n\nNo significant activity in this step.\n\n"
+            )
 
         with self.markdown_file_path.open("a") as f:
             f.write(step_header)
@@ -622,7 +650,7 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
                             param_strs.append(f'{key}="{values[0]}"')
                         else:
                             param_strs.append(f"{key}={values}")
-                    arguments.append(f"URL params: {', '.join(param_strs)}")
+                    arguments.append(f"params: {', '.join(param_strs)}")
             else:
                 # Regular URL parameter handling
                 param_strs = []
@@ -631,7 +659,7 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
                         param_strs.append(f'{key}="{values[0]}"')
                     else:
                         param_strs.append(f"{key}={values}")
-                arguments.append(f"URL params: {', '.join(param_strs)}")
+                arguments.append(f"params: {', '.join(param_strs)}")
 
         return "\n".join(arguments) if arguments else ""
 

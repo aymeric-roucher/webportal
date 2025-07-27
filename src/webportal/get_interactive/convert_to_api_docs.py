@@ -5,8 +5,8 @@ location_page: numpy/numpy/issues
 type: Button/Dropdown  
 visual_element: Sort dropdown button with "Oldest" option in the issues list header
 trigger: Click on sort dropdown and select "Oldest"
-example:
-result = get_request(https://github.com/_graphql, {
+result: GET request to https://github.com/_graphql
+arguments: {
     "body": {
         "query": "22d008b451590c967cc8d672452db3f9",
         "variables": {
@@ -17,10 +17,10 @@ result = get_request(https://github.com/_graphql, {
             "skip": 0
         }
     }
-})
+}
 effect: Sorts the issues list by creation date in ascending order (oldest first)
-returns: JSON with paginated issues data sorted by oldest creation date first
-viewport_effect: Updates the issues list display to show issues sorted chronologically from oldest to newest
+returns: {a JSON schema}
+viewport_effect: Viewport does not move.
 ```"""
 
 
@@ -47,31 +47,27 @@ You will directly give an example using one of the two tools:
 get_request or post_request.
 
 1. **REMOVE USELESS ROUTES**: Filter out routes that are not useful for API documentation:
+   - Request that didn't trigger any network activity
    - Static asset requests (CSS, JS, images)
    - Duplicate or redundant requests  
    - Internal tracking/analytics calls
    - One-time setup requests
    - Requests that don't provide meaningful functionality
 
-2. **DO NOT GENERALIZE**:
-   - Keep all specific values as they are.
-   - Example: "numpy/numpy" should remain "numpy/numpy".
-   - Do not replace values with variables like `^owner` or `^repo_name`.
-
-3. **INFER MISSING INFORMATION**:
+2. **INFER MISSING INFORMATION**:
    - Add logical `type` (Button, Dropdown, Link, etc.)
    - Add descriptive `visual_element` based on context
    - Add clear `trigger` description based on agent actions
    - Add meaningful `effect` explaining what the API call accomplishes
    - Add `viewport_effect` describing UI changes
 
-4. **STRUCTURE AND ORGANIZE**:
-   - Group related functionality together
+3. **DEDUPLICATE AND ORGANIZE**:
+   - Group related functionality together: if any interactions have the same type of request (GET/POST) and url, they should be grouped together. Just try to keep their arguments (except conflicting arguments), to show the whole functionality.
    - Use clear, descriptive names for interactive elements
    - Ensure each element is self-contained and reusable
    - You can add any additional information that you think is relevant to the API call
 
-5. **MAINTAIN TECHNICAL ACCURACY**:
+4. **MAINTAIN TECHNICAL ACCURACY**:
    - Keep all actual API endpoints, methods, and parameters intact
    - Preserve JSON structure in arguments
    - Don't modify GraphQL query hashes

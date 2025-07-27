@@ -1,5 +1,6 @@
+from time import time
 import json
-
+from time import time
 import pytest
 
 from webportal.common import DATA_PATH, MOCK_REQUESTS_PATH, TEST_PATH
@@ -8,6 +9,7 @@ from webportal.get_interactive.selenium_agent import (
     InferenceClientModel,
     SeleniumVisionAgent,
 )
+
 
 
 @pytest.mark.expensive
@@ -29,16 +31,13 @@ def test_run_selenium_network_capture_agent():
         model_id="Qwen/Qwen2.5-VL-32B-Instruct",
         provider="auto",
     )
-    selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data")
+    selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data", browser_headless=True)
     selenium_vision_agent.run("""
 I want you to go to github.com, to look for the numpy package and click the button to see all of the labels. 
 
 Then I want you to go back, and to sort the issues by oldest order
                             
               """)
-
-
-from time import time
 
 
 def test_return_requests(url: str = "arxiv.org"):
@@ -62,9 +61,6 @@ def test_return_requests(url: str = "arxiv.org"):
         tool_calls=[ToolCall(name="open_url", arguments={"url": url}, id="1")],
     )
     selenium_vision_agent.capture_requests_callback(memory_step, selenium_vision_agent)
-
-
-test_return_requests("https://arxiv.org/abs/2507.18628")
 
 
 def test_analysing_requests():

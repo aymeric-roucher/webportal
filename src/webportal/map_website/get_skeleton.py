@@ -1,10 +1,16 @@
 import ast
 import asyncio
+import os
 
+from dotenv import load_dotenv
 from litellm import completion
 from pydantic import BaseModel
 
 from webportal.map_website.crawl import crawl
+
+load_dotenv()
+
+assert os.getenv("OPENAI_API_KEY") is not None, "OPENAI_API_KEY is not set"
 
 raw_tree = """
 Site Structure for nature.com
@@ -47,7 +53,7 @@ class SiteStructure(BaseModel):
 
 
 def get_clean_urls_list(raw_tree: str) -> list[str]:
-    reponse = completion(
+    response = completion(
         model="gpt-4.1",
         messages=[
             {
@@ -58,9 +64,28 @@ def get_clean_urls_list(raw_tree: str) -> list[str]:
             }
         ],
         response_format=SiteStructure,
+        api_key=os.getenv("OPENAI_API_KEY"),
     )
+    content = ast.literal_eval(response.choices[0].message.content)["urls"]
+    # from openai import OpenAI
 
-    content = ast.literal_eval(reponse.choices[0].message.content)["urls"]
+    # client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    # response = client.chat.completions.create(
+    #     messages=[
+    #         {
+    #             "role": "user",
+    #             "content": "You're helping extract all the information from a website. To this end, you need to send agents visting a curated seleciton of pages to understand the website dynamic components.Extract a list of interesting urls to visit from the following site structure:\n"
+    #             + raw_tree
+    #             + "\n\nEach page that you select should be one that you think has a unique interactive kind of element to try out. Make sure to first include the most important pages of the website: if the website has a specific common template of webpage urls, make sure to include at least one example.",
+    #         }
+    #     ],
+    #     model="gpt-4.1",
+    #     response_format={
+    #         "type": "json_schema",
+    #         "json_schema": SiteStructure.model_json_schema(),
+    #     },
+    # )
+    # content = response.choices[0].message.parsed.urls
     return content
 
 
