@@ -46,7 +46,7 @@ export default function LandingPage() {
           <div className="max-w-4xl mx-auto">
             <Card>
               <CardContent className="p-0">
-                <div className="aspect-video bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-900 flex items-center justify-center">
+                <div className="aspect-video bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-950 dark:to-emerald-900 flex items-center justify-center">
                   <div className="text-center space-y-4">
                     <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto">
                       <Zap className="h-8 w-8 text-primary" />

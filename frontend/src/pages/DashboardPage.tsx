@@ -38,7 +38,7 @@ export default function DashboardPage() {
         return <CheckCircle className="h-4 w-4 text-green-500" />
       case 'processing':
       case 'queued':
-        return <Clock className="h-4 w-4 text-blue-500" />
+        return <Clock className="h-4 w-4 text-green-500" />
       case 'failed':
         return <AlertCircle className="h-4 w-4 text-red-500" />
       default:
@@ -127,7 +127,7 @@ export default function DashboardPage() {
                   </div>
                   <p className="text-sm text-muted-foreground">In Progress</p>
                 </div>
-                <Clock className="h-8 w-8 text-blue-500" />
+                <Clock className="h-8 w-8 text-green-500" />
               </div>
             </CardContent>
           </Card>
