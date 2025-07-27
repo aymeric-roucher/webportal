@@ -25,7 +25,6 @@ export default function DashboardPage() {
   const [filter, setFilter] = useState<'all' | 'completed' | 'processing' | 'failed'>('all')
   
   const userCredits = 15
-  const userPlan = 'free'
   
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.url.toLowerCase().includes(searchQuery.toLowerCase())

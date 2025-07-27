@@ -22,7 +22,7 @@ import { ProcessingJob } from '@/types'
 export default function ProcessingPage() {
   const { jobId } = useParams<{ jobId: string }>()
   const navigate = useNavigate()
-  const { currentJob, updateJob, getJob } = useJobStore()
+  const { updateJob, getJob } = useJobStore()
   const [job, setJob] = useState<ProcessingJob | null>(null)
   const [currentScreenshot, setCurrentScreenshot] = useState(0)
   

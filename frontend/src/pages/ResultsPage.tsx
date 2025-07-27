@@ -20,7 +20,7 @@ import ReactMarkdown from 'react-markdown'
 export default function ResultsPage() {
   const { jobId } = useParams<{ jobId: string }>()
   const { getJob } = useJobStore()
-  const [job, setJob] = useState(getJob(jobId!))
+  const [job] = useState(getJob(jobId!))
   const [markdownContent, setMarkdownContent] = useState<string>('')
   const [copiedToClipboard, setCopiedToClipboard] = useState(false)
   

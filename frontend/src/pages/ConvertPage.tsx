@@ -10,7 +10,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Globe, Loader2, Download, CheckCircle } from 'lucide-react'
 import { useJobStore } from '@/stores/useJobStore'
-import { ConversionRequest } from '@/types'
 
 const formSchema = z.object({
   url: z.string().url('Please enter a valid URL'),
