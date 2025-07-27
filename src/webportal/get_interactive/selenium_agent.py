@@ -175,6 +175,10 @@ class SeleniumVisionAgent(ToolCallingAgent):
             self.chrome_options.add_argument("--disable-web-security")
             self.chrome_options.add_argument("--disable-features=VizDisplayCompositor")
             self.chrome_options.add_argument("--remote-debugging-port=9222")
+            self.chrome_options.add_argument("--no-zygote")
+            self.chrome_options.add_argument("--disable-default-apps")
+            self.chrome_options.add_argument("--disable-extensions")
+            self.chrome_options.add_argument("--disable-plugins")
 
         # Window and display settings
         self.chrome_options.add_argument("--force-device-scale-factor=1")
@@ -566,7 +570,6 @@ class SeleniumVisionAgent(ToolCallingAgent):
 
     def close(self):
         """Clean up resources"""
-        if self.driver:
-            print("Closing browser...")
-            self.driver.quit()
-            print("Browser closed")
+        print("Closing browser...")
+        self.driver.quit()
+        print("Browser closed")

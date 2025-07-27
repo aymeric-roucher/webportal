@@ -26,7 +26,9 @@ from webportal.map_website.get_skeleton import get_clean_urls_list
 def get_main_website_urls(
     main_url: str, max_urls: int = 2, concurrency: int = 8, nb_pages: int = 100
 ) -> list[str]:
-    crawler = asyncio.run(crawl(main_url, nb_pages, max_depth=5, concurrency=concurrency))
+    crawler = asyncio.run(
+        crawl(main_url, nb_pages, max_depth=5, concurrency=concurrency)
+    )
     tree_output = crawler.export_structure("tree")
     urls = list(set(get_clean_urls_list(tree_output)))[:max_urls]
     return urls
@@ -168,4 +170,4 @@ def ingest_website(
 
 if __name__ == "__main__":
     # output = list_possible_workflows_from_url("arxiv.org")
-    output = ingest_website("arxiv.org", 20, 8, Path("data"), headless=True, nb_pages=1)
+    output = ingest_website("arxiv.org", 20, 4, Path("data"), headless=True)
