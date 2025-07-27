@@ -8,6 +8,7 @@ from typing import Callable
 from PIL import Image, ImageDraw
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.keys import Keys
 from smolagents import InferenceClientModel, ToolCallingAgent, tool
 from smolagents.agent_types import AgentImage
@@ -180,6 +181,11 @@ class SeleniumVisionAgent(ToolCallingAgent):
             self.chrome_options.add_argument("--disable-extensions")
             self.chrome_options.add_argument("--disable-plugins")
 
+            self.chrome_options.add_argument("--memory-pressure-off")
+            self.chrome_options.add_argument("--max_old_space_size=4096")
+            self.chrome_options.add_argument("--disable-background-timer-throttling")
+            self.chrome_options.add_argument("--disable-backgrounding-occluded-windows")
+            self.chrome_options.add_argument("--disable-renderer-backgrounding")
         # Window and display settings
         self.chrome_options.add_argument("--force-device-scale-factor=1")
 
@@ -187,17 +193,15 @@ class SeleniumVisionAgent(ToolCallingAgent):
         self.chrome_options.add_argument("--disable-pdf-viewer")
         self.chrome_options.add_argument("--window-position=0,0")
 
-        if browser_headless:
-            # Memory and performance optimizations for serverless
-            self.chrome_options.add_argument("--memory-pressure-off")
-            self.chrome_options.add_argument("--max_old_space_size=4096")
-            self.chrome_options.add_argument("--disable-background-timer-throttling")
-            self.chrome_options.add_argument("--disable-backgrounding-occluded-windows")
-            self.chrome_options.add_argument("--disable-renderer-backgrounding")
-
         self._additional_chrome_options()
 
-        self.driver = webdriver.Chrome(options=self.chrome_options)
+        # Use Selenium Grid instead of direct Chrome instance
+        # The selenium/standalone-chrome Docker image runs Grid Hub on port 4444
+        grid_url = "http://localhost:4444/wd/hub"
+
+        self.driver = webdriver.Remote(
+            command_executor=grid_url, options=self.chrome_options
+        )
 
         # Set browser window size
         self.driver.set_window_size(self.width, self.height)
@@ -234,15 +238,15 @@ class SeleniumVisionAgent(ToolCallingAgent):
         self._setup_desktop_tools()
         self.setup_step_callbacks()
 
+    def _additional_chrome_options(self):
+        """Additional Chrome options - override in subclasses if needed"""
+        pass
+
     def quick_open_url(self, url: str) -> Image.Image:
         self.tools["open_url"](url)
         time.sleep(1.0)
         screenshot_bytes = self.driver.get_screenshot_as_png()
         return Image.open(BytesIO(screenshot_bytes))
-
-    def _additional_chrome_options(self):
-        """Additional Chrome options"""
-        pass
 
     def setup_step_callbacks(self) -> None:
         self._setup_step_callbacks(

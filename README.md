@@ -31,3 +31,14 @@ source .env && docker run -it --rm --platform linux/amd64 --ulimit nofile=32768 
     -v "$(pwd)/src:/app/src" \
     webportal-selenium
 ```
+
+**Note**: Container auto-removes after exit (`--rm`). Selenium Grid starts automatically for multiprocessing support.
+
+### Testing Multiprocessing
+
+```bash
+docker run --rm --platform linux/amd64 --ulimit nofile=32768 \
+    -v "$(pwd)/test_grid_multiprocessing.py:/app/test_grid_multiprocessing.py" \
+    webportal-selenium \
+    /bin/bash -c "/opt/bin/start-selenium-standalone.sh & sleep 5 && uv run python test_grid_multiprocessing.py"
+```

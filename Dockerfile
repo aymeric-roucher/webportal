@@ -47,5 +47,5 @@ USER seluser
 # Set uv cache directory to avoid permission issues
 ENV UV_CACHE_DIR=/tmp/uv-cache
 
-# Default command
-CMD ["uv", "run", "python", "-m", "src.webportal.ingest"]
+# Start Selenium Grid in background, then run the main application  
+CMD ["/bin/bash", "-c", "/opt/bin/start-selenium-standalone.sh & sleep 5 && uv run python -m src.webportal.ingest"]
