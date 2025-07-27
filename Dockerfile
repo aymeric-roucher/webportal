@@ -34,9 +34,8 @@ COPY src/ ./src/
 # Install Python dependencies
 RUN uv sync --frozen
 
-# Copy remaining files
-COPY tests/ ./tests/
-COPY CLAUDE.md ./
+# Install Playwright browsers
+RUN uv run playwright install chromium --with-deps
 
 # Set environment variables for headless browser
 ENV DISPLAY=:99
@@ -48,8 +47,5 @@ USER seluser
 # Set uv cache directory to avoid permission issues
 ENV UV_CACHE_DIR=/tmp/uv-cache
 
-# Expose port (if needed for web interface)
-EXPOSE 8000
-
 # Default command
-CMD ["uv", "run", "python", "-m", "src.webportal.get_interactive.main"]
+CMD ["uv", "run", "python", "-m", "src.webportal.ingest"]

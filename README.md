@@ -14,3 +14,20 @@ Make your website agent-accessible.
 
 - **API count**: Number of APIs seems reasonable (maybe 100 for GitHub???)
 - **LLM limitations**: LLMs are good at "translating" .har into .json and into .py (but not deterministic, slow and expensive) = can be used for experimentations but should be avoided for production
+
+## Docker
+
+Building the container:
+```bash
+docker build --platform linux/amd64 -t webportal-selenium . 
+```
+
+Running the container (sharing the src folder allows to instantly propagate changes to the docker):
+```bash
+source .env && docker run -it --rm --platform linux/amd64 --ulimit nofile=32768 \
+    -e OPENAI_API_KEY=$OPENAI_API_KEY \
+    -e HF_TOKEN=$HUGGINGFACE_API_KEY \
+    -v "$(pwd)/data:/app/data" \
+    -v "$(pwd)/src:/app/src" \
+    webportal-selenium
+```
