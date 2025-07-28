@@ -18,13 +18,14 @@ def test_run_selenium_agent():
         model_id="Qwen/Qwen2.5-VL-32B-Instruct",
         provider="auto",
     )
-    selenium_vision_agent = SeleniumVisionAgent(model=model, data_dir="data")
+    selenium_vision_agent = SeleniumVisionAgent(model=model, data_dir="data", browser_headless=False,)
     selenium_vision_agent.run("""
-I want you to crawl the website github.com and click on the main features of the website.
-                            
+I want you to go to github.com, to look for the numpy package and click the button to see all of the labels. 
+
+Then I want you to go back, and to sort the issues by oldest order                            
               """)
-
-
+    
+    
 @pytest.mark.expensive
 def test_run_selenium_network_capture_agent():
     model = InferenceClientModel(
@@ -40,7 +41,7 @@ Then I want you to go back, and to sort the issues by oldest order
               """)
 
 
-def test_return_requests(url: str = "arxiv.org"):
+def test_return_requests(url: str = "github.com"):
     model = InferenceClientModel(
         model_id="Qwen/Qwen2.5-VL-32B-Instruct",
         provider="auto",
@@ -62,7 +63,6 @@ def test_return_requests(url: str = "arxiv.org"):
     )
     selenium_vision_agent.capture_requests_callback(memory_step, selenium_vision_agent)
 
-
 def test_analysing_requests():
     html_requests = json.loads((MOCK_REQUESTS_PATH / "github_html.json").read_text())
     json_requests = json.loads((MOCK_REQUESTS_PATH / "github_json.json").read_text())
@@ -73,7 +73,7 @@ def test_analysing_requests():
     )
     selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data")
 
-    markdown = selenium_vision_agent._generate_step_markdown(
+    markdown = selenium_vision_agent._generate_step_interaction_summary_markdown(
         tool_call_info={
             "tool_name": "open_url",
             "arguments": {"url": "https://github.com"},

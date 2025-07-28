@@ -195,13 +195,7 @@ class SeleniumVisionAgent(ToolCallingAgent):
 
         self._additional_chrome_options()
 
-        # Use Selenium Grid instead of direct Chrome instance
-        # The selenium/standalone-chrome Docker image runs Grid Hub on port 4444
-        grid_url = "http://localhost:4444/wd/hub"
-
-        self.driver = webdriver.Remote(
-            command_executor=grid_url, options=self.chrome_options
-        )
+        self.driver = webdriver.Chrome(options=self.chrome_options)
 
         # Set browser window size
         self.driver.set_window_size(self.width, self.height)
@@ -252,6 +246,13 @@ class SeleniumVisionAgent(ToolCallingAgent):
         self._setup_step_callbacks(
             [self.take_screenshot_callback] + self.callback_tools
         )
+        
+    def _hot_fix_tool_calling_agent_callback(self, memory_step: ActionStep, agent: ToolCallingAgent) -> None:
+        """Hot fix for tool calling agent callback, otherwise the output is always misformatted.
+        """
+        if "with arguments: " in memory_step.model_output:
+            memory_step.model_output = memory_step.model_output.split("Tool call ")[0]
+        
 
     def take_screenshot_callback(
         self, memory_step: ActionStep, agent: ToolCallingAgent
@@ -310,6 +311,7 @@ class SeleniumVisionAgent(ToolCallingAgent):
 
         # memory_step.observations_images = [screenshot_path] # IF YOU USE THIS INSTEAD OF ABOVE, LAUNCHING A SECOND TASK BREAKS
 
+        self._hot_fix_tool_calling_agent_callback(memory_step, agent)
         self.click_coordinates = None  # Reset click marker
 
     def _setup_desktop_tools(self):
