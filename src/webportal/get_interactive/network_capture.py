@@ -186,8 +186,6 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
             f"\nBrowser is currently at this url: {self.driver.current_url}\n"
         )
 
-        if "with arguments: " in memory_step.model_output:
-            memory_step.model_output = memory_step.model_output.split("Tool call ")[0]
 
         # Always analyze the step (even if no requests) to capture agent context
         self._analyze_step_requests(current_step, step_requests, memory_step)
