@@ -39,8 +39,6 @@ I want you to go to github.com, to look for the numpy package and click the butt
 Then I want you to go back, and to sort the issues by oldest order
                             
               """)
-    
-test_run_selenium_network_capture_agent()
 
 
 def test_return_requests(url: str = "github.com"):
