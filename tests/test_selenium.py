@@ -7,7 +7,7 @@ from webportal.common import DATA_PATH, MOCK_REQUESTS_PATH, TEST_PATH
 from webportal.get_interactive.network_capture import SeleniumNetworkCaptureAgent
 from webportal.get_interactive.selenium_agent import (
     InferenceClientModel,
-    SeleniumVisionAgent,
+    PlaywrightVisionAgent,
 )
 
 
@@ -18,12 +18,14 @@ def test_run_selenium_agent():
         model_id="Qwen/Qwen2.5-VL-32B-Instruct",
         provider="auto",
     )
-    selenium_vision_agent = SeleniumVisionAgent(model=model, data_dir="data", browser_headless=False,)
+    selenium_vision_agent = PlaywrightVisionAgent(model=model, data_dir="data", browser_headless=False,)
     selenium_vision_agent.run("""
 I want you to go to github.com, to look for the numpy package and click the button to see all of the labels. 
 
 Then I want you to go back, and to sort the issues by oldest order                            
               """)
+    
+
     
     
 @pytest.mark.expensive

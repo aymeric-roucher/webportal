@@ -7,7 +7,7 @@ from webportal.common import DATA_PATH
 from webportal.get_interactive.convert_to_api_docs import (
     convert_interactive_elements_to_api_docs,
 )
-from webportal.get_interactive.network_capture import SeleniumNetworkCaptureAgent
+from webportal.get_interactive.network_capture import PlaywrightNetworkCaptureAgent
 
 INGESTION_PROMPT = """
 You are tasked with exploring all interactive elements of the following webpage: {target_url}
@@ -43,7 +43,7 @@ def ingest_page(
         model_id="Qwen/Qwen2.5-VL-32B-Instruct",
         provider="auto",
     )
-    selenium_vision_agent = SeleniumNetworkCaptureAgent(
+    selenium_vision_agent = PlaywrightNetworkCaptureAgent(
         model=model,
         data_dir=str(data_dir),
         markdown_file_path=input_file,

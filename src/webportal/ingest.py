@@ -17,7 +17,7 @@ from webportal.get_interactive.convert_to_api_docs import (
     create_api_docs_conversion_prompt,
 )
 from webportal.get_interactive.ingest_page import INGESTION_PROMPT, ingest_page
-from webportal.get_interactive.network_capture import SeleniumVisionAgent
+from webportal.get_interactive.network_capture import PlaywrightVisionAgent
 from webportal.inference import call_llm
 from webportal.map_website.crawl import crawl
 from webportal.map_website.get_skeleton import get_clean_urls_list
@@ -58,7 +58,7 @@ def list_possible_workflows_from_url(
         return activities
 
     with tempfile.TemporaryDirectory() as temp_dir:
-        selenium_vision_agent = SeleniumVisionAgent(
+        selenium_vision_agent = PlaywrightVisionAgent(
             model=model,
             data_dir=str(temp_dir),
             tools=[final_answer],
