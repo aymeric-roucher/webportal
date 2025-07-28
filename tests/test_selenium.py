@@ -18,12 +18,12 @@ def test_run_selenium_agent():
         model_id="Qwen/Qwen2.5-VL-32B-Instruct",
         provider="auto",
     )
-    selenium_vision_agent = SeleniumVisionAgent(model=model, data_dir="data")
+    selenium_vision_agent = SeleniumVisionAgent(model=model, data_dir="data", browser_headless=False,)
     selenium_vision_agent.run("""
-I want you to crawl the website github.com and click on the main features of the website.
-                            
-              """)
+I want you to go to github.com, to look for the numpy package and click the button to see all of the labels. 
 
+Then I want you to go back, and to sort the issues by oldest order                            
+              """)
 
 @pytest.mark.expensive
 def test_run_selenium_network_capture_agent():

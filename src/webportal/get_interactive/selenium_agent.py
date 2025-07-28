@@ -195,13 +195,7 @@ class SeleniumVisionAgent(ToolCallingAgent):
 
         self._additional_chrome_options()
 
-        # Use Selenium Grid instead of direct Chrome instance
-        # The selenium/standalone-chrome Docker image runs Grid Hub on port 4444
-        grid_url = "http://localhost:4444/wd/hub"
-
-        self.driver = webdriver.Remote(
-            command_executor=grid_url, options=self.chrome_options
-        )
+        self.driver = webdriver.Chrome(options=self.chrome_options)
 
         # Set browser window size
         self.driver.set_window_size(self.width, self.height)
