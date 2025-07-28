@@ -65,6 +65,7 @@ def test_return_requests(url: str = "github.com"):
     )
     selenium_vision_agent.capture_requests_callback(memory_step, selenium_vision_agent)
 
+
 def test_analysing_requests():
     html_requests = json.loads((MOCK_REQUESTS_PATH / "github_html.json").read_text())
     json_requests = json.loads((MOCK_REQUESTS_PATH / "github_json.json").read_text())

@@ -40,50 +40,79 @@ class PlaywrightNetworkCaptureAgent(PlaywrightVisionAgent):
         )
 
     def _setup_network_monitoring(self):
-        """Setup Playwright network monitoring"""
+        """Setup CDP-based network monitoring for more reliable capture"""
         # Clear any existing network requests
         self.network_requests = []
         self.request_response_map = {}
         
-        # Set up request and response listeners
-        self.page.on('request', self._on_request)
-        self.page.on('response', self._on_response)
+        # Create CDP session
+        self.cdp_session = self.page.context.new_cdp_session(self.page)
         
-        print("Network monitoring enabled")
+        # Enable network domain
+        self.cdp_session.send("Network.enable")
         
-    def _on_request(self, request):
-        """Handle request events"""
+        # Set up CDP event listeners
+        self.cdp_session.on("Network.requestWillBeSent", self._on_cdp_request)
+        self.cdp_session.on("Network.responseReceived", self._on_cdp_response)
+        self.cdp_session.on("Network.loadingFinished", self._on_cdp_loading_finished)
+        
+        print("CDP-based network monitoring enabled")
+        
+    def _on_cdp_request(self, event):
+        """Handle CDP Network.requestWillBeSent events"""
+        request = event.get('request', {})
+        request_id = event.get('requestId')
+        
         request_data = {
             'timestamp': time.time(),
-            'url': request.url,
-            'method': request.method,
-            'headers': request.headers,
-            'post_data': request.post_data if request.method == 'POST' else '',
-            'request_id': id(request),
-            'type': request.resource_type,
+            'url': request.get('url', ''),
+            'method': request.get('method', 'GET'),
+            'headers': request.get('headers', {}),
+            'post_data': request.get('postData', ''),
+            'request_id': request_id,
+            'type': event.get('type', 'Other'),
         }
-        self.request_response_map[id(request)] = request_data
+        self.request_response_map[request_id] = request_data
         
-    def _on_response(self, response):
-        """Handle response events"""
-        request_id = id(response.request)
+    def _on_cdp_response(self, event):
+        """Handle CDP Network.responseReceived events"""
+        request_id = event.get('requestId')
+        response = event.get('response', {})
+        
         if request_id in self.request_response_map:
-            request_data = self.request_response_map[request_id]
-            try:
-                # Get response body
-                body = response.body() if response.status < 400 else None
-                body_text = body.decode('utf-8') if body else None
-            except Exception:
-                body_text = None
-                
-            request_data['response'] = {
-                'status_code': response.status,
-                'status_text': response.status_text,
-                'headers': response.headers,
-                'url': response.url,
-                'body': body_text,
+            self.request_response_map[request_id]['response'] = {
+                'status_code': response.get('status', 0),
+                'status_text': response.get('statusText', ''),
+                'headers': response.get('headers', {}),
+                'url': response.get('url', ''),
+                'mime_type': response.get('mimeType', ''),
                 'response_timestamp': time.time(),
+                'body': None  # Will be filled by _on_cdp_loading_finished
             }
+            
+    def _on_cdp_loading_finished(self, event):
+        """Handle CDP Network.loadingFinished events to get response body"""
+        request_id = event.get('requestId')
+        
+        if request_id in self.request_response_map and 'response' in self.request_response_map[request_id]:
+            try:
+                # Get response body using CDP
+                response_body = self.cdp_session.send("Network.getResponseBody", {"requestId": request_id})
+                body_text = response_body.get('body', '')
+                
+                # Decode if base64 encoded
+                if response_body.get('base64Encoded', False):
+                    import base64
+                    try:
+                        body_text = base64.b64decode(body_text).decode('utf-8')
+                    except Exception:
+                        pass  # Keep as base64 if decode fails
+                        
+                self.request_response_map[request_id]['response']['body'] = body_text
+                
+            except Exception:
+                # Some requests might not have accessible bodies
+                self.request_response_map[request_id]['response']['body'] = None
 
     def _initialize_markdown_file(self):
         """Initialize the centralized markdown file at the beginning of the agent session"""
@@ -94,16 +123,37 @@ class PlaywrightNetworkCaptureAgent(PlaywrightVisionAgent):
 
     def capture_step_network_activity(self, step_number: int) -> list[dict[str, Any]]:
         """Capture network activity that happened during a specific step"""
-        # Wait a bit to ensure all responses are received
-        time.sleep(1)
+        # Wait a bit longer to ensure all responses are received via CDP
+        time.sleep(2)
         
         # Get requests from the current step by filtering from our collected requests
         step_requests = []
-        current_time = time.time()
         
         for request_data in self.request_response_map.values():
             # Add step number to request data
             request_data['step_number'] = step_number
+            
+            # For requests without response bodies, try to fetch them one more time
+            if (request_data.get('response') and 
+                request_data['response'].get('body') is None and
+                request_data.get('type', '').lower() in ['xhr', 'fetch', 'document']):
+                try:
+                    response_body = self.cdp_session.send("Network.getResponseBody", 
+                                                        {"requestId": request_data['request_id']})
+                    body_text = response_body.get('body', '')
+                    
+                    # Decode if base64 encoded
+                    if response_body.get('base64Encoded', False):
+                        import base64
+                        try:
+                            body_text = base64.b64decode(body_text).decode('utf-8')
+                        except Exception:
+                            pass  # Keep as base64 if decode fails
+                            
+                    request_data['response']['body'] = body_text
+                except Exception:
+                    pass  # Leave as None if we can't get the body
+            
             step_requests.append(request_data.copy())
         
         # Store step requests for later analysis
@@ -206,12 +256,14 @@ class PlaywrightNetworkCaptureAgent(PlaywrightVisionAgent):
                 continue
 
             # Keep XHR/Fetch requests, API-like URLs, or Document requests (initial page loads)
+            # CDP uses different type names: XHR, Fetch, Document, etc.
             if (
-                request_type
+                request_type.lower()
                 in [
-                    "XHR",
-                    "Fetch",
-                    "Document",
+                    "xhr",
+                    "fetch", 
+                    "document",
+                    "websocket",
                 ]  # Include Document type for initial page loads
                 or "/api/" in url
                 or "/graphql" in url
@@ -226,7 +278,7 @@ class PlaywrightNetworkCaptureAgent(PlaywrightVisionAgent):
             # Skip None requests
             if request is None:
                 continue
-            if request.get("type") in ["XHR", "Fetch", "Document"]:
+            if request.get("type", "").lower() in ["xhr", "fetch", "document"]:
                 if request.get("response") is not None:
                     if request["response"].get("body"):
                         relevant_requests_filtered_by_type_and_body.append(request)
@@ -652,6 +704,16 @@ class PlaywrightNetworkCaptureAgent(PlaywrightVisionAgent):
             return f"{path_parts[-1]}"
         else:
             return "request"
+
+    def close(self):
+        """Clean up CDP session and parent resources"""
+        if hasattr(self, 'cdp_session'):
+            try:
+                self.cdp_session.send("Network.disable")
+                self.cdp_session.detach()
+            except Exception:
+                pass  # Ignore errors during cleanup
+        super().close()
 
 
 # Compatibility alias for existing code
