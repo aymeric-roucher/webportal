@@ -18,9 +18,11 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
         *args,
         markdown_file_path: Path | None = None,
         domain_to_stay_on: str | None = None,
+        job_id: str | None = None,
+        folder_name: str | None = None,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, job_id=job_id, folder_name=folder_name, **kwargs)
 
         self.network_requests: list[dict[str, Any]] = []
         self.step_requests: dict[int, list[dict[str, Any]]] = {}
@@ -30,6 +32,7 @@ class SeleniumNetworkCaptureAgent(SeleniumVisionAgent):
             markdown_file_path or Path(self.data_dir) / "interactive_elements.md"
         )
         self.domain_to_stay_on = domain_to_stay_on
+        self.job_id = job_id
         self._initialize_markdown_file()
 
         self._setup_network_monitoring()

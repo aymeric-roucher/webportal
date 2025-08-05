@@ -4,10 +4,12 @@ from pathlib import Path
 from smolagents.models import InferenceClientModel
 
 from webportal.common import DATA_PATH
+from webportal.secret_manager import get_huggingface_token
 from webportal.get_interactive.convert_to_api_docs import (
     convert_interactive_elements_to_api_docs,
 )
 from webportal.get_interactive.network_capture import SeleniumNetworkCaptureAgent
+from webportal.storage_utils import write_job_file_to_storage
 
 INGESTION_PROMPT = """
 You are tasked with exploring all interactive elements of the following webpage: {target_url}
@@ -32,6 +34,8 @@ def ingest_page(
     headless: bool = True,
     domain_to_stay_on: str | None = None,
     custom_prompt: str | None = None,
+    job_id: str | None = None,
+    folder_name: str | None = None,
 ) -> str:
     """Main function to run the conversion"""
     data_dir.mkdir(parents=True, exist_ok=True)
@@ -42,19 +46,35 @@ def ingest_page(
     model = InferenceClientModel(
         model_id="Qwen/Qwen2.5-VL-32B-Instruct",
         provider="auto",
+        token=get_huggingface_token(),
     )
     selenium_vision_agent = SeleniumNetworkCaptureAgent(
         model=model,
         data_dir=str(data_dir),
         markdown_file_path=input_file,
         browser_headless=headless,
-        domain_to_stay_on=domain_to_stay_on,
         max_steps=20,
+        job_id=job_id,
+        domain_name=domain_to_stay_on,
+        folder_name=folder_name,
     )
     screenshot = selenium_vision_agent.quick_open_url(target_url)
     selenium_vision_agent.run(ingestion_prompt, images=[screenshot])
     selenium_vision_agent.close()  # Clean up browser resources
     content = input_file.read_text()
+    
+    # Save raw markdown using job-specific storage if job_id is provided
+    if job_id and domain_to_stay_on:
+        filename = f"raw_markdown_{target_url.replace('/', '_').replace(':', '_')}.md"
+        if folder_name:
+            filename = f"{folder_name}/{filename}"
+        write_job_file_to_storage(
+            domain_name=domain_to_stay_on, 
+            job_id=job_id, 
+            filename=filename, 
+            content=content
+        )
+    
     api_docs = convert_interactive_elements_to_api_docs(input_elements=content)
     return api_docs
 

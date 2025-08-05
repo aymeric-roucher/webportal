@@ -1,0 +1,26 @@
+apiVersion: run.googleapis.com/v1
+kind: Job
+metadata:
+  name: webportal-job
+  annotations:
+    run.googleapis.com/launch-stage: BETA
+spec:
+  template:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          timeoutSeconds: 3600
+          containers:
+          - name: webportal
+            image: us-east1-docker.pkg.dev/webportal-468213/webportal-registry/webportal:latest
+            env:
+            - name: TARGET_WEBSITE
+              value: "clinicaltrials.gov"
+            resources:
+              limits:
+                memory: "2Gi"
+                cpu: "2"
+              requests:
+                memory: "1Gi"
+                cpu: "1"

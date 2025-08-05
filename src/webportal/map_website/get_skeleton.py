@@ -1,16 +1,14 @@
 import ast
 import asyncio
-import os
 
 from dotenv import load_dotenv
 from litellm import completion
 from pydantic import BaseModel
 
 from webportal.map_website.crawl import crawl
+from webportal.secret_manager import get_openai_api_key
 
 load_dotenv()
-
-assert os.getenv("OPENAI_API_KEY") is not None, "OPENAI_API_KEY is not set"
 
 raw_tree = """
 Site Structure for nature.com
@@ -64,7 +62,7 @@ def get_clean_urls_list(raw_tree: str) -> list[str]:
             }
         ],
         response_format=SiteStructure,
-        api_key=os.getenv("OPENAI_API_KEY"),
+        api_key=get_openai_api_key(),
     )
     content = ast.literal_eval(response.choices[0].message.content)["urls"]
     # from openai import OpenAI
