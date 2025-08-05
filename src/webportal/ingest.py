@@ -1,9 +1,7 @@
 import asyncio
-import multiprocessing
 import tempfile
 import textwrap
 import time
-from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
@@ -107,11 +105,6 @@ def ingest_single_page(
     return interactive_elements_gathered_url
 
 
-def _url_ingest_worker(url_and_params: tuple[str, Path, bool, str]) -> tuple[str, str]:
-    """Worker function for multiprocessing URL ingestion - must be at module level for pickling."""
-    url, data_dir, headless, domain_name = url_and_params
-    result = ingest_single_page(url, data_dir, headless, domain_name)
-    return url, result
 
 
 def ingest_website(
@@ -120,7 +113,6 @@ def ingest_website(
     concurrency: int = 8,
     data_dir: Path = Path("data"),
     headless: bool = True,
-    max_workers: int | None = None,
     nb_pages: int = 100,
 ) -> str:
     # Map the website
@@ -131,30 +123,17 @@ def ingest_website(
     print(f"Found {len(urls)} urls to ingest:")
     print("\n".join(urls))
 
-    # Ingest the selected urls using multiprocessing
-    if max_workers is None:
-        max_workers = multiprocessing.cpu_count()
-
+    # Ingest the selected urls sequentially
     interactive_elements_gathered: list[str] = []
 
-    with ProcessPoolExecutor(max_workers=max_workers) as executor:
-        # Submit all URL processing tasks
-        future_to_url = {
-            executor.submit(
-                _url_ingest_worker, (url, data_dir, headless, domain_name)
-            ): url
-            for url in urls
-        }
-
-        # Collect results as they complete
-        for future in tqdm(as_completed(future_to_url), total=len(urls)):
-            url = future_to_url[future]
-            result = future.result()
-            if result:
-                _, interactive_elements_gathered_url = result
-                interactive_elements_gathered.append(interactive_elements_gathered_url)
-            else:
-                print(f"Error ingesting {url}")
+    for url in tqdm(urls, desc="Ingesting URLs"):
+        interactive_elements_gathered_url = ingest_single_page(
+            url, data_dir, headless, domain_name
+        )
+        if interactive_elements_gathered_url:
+            interactive_elements_gathered.append(interactive_elements_gathered_url)
+        else:
+            print(f"Error ingesting {url}")
 
     # Aggregate elements into API docs
     print("Aggregating elements into API docs")
@@ -169,5 +148,4 @@ def ingest_website(
 
 
 if __name__ == "__main__":
-    # output = list_possible_workflows_from_url("arxiv.org")
-    output = ingest_website("arxiv.org", 20, 4, Path("data"), headless=True)
+    output = ingest_website("github.com", 20, 4, Path("data"), headless=True)
