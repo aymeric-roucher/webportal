@@ -22,10 +22,15 @@ from webportal.map_website.get_skeleton import get_clean_urls_list
 
 
 def get_main_website_urls(
-    main_url: str, max_urls: int = 2, concurrency: int = 8, nb_pages: int = 100
+    main_url: str, max_urls: int, concurrency: int, max_pages: int, max_depth: int
 ) -> list[str]:
     crawler = asyncio.run(
-        crawl(main_url, nb_pages, max_depth=5, concurrency=concurrency)
+        crawl(
+            url=main_url,
+            max_pages=max_pages,
+            max_depth=max_depth,
+            concurrency=concurrency,
+        )
     )
     tree_output = crawler.export_structure("tree")
     urls = list(set(get_clean_urls_list(tree_output)))[:max_urls]
@@ -109,17 +114,24 @@ def ingest_single_page(
 
 def ingest_website(
     main_url: str,
-    max_urls: int = 20,
+    max_urls: int = 100,
     concurrency: int = 8,
     data_dir: Path = Path("data"),
     headless: bool = True,
     nb_pages: int = 100,
+    max_depth: int = 5,
 ) -> str:
     # Map the website
     if not main_url.startswith(("http://", "https://")):
         main_url = f"https://{main_url}"
     domain_name = urlparse(main_url).netloc
-    urls = get_main_website_urls(main_url, max_urls, concurrency, nb_pages)
+    urls = get_main_website_urls(
+        main_url=main_url,
+        max_urls=max_urls,
+        concurrency=concurrency,
+        max_pages=nb_pages,
+        max_depth=max_depth,
+    )
     print(f"Found {len(urls)} urls to ingest:")
     print("\n".join(urls))
 
@@ -148,4 +160,4 @@ def ingest_website(
 
 
 if __name__ == "__main__":
-    output = ingest_website("github.com", 20, 4, Path("data"), headless=True)
+    output = ingest_website(main_url="castorama.fr")

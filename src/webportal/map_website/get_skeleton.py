@@ -58,9 +58,9 @@ def get_clean_urls_list(raw_tree: str) -> list[str]:
         messages=[
             {
                 "role": "user",
-                "content": "You're helping extract all the information from a website. To this end, you need to send agents visting a curated seleciton of pages to understand the website dynamic components.Extract a list of interesting urls to visit from the following site structure:\n"
+                "content": "You're helping extract all the information from a website. To this end, you need to send agents visting a curated selection of pages to understand the website dynamic components. Extract a list of interesting urls to visit from the following site structure:\n"
                 + raw_tree
-                + "\n\nEach page that you select should be one that you think has a unique interactive kind of element to try out. Make sure to first include the most important pages of the website: if the website has a specific common template of webpage urls, make sure to include at least one example.",
+                + "\n\nEach page that you select should be one that you think has a unique interactive kind of element to try out. Make sure to first include the most important pages of the website: if the website has a specific common template of webpage urls, make sure to include at least one example, sort them from the most important to the least important.",
             }
         ],
         response_format=SiteStructure,
