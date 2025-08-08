@@ -1,11 +1,12 @@
 import json
-import os
 
 from datasets import Dataset
 from openai import OpenAI
 from pydantic import BaseModel
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+from webportal.secret_manager import get_openai_api_key
+
+client = OpenAI(api_key=get_openai_api_key())
 
 with open("benchmark/data/gaia_validation_full.jsonl", "r") as f:
     questions = [json.loads(line) for line in f]

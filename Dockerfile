@@ -28,8 +28,9 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 WORKDIR /app
 
 # Copy all required files for editable install
-COPY pyproject.toml uv.lock README.md  ./
+COPY pyproject.toml uv.lock ./
 COPY ./src/webportal/__init__.py ./src/webportal/__init__.py
+RUN touch README.md
 
 # Install Python dependencies
 RUN uv sync --frozen
@@ -49,4 +50,4 @@ ENV UV_CACHE_DIR=/tmp/uv-cache
 COPY src/ ./src/
 
 # Start Selenium Grid in background, then run the main application  
-CMD ["echo", "Hello, world!"]
+CMD ["uv", "run", "src/webportal/ingest.py"]

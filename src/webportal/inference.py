@@ -1,13 +1,11 @@
-import os
-
 from dotenv import load_dotenv
 from openai import OpenAI
 
+from webportal.secret_manager import get_openai_api_key
+
 load_dotenv()
 
-assert os.getenv("OPENAI_API_KEY") is not None, "OPENAI_API_KEY is not set"
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=get_openai_api_key())
 model = "gpt-4.1"
 
 

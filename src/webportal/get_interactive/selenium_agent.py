@@ -4,6 +4,7 @@ import unicodedata
 from datetime import datetime
 from io import BytesIO
 from typing import Callable
+from pathlib import Path
 
 from PIL import Image, ImageDraw
 from selenium import webdriver
@@ -14,6 +15,7 @@ from smolagents import InferenceClientModel, ToolCallingAgent, tool
 from smolagents.agent_types import AgentImage
 from smolagents.memory import ActionStep, TaskStep
 from smolagents.monitoring import LogLevel
+from webportal.storage_utils import write_job_file_from_path_to_storage
 
 SELENIUM_SYSTEM_PROMPT_TEMPLATE = """You are a web automation assistant that can control a local browser using Selenium. The current date is <<current_date>>.
 
@@ -158,11 +160,17 @@ class SeleniumVisionAgent(ToolCallingAgent):
         planning_interval: int | None = None,
         browser_headless: bool = True,
         callback_tools: list[Callable] | None = None,
+        job_id: str | None = None,
+        domain_name: str | None = None,
+        folder_name: str | None = None,
         **kwargs,
     ):
         self.data_dir = data_dir
         self.planning_interval = planning_interval
         self.callback_tools = callback_tools or []
+        self.job_id = job_id
+        self.domain_name = domain_name
+        self.folder_name = folder_name
 
         self.chrome_options = webdriver.ChromeOptions()
         self.width, self.height = 1280, 720
@@ -275,6 +283,18 @@ class SeleniumVisionAgent(ToolCallingAgent):
             print("DRAWING MARKER on coords", self.click_coordinates)
             image_copy = draw_marker_on_image(image_copy, self.click_coordinates)
         image_copy.save(screenshot_path)
+
+        # Save screenshot to job-specific storage if job_id and domain_name are available
+        if self.job_id and self.domain_name:
+            screenshot_filename = f"step_{current_step:03d}.png"
+            if self.folder_name:
+                screenshot_filename = f"{self.folder_name}/{screenshot_filename}"
+            write_job_file_from_path_to_storage(
+                domain_name=self.domain_name, 
+                job_id=self.job_id, 
+                filename=screenshot_filename, 
+                file_path=Path(screenshot_path)
+            )
 
         self.last_marked_screenshot = AgentImage(screenshot_path)
         print(f"Saved screenshot for step {current_step} to {screenshot_path}")

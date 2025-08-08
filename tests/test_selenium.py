@@ -9,6 +9,7 @@ from webportal.get_interactive.selenium_agent import (
     InferenceClientModel,
     SeleniumVisionAgent,
 )
+from webportal.secret_manager import get_huggingface_token
 
 
 
@@ -17,6 +18,7 @@ def test_run_selenium_agent():
     model = InferenceClientModel(
         model_id="Qwen/Qwen2.5-VL-32B-Instruct",
         provider="auto",
+        token=get_huggingface_token(),
     )
     selenium_vision_agent = SeleniumVisionAgent(model=model, data_dir="data", browser_headless=False,)
     selenium_vision_agent.run("""
@@ -31,6 +33,7 @@ def test_run_selenium_network_capture_agent():
     model = InferenceClientModel(
         model_id="Qwen/Qwen2.5-VL-32B-Instruct",
         provider="auto",
+        token=get_huggingface_token(),
     )
     selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data", browser_headless=True)
     selenium_vision_agent.run("""
@@ -45,6 +48,7 @@ def test_return_requests(url: str = "github.com"):
     model = InferenceClientModel(
         model_id="Qwen/Qwen2.5-VL-32B-Instruct",
         provider="auto",
+        token=get_huggingface_token(),
     )
     selenium_vision_agent = SeleniumNetworkCaptureAgent(
         model=model,
@@ -70,6 +74,7 @@ def test_analysing_requests():
     model = InferenceClientModel(
         model_id="Qwen/Qwen2.5-VL-32B-Instruct",
         provider="auto",
+        token=get_huggingface_token(),
     )
     selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data")
 
