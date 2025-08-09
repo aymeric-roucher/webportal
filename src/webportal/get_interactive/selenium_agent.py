@@ -204,6 +204,45 @@ class SeleniumVisionAgent(ToolCallingAgent):
         self._additional_chrome_options()
 
         self.driver = webdriver.Chrome(options=self.chrome_options)
+        
+        # Execute stealth JavaScript to mask automation signatures
+        self.driver.execute_cdp_cmd('Page.addScriptToEvaluateOnNewDocument', {
+            'source': '''
+                Object.defineProperty(navigator, 'webdriver', {
+                    get: () => undefined,
+                });
+                Object.defineProperty(navigator, 'plugins', {
+                    get: () => [1, 2, 3, 4, 5],
+                });
+                Object.defineProperty(navigator, 'languages', {
+                    get: () => ['en-US', 'en'],
+                });
+                window.chrome = {
+                    runtime: {}
+                };
+                Object.defineProperty(navigator, 'permissions', {
+                    get: () => ({
+                        query: () => Promise.resolve({ state: 'granted' })
+                    })
+                });
+                delete navigator.__proto__.webdriver;
+                window.navigator.chrome = {
+                    runtime: {},
+                };
+                Object.defineProperty(navigator, 'hardwareConcurrency', {
+                    get: () => 4,
+                });
+                Object.defineProperty(navigator, 'deviceMemory', {
+                    get: () => 8,
+                });
+                Object.defineProperty(screen, 'availHeight', {
+                    get: () => ''' + str(self.height) + ''',
+                });
+                Object.defineProperty(screen, 'availWidth', {
+                    get: () => ''' + str(self.width) + ''',
+                });
+            '''
+        })
 
         # Set browser window size
         self.driver.set_window_size(self.width, self.height)
@@ -241,8 +280,71 @@ class SeleniumVisionAgent(ToolCallingAgent):
         self.setup_step_callbacks()
 
     def _additional_chrome_options(self):
-        """Additional Chrome options - override in subclasses if needed"""
-        pass
+        """Advanced stealth options to bypass bot detection"""
+        import random
+        import os
+        
+        # Remove automation indicators
+        self.chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        self.chrome_options.add_experimental_option('useAutomationExtension', False)
+        self.chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+        
+        # Stealth user agent rotation
+        user_agents = [
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        ]
+        selected_ua = random.choice(user_agents)
+        self.chrome_options.add_argument(f"--user-agent={selected_ua}")
+        
+        # Language and locale randomization  
+        locales = ["en-US,en;q=0.9", "en-GB,en;q=0.9", "en-CA,en;q=0.9"]
+        self.selected_locale = random.choice(locales)
+        
+        # Proxy configuration (only if enabled via environment)
+        if os.getenv("USE_PROXY", "false").lower() == "true":
+            try:
+                from webportal.stealth.proxy_manager import get_proxy_manager
+                proxy_manager = get_proxy_manager()
+                proxy_string = proxy_manager.get_proxy_for_selenium()
+                
+                if proxy_string:
+                    self.chrome_options.add_argument(f"--proxy-server=http://{proxy_string}")
+                    print(f"Using proxy: {proxy_string}")
+                else:
+                    print("No working proxy found, continuing without proxy")
+            except Exception as e:
+                print(f"Proxy setup failed: {e}")
+        
+        # Additional stealth arguments
+        self.chrome_options.add_argument("--disable-features=VizDisplayCompositor,VizServiceDisplay")
+        self.chrome_options.add_argument("--disable-ipc-flooding-protection")
+        self.chrome_options.add_argument("--disable-background-networking")
+        self.chrome_options.add_argument("--disable-background-mode")
+        self.chrome_options.add_argument("--disable-component-extensions-with-background-pages")
+        self.chrome_options.add_argument("--disable-client-side-phishing-detection")
+        self.chrome_options.add_argument("--disable-domain-reliability")
+        self.chrome_options.add_argument("--disable-features=TranslateUI")
+        self.chrome_options.add_argument("--disable-sync")
+        self.chrome_options.add_argument("--hide-scrollbars")
+        self.chrome_options.add_argument("--metrics-recording-only")
+        self.chrome_options.add_argument("--mute-audio")
+        self.chrome_options.add_argument("--no-default-browser-check")
+        self.chrome_options.add_argument("--no-first-run")
+        self.chrome_options.add_argument("--disable-logging")
+        self.chrome_options.add_argument("--disable-permissions-api")
+        self.chrome_options.add_argument("--disable-speech-api")
+        self.chrome_options.add_argument("--disable-file-system")
+        self.chrome_options.add_argument("--disable-presentation-api")
+        self.chrome_options.add_argument("--disable-notifications")
+        
+        # Randomize window size slightly
+        width_offset = random.randint(-50, 50)  
+        height_offset = random.randint(-50, 50)
+        self.width = max(1280 + width_offset, 1200)
+        self.height = max(720 + height_offset, 600)
 
     def quick_open_url(self, url: str) -> Image.Image:
         self.tools["open_url"](url)
@@ -346,11 +448,36 @@ class SeleniumVisionAgent(ToolCallingAgent):
                 y: The y coordinate (vertical position)
                 element_description: visual description including: element type, text content, size ('big' for instance), color, position relative to other elements (e.g., "blue rectangular button with white text 'Submit', approximately 120x40 pixels, located in the bottom right corner of the form")
             """
+            import random
+            import time
+            
+            # Add random human-like delays and movement
+            pre_click_delay = random.uniform(0.1, 0.5)
+            time.sleep(pre_click_delay)
+            
             action = ActionChains(self.driver)
-            action.move_by_offset(x, y).click().perform()
+            
+            # Add slight randomization to click coordinates to simulate human imprecision
+            x_offset = random.randint(-2, 2)
+            y_offset = random.randint(-2, 2)
+            final_x = max(0, min(self.width, x + x_offset))
+            final_y = max(0, min(self.height, y + y_offset))
+            
+            # Human-like mouse movement with curve
+            action.move_by_offset(final_x - 10, final_y - 10)
+            action.pause(random.uniform(0.05, 0.2))
+            action.move_by_offset(10, 10)
+            action.pause(random.uniform(0.05, 0.15))
+            action.click()
+            action.perform()
             action.reset_actions()
-            self.click_coordinates = [x, y]
-            log_msg = f"Clicked at coordinates ({x}, {y}) on: {element_description}"
+            
+            # Random post-click delay
+            post_click_delay = random.uniform(0.1, 0.3)
+            time.sleep(post_click_delay)
+            
+            self.click_coordinates = [final_x, final_y]
+            log_msg = f"Clicked at coordinates ({final_x}, {final_y}) on: {element_description}"
             self.logger.log(log_msg)
             return log_msg
 
@@ -425,10 +552,29 @@ class SeleniumVisionAgent(ToolCallingAgent):
                 text: The text to type
                 target_description: Optional visual description of the input field or element where text is being typed (e.g., "search box in the header", "username field in login form")
             """
+            import random
+            import time
+            
             clean_text = normalize_text(text)
             action = ActionChains(self.driver)
-            action.send_keys(clean_text).perform()
+            
+            # Type with human-like delays between characters
+            for char in clean_text:
+                action.send_keys(char)
+                # Random delay between keystrokes (20-150ms)
+                delay = random.uniform(0.02, 0.15)
+                action.pause(delay)
+                
+                # Occasionally pause longer (simulate thinking)
+                if random.random() < 0.1:  # 10% chance
+                    action.pause(random.uniform(0.2, 0.8))
+            
+            action.perform()
             action.reset_actions()
+            
+            # Random delay after typing
+            time.sleep(random.uniform(0.1, 0.4))
+            
             log_msg = f"Typed text: '{clean_text}' in: {target_description}"
             self.logger.log(log_msg)
             return log_msg

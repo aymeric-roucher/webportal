@@ -499,14 +499,96 @@ class FastJSCrawler:
 
             self.visited.add(url)
 
+            import random
+            
+            # Randomize user agents and headers for stealth
+            user_agents = [
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", 
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            ]
+            
+            accept_languages = ["en-US,en;q=0.9", "en-GB,en;q=0.9", "en-CA,en;q=0.9"]
+            
+            # Randomize viewport dimensions slightly
+            width = random.randint(1800, 1920)
+            height = random.randint(1000, 1080)
+            
+            stealth_headers = {
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+                "Accept-Language": random.choice(accept_languages),
+                "Accept-Encoding": "gzip, deflate, br", 
+                "Cookie": "cc-accept=true",
+                "Cache-Control": "no-cache",
+                "Upgrade-Insecure-Requests": "1",
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "none",
+                "Sec-Fetch-User": "?1",
+                "Sec-Ch-Ua": '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+                "Sec-Ch-Ua-Mobile": "?0",
+                "Sec-Ch-Ua-Platform": '"Windows"'
+            }
+            
             context = await browser.new_context(
-                viewport={"width": 1920, "height": 1080},
-                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-                extra_http_headers={"Cookie": "cc-accept=true"},
+                viewport={"width": width, "height": height},
+                user_agent=random.choice(user_agents),
+                extra_http_headers=stealth_headers,
+                java_script_enabled=True,
+                ignore_https_errors=True
             )
             page = await context.new_page()
+            
+            # Add stealth scripts to mask automation
+            await page.add_init_script("""
+                Object.defineProperty(navigator, 'webdriver', {
+                    get: () => undefined,
+                });
+                Object.defineProperty(navigator, 'plugins', {
+                    get: () => [1, 2, 3, 4, 5],
+                });
+                Object.defineProperty(navigator, 'languages', {
+                    get: () => ['en-US', 'en'],
+                });
+                window.chrome = {
+                    runtime: {}
+                };
+                Object.defineProperty(navigator, 'permissions', {
+                    get: () => ({
+                        query: () => Promise.resolve({ state: 'granted' })
+                    })
+                });
+                delete navigator.__proto__.webdriver;
+                window.navigator.chrome = {
+                    runtime: {},
+                };
+                Object.defineProperty(navigator, 'hardwareConcurrency', {
+                    get: () => 4,
+                });
+                Object.defineProperty(navigator, 'deviceMemory', {
+                    get: () => 8,
+                });
+                // Override the Date object to avoid timezone fingerprinting
+                const originalDate = Date;
+                function patchedDate(...args) {
+                    if (args.length === 0) {
+                        return new originalDate();
+                    }
+                    return new originalDate(...args);
+                }
+                patchedDate.prototype = originalDate.prototype;
+                patchedDate.now = originalDate.now;
+                patchedDate.parse = originalDate.parse;
+                patchedDate.UTC = originalDate.UTC;
+                window.Date = patchedDate;
+            """)
 
             try:
+                # Add random delay before navigation (0.5-2 seconds)
+                import asyncio
+                await asyncio.sleep(random.uniform(0.5, 2.0))
+                
                 # Navigate to the page
                 await page.goto(url, wait_until="domcontentloaded", timeout=15000)
 
@@ -580,9 +662,41 @@ class FastJSCrawler:
                 print("No URLs found in sitemap, falling back to regular crawling")
 
         async with async_playwright() as p:
-            # Launch browser in headless mode
+            # Launch browser with comprehensive stealth arguments
+            stealth_args = [
+                "--disable-blink-features=AutomationControlled",
+                "--disable-features=VizDisplayCompositor,VizServiceDisplay",
+                "--disable-ipc-flooding-protection", 
+                "--disable-backgrounding-occluded-windows",
+                "--disable-renderer-backgrounding",
+                "--disable-background-networking",
+                "--disable-background-mode",
+                "--disable-component-extensions-with-background-pages",
+                "--disable-client-side-phishing-detection", 
+                "--disable-sync",
+                "--disable-domain-reliability",
+                "--disable-features=TranslateUI",
+                "--hide-scrollbars",
+                "--disable-logging",
+                "--disable-permissions-api",
+                "--disable-speech-api",
+                "--disable-file-system",
+                "--disable-presentation-api",
+                "--disable-notifications",
+                "--disable-default-apps",
+                "--disable-extensions",
+                "--disable-plugins",
+                "--mute-audio",
+                "--no-default-browser-check",
+                "--no-first-run",
+                "--metrics-recording-only",
+                "--disable-dev-shm-usage",
+                "--no-sandbox"
+            ]
+            
             browser = await p.chromium.launch(
-                headless=True, args=["--disable-blink-features=AutomationControlled"]
+                headless=True, 
+                args=stealth_args
             )
 
             # Add start URL to queue
