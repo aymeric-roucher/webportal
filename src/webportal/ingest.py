@@ -261,5 +261,8 @@ def ingest_website(
 if __name__ == "__main__":
     import os
     main_url = os.getenv("TARGET_WEBSITE", "clinicaltrials.gov")
+    job_id = os.getenv("JOB_ID")
     print(f"Processing website: {main_url}")
-    output = ingest_website(main_url=main_url)
+    if job_id:
+        print(f"Using job_id from environment: {job_id}")
+    output = ingest_website(main_url=main_url, job_id=job_id)

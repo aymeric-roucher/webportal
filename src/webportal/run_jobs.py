@@ -23,8 +23,9 @@ def launch_crawl(url: str):
         "--max-retries=0",
         "--parallelism=1",
         "--tasks=1",
-        f"--set-env-vars=BUCKET_WEBPORTAL={BUCKET_WEBPORTAL},GOOGLE_CLOUD_PROJECT={PROJECT},TARGET_WEBSITE={url}",
-        "--set-secrets=HUGGINGFACE_API_KEY=HUGGINGFACE_API_KEY:latest,OPENAI_API_KEY=OPENAI_API_KEY:latest"
+        f"--set-env-vars=BUCKET_WEBPORTAL={BUCKET_WEBPORTAL},GOOGLE_CLOUD_PROJECT={PROJECT},TARGET_WEBSITE={url},JOB_ID={timestamp}",
+        "--set-secrets=HUGGINGFACE_API_KEY=HUGGINGFACE_API_KEY:latest,OPENAI_API_KEY=OPENAI_API_KEY:latest",
+        "--memory=2Gi"
     ]
     
     print(f"Creating crawl job: {job_name}")
