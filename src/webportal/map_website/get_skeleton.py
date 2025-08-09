@@ -52,7 +52,7 @@ class SiteStructure(BaseModel):
 
 def get_clean_urls_list(raw_tree: str) -> list[str]:
     response = completion(
-        model="gpt-4.1",
+        model="gpt-5",
         messages=[
             {
                 "role": "user",
@@ -77,7 +77,7 @@ def get_clean_urls_list(raw_tree: str) -> list[str]:
     #             + "\n\nEach page that you select should be one that you think has a unique interactive kind of element to try out. Make sure to first include the most important pages of the website: if the website has a specific common template of webpage urls, make sure to include at least one example.",
     #         }
     #     ],
-    #     model="gpt-4.1",
+    #     model="gpt-5",
     #     response_format={
     #         "type": "json_schema",
     #         "json_schema": SiteStructure.model_json_schema(),

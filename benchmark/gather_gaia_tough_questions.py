@@ -33,7 +33,7 @@ Here is the example:
 """
     try:
         response = client.responses.parse(
-            model="gpt-4.1-mini",
+            model="gpt-5-mini",
             input=prompt,
             text_format=Answer,
         )

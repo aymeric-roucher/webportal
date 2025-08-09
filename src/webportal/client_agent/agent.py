@@ -10,7 +10,7 @@ from webportal.get_interactive.request_tools import get_request, post_request
 load_dotenv()
 
 model = OpenAIModel(
-    model_id="gpt-4.1"  # for 200k token per minute
+    model_id="gpt-5"  # for 200k token per minute
 )
 
 
