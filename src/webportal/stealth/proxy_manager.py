@@ -1,5 +1,6 @@
 import random
 import requests
+import os
 from typing import Optional
 import time
 
@@ -8,7 +9,13 @@ class ProxyManager:
     """Manages proxy rotation for stealth crawling"""
     
     def __init__(self):
-        # Free proxy lists (for testing - consider premium services for production)
+        # Check for Bright Data configuration first
+        self.bright_data_host = os.getenv('BRIGHT_DATA_PROXY_HOST')
+        self.bright_data_port = os.getenv('BRIGHT_DATA_PROXY_PORT', '22225')
+        self.bright_data_username = os.getenv('BRIGHT_DATA_USERNAME')
+        self.bright_data_password = os.getenv('BRIGHT_DATA_PASSWORD')
+        
+        # Free proxy lists (fallback)
         self.free_proxy_sources = [
             "https://www.proxy-list.download/api/v1/get?type=http",
             "https://api.proxyscrape.com/v2/?request=get&protocol=http&timeout=10000&country=all&ssl=all&anonymity=all"
@@ -75,8 +82,27 @@ class ProxyManager:
         print(f"Found {len(self.working_proxies)} working proxies out of {test_count} tested")
         self.last_refresh = current_time
     
+    def get_bright_data_proxy(self) -> Optional[dict]:
+        """Get Bright Data proxy configuration"""
+        if not all([self.bright_data_host, self.bright_data_username, self.bright_data_password]):
+            return None
+        
+        proxy_url = f"http://{self.bright_data_username}:{self.bright_data_password}@{self.bright_data_host}:{self.bright_data_port}"
+        return {
+            'http': proxy_url,
+            'https': proxy_url
+        }
+    
     def get_random_proxy(self) -> Optional[dict]:
-        """Get a random working proxy"""
+        """Get a proxy - prioritizes Bright Data, falls back to free proxies"""
+        # Try Bright Data first
+        bright_data_proxy = self.get_bright_data_proxy()
+        if bright_data_proxy:
+            print("Using Bright Data proxy")
+            return bright_data_proxy
+        
+        # Fallback to free proxies
+        print("Bright Data not configured, using free proxies")
         self.refresh_proxies()
         
         if not self.working_proxies:
@@ -90,9 +116,13 @@ class ProxyManager:
     
     def get_proxy_for_selenium(self) -> Optional[str]:
         """Get proxy string formatted for Selenium"""
+        # Try Bright Data first
+        if all([self.bright_data_host, self.bright_data_username, self.bright_data_password]):
+            return f"{self.bright_data_username}:{self.bright_data_password}@{self.bright_data_host}:{self.bright_data_port}"
+        
+        # Fallback to free proxies
         proxy_dict = self.get_random_proxy()
         if proxy_dict:
-            # Extract the proxy address from the dict
             proxy_url = proxy_dict['http']
             return proxy_url.replace('http://', '')
         return None
