@@ -44,8 +44,8 @@ def ingest_page(
     ingestion_prompt = custom_prompt or INGESTION_PROMPT.format(target_url=target_url)
 
     model = InferenceClientModel(
-        model_id="Qwen/Qwen2.5-VL-32B-Instruct",
-        provider="auto",
+        model_id="Qwen/Qwen2.5-VL-72B-Instruct",
+        provider="nebius",
         token=get_huggingface_token(),
     )
     selenium_vision_agent = SeleniumNetworkCaptureAgent(

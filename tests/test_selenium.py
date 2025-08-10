@@ -16,8 +16,8 @@ from webportal.secret_manager import get_huggingface_token
 @pytest.mark.expensive
 def test_run_selenium_agent():
     model = InferenceClientModel(
-        model_id="Qwen/Qwen2.5-VL-32B-Instruct",
-        provider="auto",
+        model_id="Qwen/Qwen2.5-VL-72B-Instruct",
+        provider="nebius",
         token=get_huggingface_token(),
     )
     selenium_vision_agent = SeleniumVisionAgent(model=model, data_dir="data", browser_headless=False,)
@@ -27,12 +27,11 @@ I want you to go to github.com, to look for the numpy package and click the butt
 Then I want you to go back, and to sort the issues by oldest order                            
               """)
     
-    
 @pytest.mark.expensive
 def test_run_selenium_network_capture_agent():
     model = InferenceClientModel(
-        model_id="Qwen/Qwen2.5-VL-32B-Instruct",
-        provider="auto",
+        model_id="Qwen/Qwen2.5-VL-72B-Instruct",
+        provider="nebius",
         token=get_huggingface_token(),
     )
     selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data", browser_headless=True)
@@ -46,8 +45,8 @@ Then I want you to go back, and to sort the issues by oldest order
 
 def test_return_requests(url: str = "github.com"):
     model = InferenceClientModel(
-        model_id="Qwen/Qwen2.5-VL-32B-Instruct",
-        provider="auto",
+        model_id="Qwen/Qwen2.5-VL-72B-Instruct",
+        provider="nebius",
         token=get_huggingface_token(),
     )
     selenium_vision_agent = SeleniumNetworkCaptureAgent(
@@ -72,8 +71,8 @@ def test_analysing_requests():
     json_requests = json.loads((MOCK_REQUESTS_PATH / "github_json.json").read_text())
 
     model = InferenceClientModel(
-        model_id="Qwen/Qwen2.5-VL-32B-Instruct",
-        provider="auto",
+        model_id="Qwen/Qwen2.5-VL-72B-Instruct",
+        provider="nebius",
         token=get_huggingface_token(),
     )
     selenium_vision_agent = SeleniumNetworkCaptureAgent(model=model, data_dir="data")

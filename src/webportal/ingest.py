@@ -79,8 +79,8 @@ def list_possible_workflows_from_url(
         Don't perform them, only return the list using final_answer. Each item in the list you provide must be a full workflow.""")
 
     model = InferenceClientModel(
-        model_id="Qwen/Qwen2.5-VL-32B-Instruct",
-        provider="auto",
+        model_id="Qwen/Qwen2.5-VL-72B-Instruct",
+        provider="nebius",
         token=get_huggingface_token(),
     )
 
