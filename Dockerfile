@@ -38,8 +38,11 @@ RUN uv sync --frozen
 # Install Playwright browsers
 RUN uv run playwright install chromium --with-deps
 
-# Set environment variables for headless browser
+# Set environment variables for headless browser and stealth configuration
 ENV DISPLAY=:99
+ENV USE_STEALTH=true
+ENV USE_PROXY=false
+ENV STEALTH_RANDOM_DELAYS=true
 
 # Use the existing seluser from selenium base image and fix permissions
 RUN chown -R seluser:seluser /app
